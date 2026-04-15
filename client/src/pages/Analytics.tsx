@@ -43,7 +43,7 @@ export default function Analytics() {
   })) ?? [];
 
   const pieData = modelBreakdown?.map((m: { modelId: string; creditsUsed: number }, i: number) => ({
-    name: m.modelId.replace("gpt-4o", "GPT-4o").replace("claude-3-5-sonnet-20241022", "Claude 3.5").replace("claude-3-haiku-20240307", "Claude Haiku").replace("future-agent-1", "Future Agent"),
+    name: m.modelId.replace("gpt-4o", "Future-1 Pro").replace("claude-3-5-sonnet-20241022", "Future-1 Code").replace("claude-3-haiku-20240307", "Future-1 Fast").replace("future-agent-1", "Future-1 Ultra").replace("gpt-4o-mini", "Future-1 Mini"),
     value: m.creditsUsed,
     color: COLORS[i % COLORS.length],
   })) ?? [];

@@ -32,7 +32,7 @@ const FEATURED_AGENTS = [
     bg: "bg-blue-500/10",
     tasks: 12400,
     rating: 4.9,
-    model: "GPT-4o",
+    model: "Future-1 Pro",
   },
   {
     name: "Full-Stack Engineer",
@@ -43,7 +43,7 @@ const FEATURED_AGENTS = [
     bg: "bg-emerald-500/10",
     tasks: 8900,
     rating: 4.8,
-    model: "Claude 3.5",
+    model: "Future-1 Code",
   },
   {
     name: "Market Intelligence",
@@ -54,7 +54,7 @@ const FEATURED_AGENTS = [
     bg: "bg-violet-500/10",
     tasks: 6200,
     rating: 4.7,
-    model: "GPT-4o",
+    model: "Future-1 Pro",
   },
   {
     name: "Content Strategist",
@@ -65,7 +65,7 @@ const FEATURED_AGENTS = [
     bg: "bg-orange-500/10",
     tasks: 15600,
     rating: 4.8,
-    model: "Claude 3.5",
+    model: "Future-1 Code",
   },
   {
     name: "Data Science Suite",
@@ -76,7 +76,7 @@ const FEATURED_AGENTS = [
     bg: "bg-pink-500/10",
     tasks: 4300,
     rating: 4.9,
-    model: "GPT-4o",
+    model: "Future-1 Pro",
   },
   {
     name: "Executive Assistant",
@@ -87,7 +87,7 @@ const FEATURED_AGENTS = [
     bg: "bg-cyan-500/10",
     tasks: 21000,
     rating: 4.6,
-    model: "Future Agent",
+    model: "Future-1 Ultra",
   },
 ];
 

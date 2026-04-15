@@ -14,7 +14,7 @@ const FEATURES = [
   {
     icon: Brain,
     title: "Autonomous Task Execution",
-    description: "Agents that think, plan, and execute multi-step tasks end-to-end — fully autonomous, powered by GPT-4o and Claude.",
+    description: "Agents that think, plan, and execute multi-step tasks end-to-end — fully autonomous, powered by Future's proprietary AI.",
     color: "text-violet-400",
     bg: "bg-violet-500/10",
   },
@@ -35,7 +35,7 @@ const FEATURES = [
   {
     icon: Cpu,
     title: "Multi-Model LLM Routing",
-    description: "GPT-4o, Claude 3.5 Sonnet, Claude Haiku, GPT-4o Mini — route tasks to the best model automatically.",
+    description: "Future-1 Ultra, Pro, Code, Mini, and Fast — route tasks to the best Future model automatically.",
     color: "text-cyan-400",
     bg: "bg-cyan-500/10",
   },
@@ -86,11 +86,11 @@ const TOOLS = [
 ];
 
 const MODELS = [
-  { name: "GPT-4o", provider: "OpenAI", tier: "Premium", color: "text-emerald-400", desc: "Multimodal, fast reasoning" },
-  { name: "Claude 3.5 Sonnet", provider: "Anthropic", tier: "Premium", color: "text-orange-400", desc: "Exceptional at coding & analysis" },
-  { name: "GPT-4o Mini", provider: "OpenAI", tier: "Standard", color: "text-blue-400", desc: "Fast & cost-effective" },
-  { name: "Claude 3 Haiku", provider: "Anthropic", tier: "Standard", color: "text-violet-400", desc: "Fastest response times" },
-  { name: "Future Agent", provider: "Future AI", tier: "Ultra", color: "text-pink-400", desc: "Full autonomous mode" },
+  { name: "Future-1 Ultra", provider: "Future AI", tier: "Ultra", color: "text-pink-400", desc: "Full autonomous mode" },
+  { name: "Future-1 Pro", provider: "Future AI", tier: "Premium", color: "text-emerald-400", desc: "Multimodal, fast reasoning" },
+  { name: "Future-1 Code", provider: "Future AI", tier: "Premium", color: "text-orange-400", desc: "Exceptional at coding & analysis" },
+  { name: "Future-1 Mini", provider: "Future AI", tier: "Standard", color: "text-blue-400", desc: "Fast & cost-effective" },
+  { name: "Future-1 Fast", provider: "Future AI", tier: "Standard", color: "text-violet-400", desc: "Fastest response times" },
 ];
 
 const STEPS = [
@@ -98,7 +98,7 @@ const STEPS = [
     step: "01",
     icon: Terminal,
     title: "Define Your Agent",
-    desc: "Write a system prompt, choose a model (GPT-4o or Claude), and toggle the tools your agent needs. No code required.",
+    desc: "Write a system prompt, choose a Future model, and toggle the tools your agent needs. No code required.",
   },
   {
     step: "02",
@@ -219,7 +219,7 @@ export default function Home() {
           </h1>
 
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-4 leading-relaxed">
-            Build and deploy autonomous AI agents powered by <strong className="text-foreground">GPT-4o</strong> and <strong className="text-foreground">Claude</strong>.
+            Build and deploy autonomous AI agents powered by <strong className="text-foreground">Future's proprietary AI</strong>.
             They browse the web, write code, manage files, and complete complex tasks — end to end.
           </p>
           <p className="text-base text-muted-foreground max-w-xl mx-auto mb-10">
@@ -307,7 +307,7 @@ export default function Home() {
                 <span>•</span>
                 <span>1,240 credits</span>
                 <span>•</span>
-                <span>GPT-4o</span>
+                <span>Future-1 Pro</span>
                 <span className="ml-auto flex items-center gap-1" style={{ color: "oklch(0.65 0.18 160)" }}>
                   <div className="w-2 h-2 rounded-full" style={{ background: "oklch(0.65 0.18 160)" }} />
                   Completed
@@ -354,7 +354,7 @@ export default function Home() {
               Powered by the <span className="gradient-text">World's Best AI</span>
             </h2>
             <p className="text-muted-foreground max-w-lg mx-auto">
-              Choose the right model for each agent. Future routes to OpenAI and Anthropic directly — no middleman, full capability.
+              Choose the right model for each agent. Future's proprietary model suite covers every use case — from lightning-fast responses to full autonomous task execution.
             </p>
           </div>
           <div className="grid md:grid-cols-5 gap-4 max-w-5xl mx-auto">
@@ -538,7 +538,7 @@ export default function Home() {
                 <span className="font-bold">Future</span>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                The autonomous AI agent ecosystem. Build, deploy, and scale AI agents powered by GPT-4o and Claude.
+                The autonomous AI agent ecosystem. Build, deploy, and scale AI agents powered by Future's proprietary AI.
               </p>
             </div>
             <div>

@@ -469,11 +469,11 @@ export async function seedDefaultData() {
 
   // Seed model pricing
   const models = [
-    { modelId: "gpt-4o", displayName: "GPT-4o", provider: "openai" as const, tier: "standard" as const, creditsPerInputToken: 0.005, creditsPerOutputToken: 0.015, creditsPerToolCall: 2, contextWindow: 128000 },
-    { modelId: "gpt-4o-mini", displayName: "GPT-4o Mini", provider: "openai" as const, tier: "standard" as const, creditsPerInputToken: 0.0002, creditsPerOutputToken: 0.0006, creditsPerToolCall: 0.5, contextWindow: 128000 },
-    { modelId: "claude-3-5-sonnet-20241022", displayName: "Claude 3.5 Sonnet", provider: "anthropic" as const, tier: "premium" as const, creditsPerInputToken: 0.003, creditsPerOutputToken: 0.015, creditsPerToolCall: 3, contextWindow: 200000 },
-    { modelId: "claude-3-haiku-20240307", displayName: "Claude 3 Haiku", provider: "anthropic" as const, tier: "standard" as const, creditsPerInputToken: 0.00025, creditsPerOutputToken: 0.00125, creditsPerToolCall: 0.5, contextWindow: 200000 },
-    { modelId: "future-agent-1", displayName: "Future Agent (Built-in)", provider: "manus" as const, tier: "ultra" as const, creditsPerInputToken: 0.001, creditsPerOutputToken: 0.003, creditsPerToolCall: 1, contextWindow: 200000 },
+    { modelId: "gpt-4o", displayName: "Future-1 Pro", provider: "future" as const, tier: "premium" as const, creditsPerInputToken: 0.005, creditsPerOutputToken: 0.015, creditsPerToolCall: 2, contextWindow: 128000 },
+    { modelId: "gpt-4o-mini", displayName: "Future-1 Mini", provider: "future" as const, tier: "standard" as const, creditsPerInputToken: 0.0002, creditsPerOutputToken: 0.0006, creditsPerToolCall: 0.5, contextWindow: 128000 },
+    { modelId: "claude-3-5-sonnet-20241022", displayName: "Future-1 Code", provider: "future" as const, tier: "premium" as const, creditsPerInputToken: 0.003, creditsPerOutputToken: 0.015, creditsPerToolCall: 3, contextWindow: 200000 },
+    { modelId: "claude-3-haiku-20240307", displayName: "Future-1 Fast", provider: "future" as const, tier: "standard" as const, creditsPerInputToken: 0.00025, creditsPerOutputToken: 0.00125, creditsPerToolCall: 0.5, contextWindow: 200000 },
+    { modelId: "future-agent-1", displayName: "Future-1 Ultra", provider: "future" as const, tier: "ultra" as const, creditsPerInputToken: 0.001, creditsPerOutputToken: 0.003, creditsPerToolCall: 1, contextWindow: 200000 },
   ];
   for (const m of models) {
     await upsertModelPricing(m);

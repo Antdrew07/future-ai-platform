@@ -164,7 +164,7 @@ export default function Onboarding() {
                   Welcome to <span className="gradient-text">Future</span>
                 </h1>
                 <p className="text-lg text-muted-foreground max-w-md mx-auto leading-relaxed">
-                  Build autonomous AI agents powered by GPT-4o and Claude that can browse the web, write code, manage files, and complete complex tasks — all on your behalf.
+                  Build autonomous AI agents powered by Future's proprietary AI models that can browse the web, write code, manage files, and complete complex tasks — all on your behalf.
                 </p>
               </div>
 

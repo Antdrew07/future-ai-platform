@@ -26,11 +26,11 @@ export default function AgentList() {
   });
 
   const MODEL_LABELS: Record<string, string> = {
-    "gpt-4o": "GPT-4o",
-    "gpt-4o-mini": "GPT-4o Mini",
-    "claude-3-5-sonnet-20241022": "Claude 3.5",
-    "claude-3-haiku-20240307": "Claude Haiku",
-    "future-agent-1": "Future Agent",
+    "gpt-4o": "Future-1 Pro",
+    "gpt-4o-mini": "Future-1 Mini",
+    "claude-3-5-sonnet-20241022": "Future-1 Code",
+    "claude-3-haiku-20240307": "Future-1 Fast",
+    "future-agent-1": "Future-1 Ultra",
   };
 
   return (

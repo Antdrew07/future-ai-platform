@@ -122,3 +122,21 @@
 - [x] Add /gallery and /onboarding routes to App.tsx
 - [x] Rewrite Home.tsx as full ecosystem landing page with tool arsenal, model grid, pricing preview
 - [x] 29 Vitest tests passing, 0 TypeScript errors
+
+## Proprietary AI Branding (No Third-Party AI Names)
+
+- [ ] Define Future's own model name system (e.g. Future-1, Future-1 Ultra, Future-1 Mini, Future-1 Fast)
+- [ ] Replace all "GPT-4o", "ChatGPT", "OpenAI" references in frontend pages with Future model names
+- [ ] Replace all "Claude", "Claude 3.5", "Anthropic" references in frontend pages with Future model names
+- [ ] Update AgentBuilder model selector — show only Future model names, no vendor names
+- [ ] Update Home.tsx landing page — remove all vendor AI names, use Future branding only
+- [ ] Update Pricing.tsx — remove vendor model names
+- [ ] Update AdminPanel.tsx — show internal model IDs only (admin-facing)
+- [ ] Update AgentWorkspace.tsx — no vendor names in model display
+- [ ] Update AgentList.tsx — no vendor names in model badges
+- [ ] Update Dashboard.tsx — no vendor names in stats/activity
+- [ ] Update Analytics.tsx — no vendor names in charts/labels
+- [ ] Update Templates.tsx and AgentGallery.tsx — no vendor names
+- [ ] Update seed.mjs — model display names use Future branding only
+- [ ] Update llmRouter.ts — internal routing still uses real APIs, but model display names are Future-branded
+- [ ] Update server/routers.ts — any model list returned to frontend uses Future names

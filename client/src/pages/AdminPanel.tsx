@@ -175,11 +175,11 @@ export default function AdminPanel() {
               </thead>
               <tbody>
                 {[
-                  { id: "future-agent-1", name: "Future Agent", inputPer1k: 1, outputPer1k: 2, tier: "ultra" },
-                  { id: "gpt-4o", name: "GPT-4o", inputPer1k: 5, outputPer1k: 15, tier: "standard" },
-                  { id: "gpt-4o-mini", name: "GPT-4o Mini", inputPer1k: 0.15, outputPer1k: 0.6, tier: "standard" },
-                  { id: "claude-3-5-sonnet-20241022", name: "Claude 3.5 Sonnet", inputPer1k: 8, outputPer1k: 24, tier: "premium" },
-                  { id: "claude-3-haiku-20240307", name: "Claude 3 Haiku", inputPer1k: 0.8, outputPer1k: 4, tier: "standard" },
+                  { id: "future-agent-1", name: "Future-1 Ultra", inputPer1k: 1, outputPer1k: 2, tier: "ultra" },
+                  { id: "gpt-4o", name: "Future-1 Pro", inputPer1k: 5, outputPer1k: 15, tier: "premium" },
+                  { id: "claude-3-5-sonnet-20241022", name: "Future-1 Code", inputPer1k: 8, outputPer1k: 24, tier: "premium" },
+                  { id: "gpt-4o-mini", name: "Future-1 Mini", inputPer1k: 0.15, outputPer1k: 0.6, tier: "standard" },
+                  { id: "claude-3-haiku-20240307", name: "Future-1 Fast", inputPer1k: 0.8, outputPer1k: 4, tier: "standard" },
                 ].map((m) => (
                   <tr key={m.id} className="border-b border-border/30 hover:bg-accent/20 transition-colors">
                     <td className="px-4 py-3 font-medium text-xs">{m.name}</td>

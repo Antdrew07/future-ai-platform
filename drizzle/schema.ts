@@ -36,7 +36,7 @@ export const modelPricing = mysqlTable("model_pricing", {
   id: int("id").autoincrement().primaryKey(),
   modelId: varchar("modelId", { length: 64 }).notNull().unique(), // e.g. "gpt-4o", "claude-3-5-sonnet"
   displayName: varchar("displayName", { length: 128 }).notNull(),
-  provider: mysqlEnum("provider", ["openai", "anthropic", "manus", "custom"]).notNull(),
+  provider: mysqlEnum("provider", ["openai", "anthropic", "manus", "future", "custom"]).notNull(),
   tier: mysqlEnum("tier", ["standard", "premium", "ultra"]).default("standard").notNull(),
   creditsPerInputToken: float("creditsPerInputToken").default(0.001).notNull(),  // credits per 1 token
   creditsPerOutputToken: float("creditsPerOutputToken").default(0.002).notNull(),

@@ -22,11 +22,11 @@ import { Link } from "wouter";
 import AgentChatPanel from "@/components/AgentChatPanel";
 
 const MODELS = [
-  { id: "future-agent-1", name: "Future Agent", provider: "Future AI", tier: "ultra", desc: "Fully autonomous: browses the web, executes code, manages files, and completes complex multi-step tasks end-to-end" },
-  { id: "gpt-4o", name: "GPT-4o", provider: "OpenAI", tier: "premium", desc: "Multimodal, fast, great for complex reasoning and analysis" },
-  { id: "gpt-4o-mini", name: "GPT-4o Mini", provider: "OpenAI", tier: "standard", desc: "Fastest and most cost-effective OpenAI model" },
-  { id: "claude-3-5-sonnet-20241022", name: "Claude 3.5 Sonnet", provider: "Anthropic", tier: "premium", desc: "Exceptional at coding, analysis, and nuanced tasks" },
-  { id: "claude-3-haiku-20240307", name: "Claude 3 Haiku", provider: "Anthropic", tier: "standard", desc: "Anthropic's fastest and most compact model" },
+  { id: "future-agent-1", name: "Future-1 Ultra", provider: "Future AI", tier: "ultra", desc: "Fully autonomous: browses the web, executes code, manages files, and completes complex multi-step tasks end-to-end" },
+  { id: "gpt-4o", name: "Future-1 Pro", provider: "Future AI", tier: "premium", desc: "Multimodal, fast, great for complex reasoning and deep analysis" },
+  { id: "gpt-4o-mini", name: "Future-1 Mini", provider: "Future AI", tier: "standard", desc: "Fastest and most cost-effective model for everyday tasks" },
+  { id: "claude-3-5-sonnet-20241022", name: "Future-1 Code", provider: "Future AI", tier: "premium", desc: "Exceptional at coding, analysis, and nuanced reasoning tasks" },
+  { id: "claude-3-haiku-20240307", name: "Future-1 Fast", provider: "Future AI", tier: "standard", desc: "Lightning-fast responses for simple tasks and high-volume use" },
 ];
 
 const TIER_COLORS: Record<string, string> = {

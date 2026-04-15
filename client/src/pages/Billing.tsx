@@ -148,11 +148,11 @@ export default function Billing() {
                 </thead>
                 <tbody>
                   {[
-                    { name: "Future Agent", model: "future-agent-1", input: 1, output: 2, tier: "ultra" },
-                    { name: "GPT-4o", model: "gpt-4o", input: 5, output: 15, tier: "standard" },
-                    { name: "GPT-4o Mini", model: "gpt-4o-mini", input: 0.15, output: 0.6, tier: "standard" },
-                    { name: "Claude 3.5 Sonnet", model: "claude-3-5-sonnet-20241022", input: 8, output: 24, tier: "premium" },
-                    { name: "Claude 3 Haiku", model: "claude-3-haiku-20240307", input: 0.8, output: 4, tier: "standard" },
+                    { name: "Future-1 Ultra", model: "future-agent-1", input: 1, output: 2, tier: "ultra" },
+                    { name: "Future-1 Pro", model: "gpt-4o", input: 5, output: 15, tier: "premium" },
+                    { name: "Future-1 Code", model: "claude-3-5-sonnet-20241022", input: 8, output: 24, tier: "premium" },
+                    { name: "Future-1 Mini", model: "gpt-4o-mini", input: 0.15, output: 0.6, tier: "standard" },
+                    { name: "Future-1 Fast", model: "claude-3-haiku-20240307", input: 0.8, output: 4, tier: "standard" },
                   ].map((m) => (
                     <tr key={m.model} className="border-b border-border/30 hover:bg-accent/20 transition-colors">
                       <td className="px-4 py-3 font-medium">{m.name}</td>
