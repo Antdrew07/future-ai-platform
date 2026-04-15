@@ -4,34 +4,63 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+
+// Public pages
 import Home from "./pages/Home";
+import AgentPublic from "./pages/AgentPublic";
+import Templates from "./pages/Templates";
+import Pricing from "./pages/Pricing";
+
+// Dashboard pages
+import Dashboard from "./pages/Dashboard";
+import AgentList from "./pages/AgentList";
+import AgentBuilder from "./pages/AgentBuilder";
+import TaskView from "./pages/TaskView";
+import Analytics from "./pages/Analytics";
+import Billing from "./pages/Billing";
+import ApiKeys from "./pages/ApiKeys";
+import Teams from "./pages/Teams";
+import Settings from "./pages/Settings";
+
+// Admin pages
+import AdminPanel from "./pages/AdminPanel";
 
 function Router() {
-  // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
+      {/* Public */}
+      <Route path="/" component={Home} />
+      <Route path="/pricing" component={Pricing} />
+      <Route path="/templates" component={Templates} />
+      <Route path="/agent/:slug" component={AgentPublic} />
+
+      {/* Dashboard */}
+      <Route path="/dashboard" component={Dashboard} />
+      <Route path="/dashboard/agents" component={AgentList} />
+      <Route path="/dashboard/agents/new" component={AgentBuilder} />
+      <Route path="/dashboard/agents/:id" component={AgentBuilder} />
+      <Route path="/dashboard/tasks/:id" component={TaskView} />
+      <Route path="/dashboard/analytics" component={Analytics} />
+      <Route path="/dashboard/billing" component={Billing} />
+      <Route path="/dashboard/api-keys" component={ApiKeys} />
+      <Route path="/dashboard/teams" component={Teams} />
+      <Route path="/dashboard/settings" component={Settings} />
+
+      {/* Admin */}
+      <Route path="/admin" component={AdminPanel} />
+
+      <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
   );
 }
 
-// NOTE: About Theme
-// - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
-//   to keep consistent foreground/background color across components
-// - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
-
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="light"
-        // switchable
-      >
+      <ThemeProvider defaultTheme="dark">
         <TooltipProvider>
-          <Toaster />
+          <Toaster richColors position="top-right" />
           <Router />
         </TooltipProvider>
       </ThemeProvider>
