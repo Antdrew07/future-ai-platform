@@ -16,6 +16,7 @@ import Dashboard from "./pages/Dashboard";
 import AgentList from "./pages/AgentList";
 import AgentBuilder from "./pages/AgentBuilder";
 import TaskView from "./pages/TaskView";
+import AgentWorkspace from "./pages/AgentWorkspace";
 import Analytics from "./pages/Analytics";
 import Billing from "./pages/Billing";
 import ApiKeys from "./pages/ApiKeys";
@@ -40,6 +41,7 @@ function Router() {
       <Route path="/dashboard/agents/new" component={AgentBuilder} />
       <Route path="/dashboard/agents/:id" component={AgentBuilder} />
       <Route path="/dashboard/tasks/:id" component={TaskView} />
+      <Route path="/workspace/:agentId" component={AgentWorkspace} />
       <Route path="/dashboard/analytics" component={Analytics} />
       <Route path="/dashboard/billing" component={Billing} />
       <Route path="/dashboard/api-keys" component={ApiKeys} />

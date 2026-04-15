@@ -22,17 +22,17 @@ import { Link } from "wouter";
 import AgentChatPanel from "@/components/AgentChatPanel";
 
 const MODELS = [
-  { id: "gpt-4o", name: "GPT-4o", provider: "OpenAI", tier: "standard", desc: "Fast and capable for most tasks" },
-  { id: "gpt-4o-mini", name: "GPT-4o Mini", provider: "OpenAI", tier: "standard", desc: "Fastest, most cost-effective" },
-  { id: "claude-3-5-sonnet-20241022", name: "Claude 3.5 Sonnet", provider: "Anthropic", tier: "premium", desc: "Best for complex reasoning" },
-  { id: "claude-3-haiku-20240307", name: "Claude 3 Haiku", provider: "Anthropic", tier: "standard", desc: "Fast Claude model" },
-  { id: "future-agent-1", name: "Future Agent", provider: "Future", tier: "ultra", desc: "Our built-in model" },
+  { id: "future-agent-1", name: "Future Agent", provider: "Future (Manus)", tier: "ultra", desc: "Autonomous agent: browses web, executes code, completes complex tasks end-to-end" },
+  { id: "gpt-4o", name: "GPT-4o", provider: "OpenAI", tier: "premium", desc: "Multimodal, fast, great for complex reasoning and analysis" },
+  { id: "gpt-4o-mini", name: "GPT-4o Mini", provider: "OpenAI", tier: "standard", desc: "Fastest and most cost-effective OpenAI model" },
+  { id: "claude-3-5-sonnet-20241022", name: "Claude 3.5 Sonnet", provider: "Anthropic", tier: "premium", desc: "Exceptional at coding, analysis, and nuanced tasks" },
+  { id: "claude-3-haiku-20240307", name: "Claude 3 Haiku", provider: "Anthropic", tier: "standard", desc: "Anthropic's fastest and most compact model" },
 ];
 
 const TIER_COLORS: Record<string, string> = {
   standard: "bg-blue-500/10 text-blue-400 border-blue-500/20",
   premium: "bg-violet-500/10 text-violet-400 border-violet-500/20",
-  ultra: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
+  ultra: "bg-gradient-to-r from-yellow-500/20 to-orange-500/20 text-yellow-300 border-yellow-500/30",
 };
 
 export default function AgentBuilder() {
@@ -50,7 +50,7 @@ export default function AgentBuilder() {
     name: "",
     description: "",
     systemPrompt: "",
-    modelId: "gpt-4o",
+    modelId: "future-agent-1",
     memoryEnabled: false,
     isPublic: false,
     isDeployed: false,

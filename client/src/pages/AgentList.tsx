@@ -3,7 +3,7 @@ import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { toast } from "sonner";
 import {
   Bot, Plus, Settings, Play, Globe, Lock, Zap, MoreHorizontal,
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export default function AgentList() {
+  const [, navigate] = useLocation();
   const { data: agents, isLoading, refetch } = trpc.agents.list.useQuery();
   const deployMutation = trpc.agents.deploy.useMutation({
     onSuccess: () => { toast.success("Agent deployment status updated"); refetch(); },
@@ -120,21 +121,31 @@ export default function AgentList() {
                     {agent.description || agent.systemPrompt.slice(0, 80) + "..."}
                   </p>
 
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5">
-                      <Badge variant="secondary" className="text-xs px-2 py-0.5">
-                        {MODEL_LABELS[agent.modelId] ?? agent.modelId}
-                      </Badge>
-                      {agent.isPublic ? (
-                        <Globe className="w-3.5 h-3.5 text-muted-foreground" />
-                      ) : (
-                        <Lock className="w-3.5 h-3.5 text-muted-foreground" />
-                      )}
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <Badge variant="secondary" className="text-xs px-2 py-0.5">
+                          {MODEL_LABELS[agent.modelId] ?? agent.modelId}
+                        </Badge>
+                        {agent.isPublic ? (
+                          <Globe className="w-3.5 h-3.5 text-muted-foreground" />
+                        ) : (
+                          <Lock className="w-3.5 h-3.5 text-muted-foreground" />
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Zap className="w-3 h-3" />
+                        {agent.totalRuns} runs
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Zap className="w-3 h-3" />
-                      {agent.totalRuns} runs
-                    </div>
+                    <Button
+                      size="sm"
+                      className="w-full bg-violet-600 hover:bg-violet-700 text-white text-xs h-8"
+                      onClick={() => navigate(`/workspace/${agent.id}`)}
+                    >
+                      <Sparkles className="w-3.5 h-3.5 mr-1.5" />
+                      Launch Workspace
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
