@@ -49,6 +49,6 @@
 
 ## Post-Launch TODO
 - [ ] Claim Stripe sandbox: https://dashboard.stripe.com/claim_sandbox/YWNjdF8xVE1acXhMT0xaalJLdjMzLDE3NzY4ODk2MDEv100JYUHy778
-- [ ] Add OpenAI API key in Settings → Secrets (OPENAI_API_KEY) — rotate the compromised key first
-- [ ] Add Anthropic API key in Settings → Secrets (ANTHROPIC_API_KEY)
+- [x] Add OpenAI API key in Settings → Secrets (OPENAI_API_KEY) — rotate the compromised key first
+- [x] Add Anthropic API key in Settings → Secrets (ANTHROPIC_API_KEY)
 - [ ] Publish via Manus UI Publish button after claiming Stripe sandbox
