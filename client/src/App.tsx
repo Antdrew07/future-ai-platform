@@ -10,6 +10,8 @@ import Home from "./pages/Home";
 import AgentPublic from "./pages/AgentPublic";
 import Templates from "./pages/Templates";
 import Pricing from "./pages/Pricing";
+import AgentGallery from "./pages/AgentGallery";
+import Onboarding from "./pages/Onboarding";
 
 // Dashboard pages
 import Dashboard from "./pages/Dashboard";
@@ -24,7 +26,7 @@ import Teams from "./pages/Teams";
 import Settings from "./pages/Settings";
 
 // Admin pages
-import AdminPanel from "./pages/AdminPanel";
+import AdminPanel from "./pages/AdminPanel";  // role-gated
 
 function Router() {
   return (
@@ -33,7 +35,11 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/pricing" component={Pricing} />
       <Route path="/templates" component={Templates} />
+      <Route path="/gallery" component={AgentGallery} />
       <Route path="/agent/:slug" component={AgentPublic} />
+
+      {/* Onboarding */}
+      <Route path="/onboarding" component={Onboarding} />
 
       {/* Dashboard */}
       <Route path="/dashboard" component={Dashboard} />

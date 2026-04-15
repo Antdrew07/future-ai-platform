@@ -1,7 +1,7 @@
 /**
  * Future AI Platform — Agent Workspace
  * 
- * Full-screen Manus-like task execution interface:
+ * Full-screen autonomous task execution interface:
  * - Left: Chat panel (task input + conversation history)
  * - Right: Live execution feed (steps, tool calls, results)
  * - Bottom: File artifacts panel

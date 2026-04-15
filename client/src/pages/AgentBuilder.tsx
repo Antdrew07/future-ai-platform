@@ -22,7 +22,7 @@ import { Link } from "wouter";
 import AgentChatPanel from "@/components/AgentChatPanel";
 
 const MODELS = [
-  { id: "future-agent-1", name: "Future Agent", provider: "Future (Manus)", tier: "ultra", desc: "Autonomous agent: browses web, executes code, completes complex tasks end-to-end" },
+  { id: "future-agent-1", name: "Future Agent", provider: "Future AI", tier: "ultra", desc: "Fully autonomous: browses the web, executes code, manages files, and completes complex multi-step tasks end-to-end" },
   { id: "gpt-4o", name: "GPT-4o", provider: "OpenAI", tier: "premium", desc: "Multimodal, fast, great for complex reasoning and analysis" },
   { id: "gpt-4o-mini", name: "GPT-4o Mini", provider: "OpenAI", tier: "standard", desc: "Fastest and most cost-effective OpenAI model" },
   { id: "claude-3-5-sonnet-20241022", name: "Claude 3.5 Sonnet", provider: "Anthropic", tier: "premium", desc: "Exceptional at coding, analysis, and nuanced tasks" },

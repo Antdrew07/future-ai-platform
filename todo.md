@@ -91,3 +91,34 @@
 - [x] File manager panel (agent-created files as downloadable artifacts)
 - [x] Launch Workspace button on agent cards
 - [x] 29 Vitest tests passing
+
+## Branding Cleanup
+
+- [x] Remove all "Manus", "Meta", "Powered by Manus" references from landing page
+- [x] Remove all such references from dashboard layout, sidebar, footer
+- [x] Remove from AgentBuilder, AgentWorkspace, and all other pages
+- [x] Replace any "Manus" model label with "Future Agent" in UI
+- [x] Audit all files for any remaining third-party branding leakage
+
+## Full Ecosystem Upgrade
+
+### Branding Cleanup
+- [x] Remove all "Manus", "Meta", "Powered by Manus" text from every page
+- [x] Replace "Future Agent (Powered by Manus)" with "Future Agent" everywhere
+- [x] Update model labels in AgentBuilder, AgentList, AdminPanel, AgentWorkspace
+- [x] Update landing page hero copy to reflect independent ecosystem vision
+- [x] Update footer — Future branding only
+
+### Engine Upgrade
+- [x] Wire OpenAI GPT-4o directly as primary agent engine (tool_choice + function calling)
+- [x] Wire Claude 3.5 Sonnet directly as secondary engine (Anthropic tool_use)
+- [x] Update agentLoop.ts to route by modelId to correct provider
+- [x] Update llmRouter.ts to use OPENAI_API_KEY and ANTHROPIC_API_KEY env vars
+
+### Ecosystem Expansion
+- [x] Add onboarding wizard for new users (3-step: welcome, create agent, ready)
+- [x] Add public Agent Gallery page (/gallery — browse community agents, search, filter)
+- [x] Enhance Templates marketplace with categories and featured section
+- [x] Add /gallery and /onboarding routes to App.tsx
+- [x] Rewrite Home.tsx as full ecosystem landing page with tool arsenal, model grid, pricing preview
+- [x] 29 Vitest tests passing, 0 TypeScript errors

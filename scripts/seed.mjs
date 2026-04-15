@@ -17,14 +17,14 @@ const db = drizzle(connection);
 const models = [
   {
     id: "future-agent-1",
-    displayName: "Future Agent (Powered by Manus)",
+    displayName: "Future Agent",
     provider: "manus",
-    tier: "premium",
+    tier: "ultra",
     creditsPerInputToken: 0.008,   // 8 credits per 1K input tokens
     creditsPerOutputToken: 0.024,  // 24 credits per 1K output tokens
     creditsPerToolCall: 0.5,       // 0.5 credits per tool call
     isActive: true,
-    description: "The most capable autonomous agent, powered by Manus AI. Can browse the web, execute code, and complete complex multi-step tasks.",
+    description: "The most powerful autonomous agent on the Future platform. Browses the web, executes code, manages files, and completes complex multi-step tasks end-to-end.",
     maxTokens: 32768,
     supportsTools: true,
     supportsVision: true,

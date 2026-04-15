@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -8,8 +7,9 @@ import {
   DialogFooter,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Sparkles } from "lucide-react";
 
-interface ManusDialogProps {
+interface FutureAuthDialogProps {
   title?: string;
   logo?: string;
   open?: boolean;
@@ -25,7 +25,7 @@ export function ManusDialog({
   onLogin,
   onOpenChange,
   onClose,
-}: ManusDialogProps) {
+}: FutureAuthDialogProps) {
   const [internalOpen, setInternalOpen] = useState(open);
 
   useEffect(() => {
@@ -40,7 +40,6 @@ export function ManusDialog({
     } else {
       setInternalOpen(nextOpen);
     }
-
     if (!nextOpen) {
       onClose?.();
     }
@@ -51,36 +50,40 @@ export function ManusDialog({
       open={onOpenChange ? open : internalOpen}
       onOpenChange={handleOpenChange}
     >
-      <DialogContent className="py-5 bg-[#f8f8f7] rounded-[20px] w-[400px] shadow-[0px_4px_11px_0px_rgba(0,0,0,0.08)] border border-[rgba(0,0,0,0.08)] backdrop-blur-2xl p-0 gap-0 text-center">
-        <div className="flex flex-col items-center gap-2 p-5 pt-12">
+      <DialogContent className="py-5 bg-[#0d0d14] rounded-2xl w-[400px] shadow-2xl border border-white/10 backdrop-blur-2xl p-0 gap-0 text-center">
+        <div className="flex flex-col items-center gap-3 p-6 pt-10">
           {logo ? (
-            <div className="w-16 h-16 bg-white rounded-xl border border-[rgba(0,0,0,0.08)] flex items-center justify-center">
-              <img
-                src={logo}
-                alt="Dialog graphic"
-                className="w-10 h-10 rounded-md"
-              />
+            <div className="w-14 h-14 bg-white/5 rounded-xl border border-white/10 flex items-center justify-center">
+              <img src={logo} alt="App logo" className="w-9 h-9 rounded-md" />
             </div>
-          ) : null}
+          ) : (
+            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-violet-600 to-blue-600 flex items-center justify-center shadow-lg">
+              <Sparkles className="w-7 h-7 text-white" />
+            </div>
+          )}
 
-          {/* Title and subtitle */}
           {title ? (
-            <DialogTitle className="text-xl font-semibold text-[#34322d] leading-[26px] tracking-[-0.44px]">
+            <DialogTitle className="text-xl font-bold text-white tracking-tight">
               {title}
             </DialogTitle>
-          ) : null}
-          <DialogDescription className="text-sm text-[#858481] leading-5 tracking-[-0.154px]">
-            Please login with Manus to continue
+          ) : (
+            <DialogTitle className="text-xl font-bold text-white tracking-tight">
+              Welcome to Future
+            </DialogTitle>
+          )}
+
+          <DialogDescription className="text-sm text-white/50 leading-5">
+            Sign in to build and deploy autonomous AI agents
           </DialogDescription>
         </div>
 
-        <DialogFooter className="px-5 py-5">
-          {/* Login button */}
+        <DialogFooter className="px-6 pb-6">
           <Button
             onClick={onLogin}
-            className="w-full h-10 bg-[#1a1a19] hover:bg-[#1a1a19]/90 text-white rounded-[10px] text-sm font-medium leading-5 tracking-[-0.154px]"
+            className="w-full h-11 bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-700 hover:to-blue-700 text-white rounded-xl text-sm font-semibold shadow-lg"
           >
-            Login with Manus
+            <Sparkles className="w-4 h-4 mr-2" />
+            Continue with Future
           </Button>
         </DialogFooter>
       </DialogContent>

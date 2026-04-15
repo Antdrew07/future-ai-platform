@@ -6,9 +6,9 @@
  * and streams each step to the client via Server-Sent Events (SSE).
  */
 
-import { invokeLLM } from "./_core/llm";
+import { routeLLMCall, type LLMMessage, type LLMTool } from "./llmRouter";
 import { executeTool, getToolsForAgent, getTaskFiles, clearTaskFiles } from "./agentTools";
-import { getAgentById, createTaskStep, updateTask, deductCredits, getModelById } from "./db";
+import { getAgentById, createTaskStep, updateTask } from "./db";
 import type { Response } from "express";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -117,13 +117,17 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<void> {
     while (loopCount < maxSteps && !taskDone) {
       loopCount++;
 
-      // Call LLM with tools
-      let llmResponse;
+      // Call LLM with tools via the multi-provider router
+      let llmResult;
       try {
-        llmResponse = await invokeLLM({
-          messages,
-          tools: tools as Parameters<typeof invokeLLM>[0]["tools"],
+        llmResult = await routeLLMCall({
+          modelId: agent.modelId ?? "future-agent-1",
+          messages: messages as LLMMessage[],
+          tools: tools as LLMTool[],
           tool_choice: "auto",
+          userId,
+          agentId,
+          taskId,
         });
       } catch (llmErr) {
         emitStep({
@@ -135,33 +139,25 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<void> {
         break;
       }
 
-      // Track credits
-      const usage = llmResponse.usage;
-      if (usage) {
-        const creditsForCall = Math.ceil(((usage.prompt_tokens ?? 0) + (usage.completion_tokens ?? 0)) / 100);
-        totalCreditsUsed += creditsForCall;
-      }
+      // Track credits (already deducted inside routeLLMCall)
+      totalCreditsUsed += llmResult.creditsUsed;
 
-      const choice = llmResponse.choices?.[0];
-      if (!choice) break;
-
-      const message = choice.message;
-      const finishReason = choice.finish_reason;
+      const finishReason = llmResult.finishReason ?? "stop";
 
       // Add assistant message to history
       messages.push({
         role: "assistant",
-        content: typeof message.content === "string" ? (message.content ?? "") : "",
+        content: llmResult.content ?? "",
       });
 
       // ── Case 1: LLM wants to call a tool ──────────────────────────────────
-      if (finishReason === "tool_calls" && message.tool_calls && message.tool_calls.length > 0) {
-        for (const toolCall of message.tool_calls) {
-          const toolName = toolCall.function?.name ?? "unknown";
+      if (finishReason === "tool_calls" && llmResult.toolCalls && llmResult.toolCalls.length > 0) {
+        for (const toolCall of llmResult.toolCalls) {
+          const toolName = toolCall.name ?? "unknown";
           let toolArgs: Record<string, unknown> = {};
 
           try {
-            toolArgs = JSON.parse(toolCall.function?.arguments ?? "{}") as Record<string, unknown>;
+            toolArgs = JSON.parse(toolCall.arguments ?? "{}") as Record<string, unknown>;
           } catch {
             toolArgs = {};
           }
@@ -226,7 +222,7 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<void> {
       }
       // ── Case 2: LLM gives a direct text response ──────────────────────────
       else if (finishReason === "stop" || finishReason === "length") {
-        const textContent = typeof message.content === "string" ? message.content : "";
+        const textContent = llmResult.content ?? "";
 
         if (textContent) {
           finalAnswer = textContent;
@@ -261,11 +257,7 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<void> {
       finalAnswer = steps.filter(s => s.type === "tool_result").map(s => s.content).join("\n\n") || "Task partially completed.";
     }
 
-    // Deduct credits
-    if (totalCreditsUsed > 0) {
-      await deductCredits(userId, totalCreditsUsed, `Agent task #${taskId}`).catch(console.error);
-    }
-
+    // Credits already deducted per-call inside routeLLMCall
     // Update task status
     await updateTask(taskId, { status: "completed" }).catch(console.error);
 
