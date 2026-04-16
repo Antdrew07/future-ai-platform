@@ -202,3 +202,10 @@
 - [x] Remove all Manus OAuth references from frontend
 - [x] Write Vitest tests for register/login/logout
 - [x] Final checkpoint
+
+## Onboarding Redesign — Manus-style Task Prompt
+
+- [x] Replace "Create Agent" template picker with a simple task prompt UI (text box + suggestion chips)
+- [x] Suggestion chips: Build a website, Write & run code, Research a topic, Analyze data, Create a presentation, Automate a workflow, Custom task
+- [x] On submit, navigate to agent workspace with the task pre-filled
+- [x] Keep the same 3-step onboarding flow structure

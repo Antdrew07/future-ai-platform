@@ -1,61 +1,106 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import {
-  Sparkles, Bot, Zap, Globe, Code2, Brain, ArrowRight,
-  CheckCircle2, Terminal, Cpu, Play, Rocket
+  Sparkles, Globe, Code2, Cpu, ArrowRight,
+  CheckCircle2, Bot, Play, Rocket, Send,
+  Globe2, FileCode2, BarChart2, Presentation,
+  Workflow, Pencil, Search, ShoppingCart,
 } from "lucide-react";
 
 const STEPS = [
-  { id: 1, title: "Welcome", icon: Sparkles },
-  { id: 2, title: "Create Agent", icon: Bot },
-  { id: 3, title: "Ready", icon: CheckCircle2 },
+  { id: 1, title: "Welcome" },
+  { id: 2, title: "What to build" },
+  { id: 3, title: "Ready" },
 ];
 
-const TEMPLATE_AGENTS = [
-  { name: "Research Assistant", description: "Searches the web, synthesizes information, and writes comprehensive reports.", prompt: "You are a research assistant. When given a topic, search the web thoroughly, gather information from multiple sources, and produce a well-structured, comprehensive report with citations.", icon: Globe, gradient: "from-blue-500/20 to-cyan-500/20", tools: ["web_search", "write_file"] },
-  { name: "Code Engineer", description: "Writes, debugs, and executes code in Python, JavaScript, and more.", prompt: "You are an expert software engineer. Write clean, well-documented code, explain your approach, and execute it to verify correctness.", icon: Code2, gradient: "from-emerald-500/20 to-green-500/20", tools: ["code_execute", "write_file"] },
-  { name: "Data Analyst", description: "Analyzes datasets, finds patterns, and generates insights with visualizations.", prompt: "You are a data analyst. Analyze data thoroughly, identify patterns and trends, and present findings clearly with actionable insights.", icon: Brain, gradient: "from-violet-500/20 to-purple-500/20", tools: ["code_execute", "analyze_data"] },
-  { name: "Custom Agent", description: "Start from scratch and define your own capabilities.", prompt: "", icon: Terminal, gradient: "from-orange-500/20 to-amber-500/20", tools: [] },
+// Practical suggestion chips — Manus/twin-style
+const SUGGESTIONS = [
+  { icon: Globe2,        label: "Build a website",         prompt: "Build a modern website for my business. I'll describe what I need." },
+  { icon: FileCode2,     label: "Write & run code",        prompt: "Write and run code to solve a problem for me." },
+  { icon: Search,        label: "Research a topic",        prompt: "Research a topic thoroughly and give me a comprehensive summary." },
+  { icon: BarChart2,     label: "Analyze data",            prompt: "Analyze a dataset and give me insights and visualizations." },
+  { icon: Presentation,  label: "Create a presentation",   prompt: "Create a polished presentation or slide deck for me." },
+  { icon: Workflow,      label: "Automate a workflow",     prompt: "Help me automate a repetitive task or workflow." },
+  { icon: ShoppingCart,  label: "Build an online store",   prompt: "Help me set up an e-commerce store or product listing." },
+  { icon: Pencil,        label: "Write content",           prompt: "Write high-quality content — blog posts, emails, copy, or reports." },
 ];
+
+// Map a task prompt to a sensible agent name + system prompt
+function buildAgent(task: string) {
+  const lower = task.toLowerCase();
+  if (lower.includes("website") || lower.includes("web app") || lower.includes("landing")) {
+    return { name: "Web Builder", systemPrompt: "You are an expert web developer. Build clean, modern websites and web apps based on user requirements. Write code, explain your choices, and iterate until the user is satisfied." };
+  }
+  if (lower.includes("code") || lower.includes("script") || lower.includes("program")) {
+    return { name: "Code Engineer", systemPrompt: "You are an expert software engineer. Write clean, well-documented code, explain your approach, and execute it to verify correctness." };
+  }
+  if (lower.includes("research") || lower.includes("summary") || lower.includes("report")) {
+    return { name: "Research Assistant", systemPrompt: "You are a research assistant. Search the web thoroughly, gather information from multiple sources, and produce a well-structured, comprehensive report." };
+  }
+  if (lower.includes("data") || lower.includes("analyz") || lower.includes("dataset") || lower.includes("chart")) {
+    return { name: "Data Analyst", systemPrompt: "You are a data analyst. Analyze data thoroughly, identify patterns and trends, and present findings clearly with actionable insights and visualizations." };
+  }
+  if (lower.includes("presentation") || lower.includes("slide") || lower.includes("deck")) {
+    return { name: "Presentation Designer", systemPrompt: "You are an expert at creating compelling presentations. Design clear, visually appealing slide decks with strong narratives and concise content." };
+  }
+  if (lower.includes("automat") || lower.includes("workflow") || lower.includes("task")) {
+    return { name: "Automation Agent", systemPrompt: "You are an automation expert. Identify repetitive tasks, design efficient workflows, and build scripts or integrations to automate them." };
+  }
+  if (lower.includes("store") || lower.includes("shop") || lower.includes("ecommerce") || lower.includes("product")) {
+    return { name: "E-Commerce Builder", systemPrompt: "You are an e-commerce specialist. Help set up online stores, product listings, and shopping experiences." };
+  }
+  if (lower.includes("write") || lower.includes("content") || lower.includes("blog") || lower.includes("copy")) {
+    return { name: "Content Writer", systemPrompt: "You are a skilled content writer. Produce high-quality, engaging written content tailored to the audience and purpose." };
+  }
+  return { name: "AI Assistant", systemPrompt: "You are a highly capable AI assistant. Complete tasks thoroughly, explain your reasoning, and ask clarifying questions when needed." };
+}
 
 export default function Onboarding() {
   const [, navigate] = useLocation();
   const [step, setStep] = useState(1);
-  const [selectedTemplate, setSelectedTemplate] = useState<typeof TEMPLATE_AGENTS[0] | null>(null);
-  const [agentName, setAgentName] = useState("");
-  const [agentPrompt, setAgentPrompt] = useState("");
+  const [task, setTask] = useState("");
   const [createdAgentId, setCreatedAgentId] = useState<number | null>(null);
+  const [createdAgentName, setCreatedAgentName] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const createAgent = trpc.agents.create.useMutation({
-    onSuccess: (agent) => { setCreatedAgentId(agent.id); setStep(3); },
-    onError: (err) => toast.error("Failed to create agent: " + err.message),
+    onSuccess: (agent) => {
+      setCreatedAgentId(agent.id);
+      setCreatedAgentName(agent.name);
+      setStep(3);
+    },
+    onError: (err) => toast.error("Failed to start: " + err.message),
   });
 
-  const handleSelectTemplate = (template: typeof TEMPLATE_AGENTS[0]) => {
-    setSelectedTemplate(template);
-    if (template.name !== "Custom Agent") {
-      setAgentName(template.name);
-      setAgentPrompt(template.prompt);
-    } else { setAgentName(""); setAgentPrompt(""); }
-  };
-
-  const handleCreateAgent = () => {
-    if (!agentName.trim()) { toast.error("Please enter an agent name"); return; }
+  const handleStart = () => {
+    const trimmed = task.trim();
+    if (!trimmed) { toast.error("Please describe what you'd like to do"); return; }
+    const { name, systemPrompt } = buildAgent(trimmed);
     createAgent.mutate({
-      name: agentName,
-      description: selectedTemplate?.description ?? "",
-      systemPrompt: agentPrompt,
+      name,
+      description: trimmed.slice(0, 200),
+      systemPrompt,
       modelId: "future-agent-1",
       webSearchEnabled: true,
       codeExecutionEnabled: true,
       fileUploadEnabled: true,
       apiCallsEnabled: true,
     });
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleStart();
+    }
+  };
+
+  const handleSuggestion = (prompt: string) => {
+    setTask(prompt);
+    textareaRef.current?.focus();
   };
 
   return (
@@ -111,7 +156,7 @@ export default function Onboarding() {
                   Welcome to <span className="gradient-text">Future</span>
                 </h1>
                 <p className="text-sm text-white/40 max-w-md mx-auto leading-relaxed">
-                  Build autonomous AI agents that can browse the web, write code, manage files, and complete complex tasks — all on your behalf.
+                  Your autonomous AI that browses the web, writes code, manages files, and completes complex tasks — all on your behalf.
                 </p>
               </div>
 
@@ -136,78 +181,71 @@ export default function Onboarding() {
             </div>
           )}
 
-          {/* Step 2: Create Agent */}
+          {/* Step 2: Task Prompt — Manus-style */}
           {step === 2 && (
             <div className="space-y-6">
               <div className="text-center space-y-2">
-                <h2 className="text-2xl font-heading font-bold text-white">Create Your First Agent</h2>
-                <p className="text-xs text-white/40">Choose a template or start from scratch</p>
+                <h2 className="text-2xl font-heading font-bold text-white">What can I help you with?</h2>
+                <p className="text-xs text-white/40">Describe your task and Future will get to work</p>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                {TEMPLATE_AGENTS.map((template) => (
+              {/* Main prompt box */}
+              <div className="glass rounded-2xl border border-white/[0.08] overflow-hidden focus-within:border-violet-500/40 transition-colors duration-200">
+                <textarea
+                  ref={textareaRef}
+                  value={task}
+                  onChange={(e) => setTask(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="e.g. Build me a landing page for my SaaS product, or research the latest AI trends and write a report…"
+                  rows={4}
+                  className="w-full bg-transparent text-white/90 placeholder:text-white/20 text-sm px-5 pt-5 pb-3 resize-none outline-none font-sans leading-relaxed"
+                />
+                <div className="flex items-center justify-between px-4 pb-4">
+                  <span className="text-[11px] text-white/20">Press Enter to start · Shift+Enter for new line</span>
                   <button
-                    key={template.name}
-                    onClick={() => handleSelectTemplate(template)}
-                    className={`glass p-4 rounded-xl text-left transition-all duration-200 ${
-                      selectedTemplate?.name === template.name
-                        ? "ring-1 ring-violet-500/40 bg-violet-500/5"
-                        : "hover:bg-white/[0.02]"
-                    }`}
+                    onClick={handleStart}
+                    disabled={!task.trim() || createAgent.isPending}
+                    className="flex items-center gap-1.5 h-8 px-4 rounded-lg bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-semibold transition-all duration-200 shadow-lg shadow-violet-500/20"
                   >
-                    <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${template.gradient} flex items-center justify-center mb-3 ring-1 ring-white/[0.06]`}>
-                      <template.icon className="w-4 h-4 text-white/50" />
-                    </div>
-                    <div className="font-heading font-semibold text-sm text-white mb-1">{template.name}</div>
-                    <div className="text-[11px] text-white/30 leading-relaxed line-clamp-2">{template.description}</div>
+                    {createAgent.isPending ? (
+                      <>
+                        <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        Starting…
+                      </>
+                    ) : (
+                      <>
+                        <Send className="w-3 h-3" />
+                        Start
+                      </>
+                    )}
                   </button>
-                ))}
+                </div>
               </div>
 
-              {selectedTemplate && (
-                <div className="glass rounded-xl p-5 space-y-4">
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-white/60">Agent Name</label>
-                    <Input
-                      value={agentName}
-                      onChange={(e) => setAgentName(e.target.value)}
-                      placeholder="My Research Assistant"
-                      className="bg-white/[0.03] border-white/[0.06]"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-white/60">System Instructions</label>
-                    <Textarea
-                      value={agentPrompt}
-                      onChange={(e) => setAgentPrompt(e.target.value)}
-                      placeholder="Describe what your agent should do..."
-                      rows={4}
-                      className="bg-white/[0.03] border-white/[0.06] resize-none font-mono text-xs"
-                    />
-                  </div>
+              {/* Suggestion chips */}
+              <div>
+                <p className="text-[11px] text-white/25 mb-3 text-center uppercase tracking-widest">Or choose a task</p>
+                <div className="flex flex-wrap gap-2 justify-center">
+                  {SUGGESTIONS.map((s) => (
+                    <button
+                      key={s.label}
+                      onClick={() => handleSuggestion(s.prompt)}
+                      className={`flex items-center gap-1.5 h-8 px-3.5 rounded-full border text-xs font-medium transition-all duration-150 ${
+                        task === s.prompt
+                          ? "border-violet-500/50 bg-violet-500/10 text-violet-300"
+                          : "border-white/[0.08] bg-white/[0.03] text-white/50 hover:border-white/20 hover:text-white/80 hover:bg-white/[0.05]"
+                      }`}
+                    >
+                      <s.icon className="w-3 h-3" />
+                      {s.label}
+                    </button>
+                  ))}
                 </div>
-              )}
+              </div>
 
-              <div className="flex gap-3">
-                <Button variant="outline" onClick={() => setStep(1)} className="flex-1 border-white/[0.06] bg-white/[0.02] text-white/60">
-                  Back
-                </Button>
-                <Button
-                  className="flex-1 glow-primary"
-                  disabled={!selectedTemplate || !agentName.trim() || createAgent.isPending}
-                  onClick={handleCreateAgent}
-                >
-                  {createAgent.isPending ? (
-                    <span className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Creating...
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-2">
-                      <Zap className="w-4 h-4" />
-                      Create Agent
-                    </span>
-                  )}
+              <div className="flex justify-center">
+                <Button variant="ghost" size="sm" className="text-xs text-white/30 hover:text-white/60" onClick={() => setStep(1)}>
+                  ← Back
                 </Button>
               </div>
             </div>
@@ -221,29 +259,31 @@ export default function Onboarding() {
                   <CheckCircle2 className="w-10 h-10 text-white" />
                 </div>
                 <h1 className="text-3xl font-heading font-bold text-white">
-                  You're All Set!
+                  Your agent is ready!
                 </h1>
                 <p className="text-sm text-white/40 max-w-md mx-auto">
-                  Your first agent is ready. Launch the workspace to start running tasks.
+                  Launch the workspace and Future will start working on your task right away.
                 </p>
               </div>
 
               <div className="glass rounded-xl p-6 max-w-sm mx-auto">
-                <div className="flex items-center gap-3 mb-3">
+                <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/20 to-blue-500/20 flex items-center justify-center ring-1 ring-white/[0.06]">
                     <Bot className="w-5 h-5 text-white/40" />
                   </div>
-                  <div>
-                    <div className="font-heading font-semibold text-white text-sm">{agentName}</div>
-                    <div className="text-[10px] text-white/30">Future-1 Ultra</div>
+                  <div className="text-left">
+                    <div className="font-heading font-semibold text-white text-sm">{createdAgentName}</div>
+                    <div className="text-[10px] text-white/30">Future-1 Ultra · Ready to run</div>
                   </div>
                 </div>
-                <p className="text-xs text-white/30 line-clamp-2">{selectedTemplate?.description}</p>
+                {task && (
+                  <p className="text-xs text-white/30 mt-3 leading-relaxed line-clamp-2 text-left">{task}</p>
+                )}
               </div>
 
               <div className="flex flex-col gap-3 max-w-sm mx-auto">
                 {createdAgentId && (
-                  <Button size="lg" className="h-11 glow-primary font-heading font-semibold" onClick={() => navigate(`/workspace/${createdAgentId}`)}>
+                  <Button size="lg" className="h-11 glow-primary font-heading font-semibold" onClick={() => navigate(`/workspace/${createdAgentId}?task=${encodeURIComponent(task)}`)}>
                     <Play className="w-4 h-4 mr-2" />
                     Launch Workspace
                   </Button>

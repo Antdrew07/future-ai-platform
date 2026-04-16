@@ -320,10 +320,15 @@ function ArtifactsPanel({ steps }: { steps: AgentStep[] }) {
 
 export default function AgentWorkspace() {
   const { agentId } = useParams<{ agentId: string }>();
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
   const { user, isAuthenticated } = useAuth();
 
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("task") ?? "";
+    } catch { return ""; }
+  });
   const [currentRun, setCurrentRun] = useState<TaskRun | null>(null);
   const [conversationHistory, setConversationHistory] = useState<Array<{ role: string; content: string; taskId?: number }>>([]);
   const [isRunning, setIsRunning] = useState(false);
