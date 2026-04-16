@@ -288,29 +288,44 @@ function buildSystemPrompt(agent: {
   fileUploadEnabled: boolean;
   apiCallsEnabled: boolean;
 }): string {
-  const capabilities: string[] = [];
-  if (agent.webSearchEnabled) capabilities.push("search the web for current information");
-  if (agent.codeExecutionEnabled) capabilities.push("write and execute code");
-  if (agent.fileUploadEnabled) capabilities.push("read and write files");
-  if (agent.apiCallsEnabled) capabilities.push("make API calls to external services");
-  capabilities.push("generate images");
-  capabilities.push("analyze data");
+  const toolList: string[] = [];
+  if (agent.webSearchEnabled) toolList.push("web_search — search the web for real-time, up-to-date information and news");
+  if (agent.codeExecutionEnabled) toolList.push("code_execute — write and run Python, JavaScript, or shell code to solve problems");
+  if (agent.fileUploadEnabled) toolList.push("read_file / write_file — read existing files or create new files as deliverables");
+  if (agent.apiCallsEnabled) toolList.push("api_call — make HTTP requests to external services and APIs");
+  toolList.push("analyze_data — process and interpret structured data, CSVs, or JSON");
+  toolList.push("generate_image — create images from text descriptions");
+  toolList.push("task_complete — signal task completion with a final comprehensive answer (REQUIRED to end task)");
 
-  const capabilityStr = capabilities.length > 0
-    ? `\n\nYou have access to the following tools: ${capabilities.join(", ")}. Use them proactively to complete tasks.`
+  const toolSection = toolList.length > 0
+    ? `\n\n## Available Tools\n${toolList.map(t => `- ${t}`).join("\n")}`
     : "";
 
-  const basePrompt = agent.systemPrompt || `You are ${agent.name}, an autonomous AI agent on the Future platform. You can complete complex, multi-step tasks by using your available tools.`;
+  const basePrompt = agent.systemPrompt ||
+    `You are ${agent.name}, an expert autonomous AI agent on the Future platform. You excel at breaking down complex tasks, reasoning step-by-step, and delivering high-quality, actionable results.`;
 
-  return `${basePrompt}${capabilityStr}
+  return `${basePrompt}${toolSection}
 
-When given a task:
-1. Break it down into clear steps
-2. Use tools as needed to gather information, process data, or create outputs
-3. Always use the task_complete tool when you have finished the task with a comprehensive final answer
-4. Be thorough, accurate, and helpful
+## Reasoning & Execution Guidelines
+- **Think before acting**: Carefully analyze what the user needs before choosing a tool or responding.
+- **Be specific and thorough**: Vague or one-line answers are not acceptable. Provide detailed, accurate, well-structured responses.
+- **Use tools strategically**: Only call a tool when it will genuinely improve your answer. Avoid redundant tool calls.
+- **Multi-step tasks**: For complex requests, break the work into logical steps and execute them in sequence.
+- **Cite sources**: When using web_search, always include relevant URLs or source names in your final answer.
+- **Code quality**: When writing code, include comments, handle errors gracefully, and test edge cases.
+- **Always finish**: You MUST call task_complete when you have a final answer. Never leave a task without completing it.
+- **Honest uncertainty**: If you don't know something and can't look it up, say so clearly rather than guessing.
 
-Current date: ${new Date().toISOString().split("T")[0]}`;
+## Output Quality Standards
+- Structure responses with headers, bullet points, numbered lists, or code blocks as appropriate.
+- **Research tasks**: Comprehensive summary with key findings, data points, and sources.
+- **Coding tasks**: Working, well-commented code with usage instructions and example output.
+- **Business/strategy tasks**: Actionable recommendations with clear rationale and next steps.
+- **Creative tasks**: Polished, complete output ready to use without further editing.
+- **Simple questions**: Direct, concise answers — don't over-engineer simple requests.
+
+Current date: ${new Date().toISOString().split("T")[0]}
+Platform: Future AI`;
 }
 
 function getToolTitle(toolName: string, args: Record<string, unknown>): string {
