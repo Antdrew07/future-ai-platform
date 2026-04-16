@@ -1,7 +1,6 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { getLoginUrl } from "@/const";
 import { trpc } from "@/lib/trpc";
 import { Link, useLocation } from "wouter";
 import {
@@ -60,9 +59,9 @@ export default function FutureDashboardLayout({ children, title, subtitle }: Pro
           </div>
           <h2 className="text-xl font-heading font-bold mb-2">Welcome to Future</h2>
           <p className="text-sm text-muted-foreground mb-6">Sign in to access your AI workspace</p>
-          <a href={getLoginUrl()}>
+          <Link href="/signin">
             <Button className="bg-primary hover:bg-primary/90 glow-primary px-8">Sign In</Button>
-          </a>
+          </Link>
         </div>
       </div>
     );

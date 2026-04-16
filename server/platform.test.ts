@@ -7,6 +7,8 @@ import type { TrpcContext } from "./_core/context";
 vi.mock("./db", () => ({
   upsertUser: vi.fn(),
   getUserByOpenId: vi.fn(),
+  getUserByEmail: vi.fn(),
+  createUserWithPassword: vi.fn(),
   getUserById: vi.fn(),
   getAllUsers: vi.fn().mockResolvedValue([]),
   getUserCount: vi.fn().mockResolvedValue(0),
@@ -75,10 +77,14 @@ type AuthenticatedUser = NonNullable<TrpcContext["user"]>;
 function makeUser(overrides: Partial<AuthenticatedUser> = {}): AuthenticatedUser {
   return {
     id: 1,
-    openId: "test-user-open-id",
+    openId: "email_testuserid123",
     email: "test@future.ai",
     name: "Test User",
-    loginMethod: "manus",
+    loginMethod: "email",
+    passwordHash: "$2b$12$hashedpassword",
+    avatar: null,
+    creditBalance: 0,
+    apiQuota: 100,
     role: "user",
     createdAt: new Date(),
     updatedAt: new Date(),

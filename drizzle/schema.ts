@@ -20,6 +20,7 @@ export const users = mysqlTable("users", {
   email: varchar("email", { length: 320 }),
   avatar: text("avatar"),
   loginMethod: varchar("loginMethod", { length: 64 }),
+  passwordHash: varchar("passwordHash", { length: 256 }),
   role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
   creditBalance: bigint("creditBalance", { mode: "number" }).default(0).notNull(),
   apiQuota: int("apiQuota").default(100).notNull(), // monthly API calls limit

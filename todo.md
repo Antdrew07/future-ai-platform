@@ -185,3 +185,20 @@
 - [x] Implement animated numeric counters on landing page stats section (IntersectionObserver-based)
 - [x] Footer with gradient divider in Home.tsx verified and implemented
 - [x] Upgrade AgentWorkspace execution feed cards with luxury glass styling (StepCard + ArtifactsPanel)
+
+## Custom Email/Password Auth (Replace Manus OAuth)
+
+- [x] Add passwordHash column to users table, push migration
+- [x] Install bcryptjs for password hashing
+- [x] Build auth.register tRPC procedure (email, password, name)
+- [x] Build auth.login tRPC procedure (email, password → JWT cookie)
+- [x] Build auth.logout and auth.me procedures using custom JWT
+- [x] Replace Manus OAuth context with custom JWT session context
+- [x] Build Future-branded Sign In page (/signin)
+- [x] Build Future-branded Sign Up page (/signup)
+- [x] Update App.tsx: remove Manus OAuth login URL, wire /signin and /signup routes
+- [x] Update FutureDashboardLayout: replace getLoginUrl() with /signin redirect
+- [x] Update useAuth hook to use custom auth procedures
+- [x] Remove all Manus OAuth references from frontend
+- [x] Write Vitest tests for register/login/logout
+- [x] Final checkpoint

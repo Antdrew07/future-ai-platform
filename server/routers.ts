@@ -7,7 +7,7 @@ import { z } from "zod/v4";
 import { nanoid } from "nanoid";
 import { createHash } from "crypto";
 import {
-  upsertUser, getUserByOpenId, getUserById, getAllUsers, getUserCount,
+  upsertUser, getUserByOpenId, getUserByEmail, createUserWithPassword, getUserById, getAllUsers, getUserCount,
   createAgent, getAgentsByUserId, getAgentById, getAgentBySlug, updateAgent, deleteAgent, getPublicAgents,
   createTask, getTasksByUserId, getTasksByAgentId, getTaskById, updateTask, createTaskStep, getTaskSteps,
   getOrCreateConversation, getConversationsByUserId, addMessage, getMessages,
@@ -21,6 +21,9 @@ import {
 import { routeLLMCall } from "./llmRouter";
 import { invokeLLM } from "./_core/llm";
 import { createCheckoutSession } from "./stripeWebhook";
+import bcrypt from "bcryptjs";
+import { sdk } from "./_core/sdk";
+import { ONE_YEAR_MS } from "@shared/const";
 
 // ─── Admin Middleware ─────────────────────────────────────────────────────────
 const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
@@ -34,6 +37,52 @@ export const appRouter = router({
   // ─── Auth ──────────────────────────────────────────────────────────────────
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
+
+    register: publicProcedure.input(z.object({
+      name: z.string().min(1).max(128),
+      email: z.string().email(),
+      password: z.string().min(8, "Password must be at least 8 characters"),
+    })).mutation(async ({ ctx, input }) => {
+      // Check if email already in use
+      const existing = await getUserByEmail(input.email);
+      if (existing) throw new TRPCError({ code: "CONFLICT", message: "An account with this email already exists" });
+
+      const passwordHash = await bcrypt.hash(input.password, 12);
+      const openId = `email_${nanoid(24)}`;
+      await createUserWithPassword({ email: input.email, name: input.name, passwordHash, openId });
+
+      const user = await getUserByEmail(input.email);
+      if (!user) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to create user" });
+
+      // Issue session cookie
+      const sessionToken = await sdk.signSession({ openId, appId: "future", name: input.name }, { expiresInMs: ONE_YEAR_MS });
+      const cookieOptions = getSessionCookieOptions(ctx.req);
+      ctx.res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
+
+      return { success: true, user: { id: user.id, name: user.name, email: user.email, role: user.role } };
+    }),
+
+    login: publicProcedure.input(z.object({
+      email: z.string().email(),
+      password: z.string().min(1),
+    })).mutation(async ({ ctx, input }) => {
+      const user = await getUserByEmail(input.email);
+      if (!user || !user.passwordHash) throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid email or password" });
+
+      const valid = await bcrypt.compare(input.password, user.passwordHash);
+      if (!valid) throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid email or password" });
+
+      // Update lastSignedIn
+      await upsertUser({ openId: user.openId, lastSignedIn: new Date() });
+
+      // Issue session cookie
+      const sessionToken = await sdk.signSession({ openId: user.openId, appId: "future", name: user.name ?? "" }, { expiresInMs: ONE_YEAR_MS });
+      const cookieOptions = getSessionCookieOptions(ctx.req);
+      ctx.res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
+
+      return { success: true, user: { id: user.id, name: user.name, email: user.email, role: user.role } };
+    }),
+
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });

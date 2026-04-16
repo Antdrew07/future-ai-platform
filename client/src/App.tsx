@@ -5,6 +5,10 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 
+// Auth pages
+import SignIn from "./pages/SignIn";
+import SignUp from "./pages/SignUp";
+
 // Public pages
 import Home from "./pages/Home";
 import AgentPublic from "./pages/AgentPublic";
@@ -31,6 +35,10 @@ import AdminPanel from "./pages/AdminPanel";  // role-gated
 function Router() {
   return (
     <Switch>
+      {/* Auth */}
+      <Route path="/signin" component={SignIn} />
+      <Route path="/signup" component={SignUp} />
+
       {/* Public */}
       <Route path="/" component={Home} />
       <Route path="/pricing" component={Pricing} />
