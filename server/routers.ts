@@ -54,6 +54,9 @@ export const appRouter = router({
       const user = await getUserByEmail(input.email);
       if (!user) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Failed to create user" });
 
+      // Grant 100 free starter credits
+      await addCredits(user.id, 100, "bonus", "Welcome gift — 100 free credits to get you started");
+
       // Issue session cookie
       const sessionToken = await sdk.signSession({ openId, appId: "future", name: input.name }, { expiresInMs: ONE_YEAR_MS });
       const cookieOptions = getSessionCookieOptions(ctx.req);

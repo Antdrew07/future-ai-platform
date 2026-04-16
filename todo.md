@@ -209,3 +209,9 @@
 - [x] Suggestion chips: Build a website, Write & run code, Research a topic, Analyze data, Create a presentation, Automate a workflow, Custom task
 - [x] On submit, navigate to agent workspace with the task pre-filled
 - [x] Keep the same 3-step onboarding flow structure
+
+## Free Credits on Signup
+
+- [x] Grant 100 free credits to every new user on registration (in auth.register procedure)
+- [x] Seed existing users who have 0 credits with 100 free credits via DB migration script
+- [x] Show free credit balance clearly in the workspace UI so users know they have credits

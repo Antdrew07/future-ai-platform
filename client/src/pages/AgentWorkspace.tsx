@@ -341,6 +341,9 @@ export default function AgentWorkspace() {
   const { data: agentList } = trpc.agents.list.useQuery();
   const agent = agentList?.find(a => a.id === parseInt(agentId ?? "0"));
 
+  // Credit balance
+  const { data: creditData } = trpc.credits.balance.useQuery(undefined, { refetchInterval: 30000 });
+
   // Auto-scroll steps
   useEffect(() => {
     stepsEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -522,6 +525,16 @@ export default function AgentWorkspace() {
           </div>
         )}
 
+        {creditData !== undefined && (
+          <div className={`flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full border ${
+            creditData <= 10
+              ? "border-red-500/30 bg-red-500/10 text-red-400"
+              : "border-violet-500/20 bg-violet-500/10 text-violet-300"
+          }`}>
+            <Coins className="w-3 h-3" />
+            <span>{creditData} credits</span>
+          </div>
+        )}
         <Badge variant="outline" className="text-xs border-white/10 text-white/40">
           {agent?.webSearchEnabled && "Search "}
           {agent?.codeExecutionEnabled && "Code "}
