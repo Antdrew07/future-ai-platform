@@ -126,7 +126,7 @@ export default function AgentBuilder() {
       subtitle={agentId ? existingAgent?.name : "Configure your autonomous AI agent"}>
       <div className="flex flex-col h-full">
         {/* Toolbar */}
-        <div className="flex items-center gap-3 px-6 py-3 border-b border-border/50 bg-background/30 flex-shrink-0">
+        <div className="flex items-center gap-3 px-6 py-3 border-b border-border/30 glass-strong flex-shrink-0">
           <Link href="/dashboard/agents">
             <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground">
               <ArrowLeft className="w-3.5 h-3.5 mr-1.5" />
@@ -182,41 +182,41 @@ export default function AgentBuilder() {
           <div className="flex-1 overflow-auto p-6">
             <div className="max-w-3xl mx-auto space-y-6">
               {/* Basic Info */}
-              <Card className="bg-card/50 border-border/50">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <div className="glass rounded-xl overflow-hidden">
+                <div className="px-5 pt-5 pb-2">
+                  <h3 className="text-sm font-heading font-semibold flex items-center gap-2">
                     <Bot className="w-4 h-4 text-primary" />
                     Agent Identity
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
+                  </h3>
+                </div>
+                <div className="px-5 pb-5 space-y-4">
                   <div>
                     <Label className="text-xs text-muted-foreground mb-1.5 block">Name *</Label>
                     <Input placeholder="e.g. Research Assistant" value={form.name}
                       onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                      className="bg-input/50" />
+                      className="bg-input/50 rounded-xl" />
                   </div>
                   <div>
                     <Label className="text-xs text-muted-foreground mb-1.5 block">Description</Label>
                     <Input placeholder="What does this agent do?" value={form.description}
                       onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-                      className="bg-input/50" />
+                      className="bg-input/50 rounded-xl" />
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
               {/* System Prompt */}
-              <Card className="bg-card/50 border-border/50">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <div className="glass rounded-xl overflow-hidden">
+                <div className="px-5 pt-5 pb-2">
+                  <h3 className="text-sm font-heading font-semibold flex items-center gap-2">
                     <Brain className="w-4 h-4 text-violet-400" />
                     System Prompt *
-                  </CardTitle>
-                  <CardDescription className="text-xs">
+                  </h3>
+                  <p className="text-[11px] text-muted-foreground mt-1">
                     Define your agent's personality, capabilities, and behavior.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
+                  </p>
+                </div>
+                <div className="px-5 pb-5">
                   <Textarea
                     placeholder="You are an expert research assistant. When given a task, you:
 1. Break it down into clear steps
@@ -227,7 +227,7 @@ export default function AgentBuilder() {
 Be thorough, accurate, and helpful."
                     value={form.systemPrompt}
                     onChange={e => setForm(f => ({ ...f, systemPrompt: e.target.value }))}
-                    className="min-h-[180px] font-mono text-sm bg-input/50 resize-none"
+                    className="min-h-[180px] font-mono text-sm bg-input/50 resize-none rounded-xl"
                   />
                   <div className="flex items-center justify-between mt-2">
                     <span className="text-xs text-muted-foreground">{form.systemPrompt.length} characters</span>
@@ -237,26 +237,26 @@ Be thorough, accurate, and helpful."
                       Use template
                     </Button>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
               {/* Model Selection */}
-              <Card className="bg-card/50 border-border/50">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <div className="glass rounded-xl overflow-hidden">
+                <div className="px-5 pt-5 pb-2">
+                  <h3 className="text-sm font-heading font-semibold flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-cyan-400" />
                     Model
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
+                  </h3>
+                </div>
+                <div className="px-5 pb-5 space-y-4">
                   <div className="grid gap-2">
                     {MODELS.map((model) => (
                       <div key={model.id}
                         onClick={() => setForm(f => ({ ...f, modelId: model.id }))}
-                        className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${
+                        className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all duration-200 ${
                           form.modelId === model.id
-                            ? "border-primary/50 bg-primary/5"
-                            : "border-border/50 hover:border-border hover:bg-accent/30"
+                            ? "border-primary/40 bg-primary/5 glow-subtle"
+                            : "border-border/30 hover:border-border/50 hover:bg-accent/30"
                         }`}>
                         <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
                           form.modelId === model.id ? "border-primary" : "border-muted-foreground/30"
@@ -305,21 +305,21 @@ Be thorough, accurate, and helpful."
                       min={1} max={50} step={1}
                     />
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
               {/* Tools */}
-              <Card className="bg-card/50 border-border/50">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <div className="glass rounded-xl overflow-hidden">
+                <div className="px-5 pt-5 pb-2">
+                  <h3 className="text-sm font-heading font-semibold flex items-center gap-2">
                     <Code2 className="w-4 h-4 text-emerald-400" />
                     Tool Integrations
-                  </CardTitle>
-                  <CardDescription className="text-xs">
+                  </h3>
+                  <p className="text-[11px] text-muted-foreground mt-1">
                     Enable capabilities your agent can use during task execution.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
+                  </p>
+                </div>
+                <div className="px-5 pb-5 space-y-3">
                   {[
                     { key: "webSearchEnabled", icon: Search, label: "Web Search", desc: "Search the internet for real-time information", color: "text-blue-400" },
                     { key: "codeExecutionEnabled", icon: Code2, label: "Code Execution", desc: "Write and run Python/JavaScript code", color: "text-emerald-400" },
@@ -327,7 +327,7 @@ Be thorough, accurate, and helpful."
                     { key: "apiCallsEnabled", icon: Webhook, label: "API Calls", desc: "Make HTTP requests to external APIs", color: "text-pink-400" },
                     { key: "memoryEnabled", icon: Brain, label: "Memory", desc: "Remember context across conversations", color: "text-violet-400" },
                   ].map((tool) => (
-                    <div key={tool.key} className="flex items-center justify-between p-3 rounded-lg border border-border/30 hover:bg-accent/20 transition-colors">
+                    <div key={tool.key} className="flex items-center justify-between p-3 rounded-xl border border-border/20 hover:bg-accent/30 transition-all duration-200">
                       <div className="flex items-center gap-3">
                         <tool.icon className={`w-4 h-4 ${tool.color}`} />
                         <div>
@@ -341,19 +341,19 @@ Be thorough, accurate, and helpful."
                       />
                     </div>
                   ))}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
 
               {/* Visibility */}
-              <Card className="bg-card/50 border-border/50">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+              <div className="glass rounded-xl overflow-hidden">
+                <div className="px-5 pt-5 pb-2">
+                  <h3 className="text-sm font-heading font-semibold flex items-center gap-2">
                     <Globe className="w-4 h-4 text-cyan-400" />
                     Visibility & Sharing
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-center justify-between p-3 rounded-lg border border-border/30">
+                  </h3>
+                </div>
+                <div className="px-5 pb-5 space-y-3">
+                  <div className="flex items-center justify-between p-3 rounded-xl border border-border/20">
                     <div className="flex items-center gap-3">
                       {form.isPublic ? <Globe className="w-4 h-4 text-cyan-400" /> : <Lock className="w-4 h-4 text-muted-foreground" />}
                       <div>
@@ -369,7 +369,7 @@ Be thorough, accurate, and helpful."
                     />
                   </div>
                   {agentId && existingAgent && form.isDeployed && (
-                    <div className="p-3 rounded-lg border border-emerald-500/20 bg-emerald-500/5">
+                    <div className="p-3 rounded-xl border border-emerald-500/20 bg-emerald-500/5">
                       <div className="text-xs text-muted-foreground mb-1.5">Shareable link</div>
                       <div className="flex items-center gap-2">
                         <code className="text-xs font-mono text-emerald-400 flex-1 truncate">
@@ -387,8 +387,8 @@ Be thorough, accurate, and helpful."
                       </div>
                     </div>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </div>
           </div>
         ) : (

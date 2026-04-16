@@ -39,8 +39,9 @@ export default function Billing() {
       <div className="p-6 space-y-6">
         {/* Balance Card */}
         <div className="grid md:grid-cols-3 gap-4">
-          <Card className="bg-primary/5 border-primary/20 md:col-span-1">
-            <CardContent className="p-5">
+          <div className="glass rounded-xl p-5 md:col-span-1 border-primary/20 relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent" />
+            <div className="relative">
               <div className="flex items-center gap-2 mb-3">
                 <Zap className="w-4 h-4 text-primary" />
                 <span className="text-sm font-medium">Credit Balance</span>
@@ -49,11 +50,11 @@ export default function Billing() {
                 {(balance ?? 0).toLocaleString()}
               </div>
               <div className="text-xs text-muted-foreground">Available credits</div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          <Card className="bg-card/50 border-border/50">
-            <CardContent className="p-5">
+          <div className="glass rounded-xl p-5">
+            <div>
               <div className="flex items-center gap-2 mb-3">
                 <TrendingUp className="w-4 h-4 text-emerald-400" />
                 <span className="text-sm font-medium">This Month</span>
@@ -62,11 +63,11 @@ export default function Billing() {
                 {transactions?.filter(t => t.type === "usage").reduce((a, t) => a + Math.abs(t.amount), 0).toLocaleString() ?? 0}
               </div>
               <div className="text-xs text-muted-foreground">Credits used</div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          <Card className="bg-card/50 border-border/50">
-            <CardContent className="p-5">
+          <div className="glass rounded-xl p-5">
+            <div>
               <div className="flex items-center gap-2 mb-3">
                 <CreditCard className="w-4 h-4 text-cyan-400" />
                 <span className="text-sm font-medium">Total Purchased</span>
@@ -75,8 +76,8 @@ export default function Billing() {
                 {transactions?.filter(t => t.type === "purchase").reduce((a, t) => a + t.amount, 0).toLocaleString() ?? 0}
               </div>
               <div className="text-xs text-muted-foreground">All time</div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
         {/* Credit Packs */}
@@ -84,21 +85,19 @@ export default function Billing() {
           <h2 className="text-base font-semibold mb-4">Buy Credits</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {packs && packs.length > 0 ? packs.map((pack) => (
-              <Card key={pack.id} className={`bg-card/50 border-border/50 hover:border-primary/30 transition-all ${pack.isPopular ? "border-primary/40 bg-primary/5" : ""}`}>
-                <CardContent className="p-4">
+              <div key={pack.id} className={`glass card-hover rounded-xl p-4 ${pack.isPopular ? "border-primary/30 ring-1 ring-primary/20" : ""}`}>
                   {pack.isPopular && (
                     <Badge className="mb-2 text-[10px] bg-primary/20 text-primary border-0">Popular</Badge>
                   )}
                   <div className="text-xl font-bold mb-0.5">{pack.credits.toLocaleString()}</div>
                   <div className="text-xs text-muted-foreground mb-3">credits</div>
                   <div className="text-2xl font-black mb-4">${pack.priceUsd}</div>
-                  <Button className="w-full h-8 text-xs" variant={pack.isPopular ? "default" : "outline"}
+                  <Button className={`w-full h-8 text-xs ${pack.isPopular ? "glow-primary" : ""}`} variant={pack.isPopular ? "default" : "outline"}
                     onClick={() => handleBuyCredits({ credits: pack.credits, priceUsd: pack.priceUsd, name: pack.name })}>
                     <ExternalLink className="w-3 h-3 mr-1.5" />
                     Buy Now
                   </Button>
-                </CardContent>
-              </Card>
+              </div>
             )) : (
               // Default packs if none in DB
               [
@@ -107,21 +106,19 @@ export default function Billing() {
                 { id: 3, credits: 150000, priceUsd: 50, isPopular: false },
                 { id: 4, credits: 500000, priceUsd: 150, isPopular: false },
               ].map((pack) => (
-                <Card key={pack.id} className={`bg-card/50 border-border/50 hover:border-primary/30 transition-all ${pack.isPopular ? "border-primary/40 bg-primary/5" : ""}`}>
-                  <CardContent className="p-4">
+                <div key={pack.id} className={`glass card-hover rounded-xl p-4 ${pack.isPopular ? "border-primary/30 ring-1 ring-primary/20" : ""}`}>
                     {pack.isPopular && (
                       <Badge className="mb-2 text-[10px] bg-primary/20 text-primary border-0">Popular</Badge>
                     )}
                     <div className="text-xl font-bold mb-0.5">{pack.credits.toLocaleString()}</div>
                     <div className="text-xs text-muted-foreground mb-3">credits</div>
                     <div className="text-2xl font-black mb-4">${pack.priceUsd}</div>
-                    <Button className="w-full h-8 text-xs" variant={pack.isPopular ? "default" : "outline"}
+                    <Button className={`w-full h-8 text-xs ${pack.isPopular ? "glow-primary" : ""}`} variant={pack.isPopular ? "default" : "outline"}
                       onClick={() => handleBuyCredits({ credits: pack.credits, priceUsd: pack.priceUsd })}>
                       <ExternalLink className="w-3 h-3 mr-1.5" />
                       Buy Now
                     </Button>
-                  </CardContent>
-                </Card>
+                </div>
               ))
             )}
           </div>
@@ -135,8 +132,8 @@ export default function Billing() {
         {/* Model Pricing */}
         <div>
           <h2 className="text-base font-semibold mb-4">Credit Costs Per Model</h2>
-          <Card className="bg-card/50 border-border/50">
-            <CardContent className="p-0">
+          <div className="glass rounded-xl overflow-hidden">
+            <div className="p-0">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border/50">
@@ -169,14 +166,14 @@ export default function Billing() {
                   ))}
                 </tbody>
               </table>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
         {/* Transaction History */}
         <div>
           <h2 className="text-base font-semibold mb-4">Transaction History</h2>
-          <Card className="bg-card/50 border-border/50">
+          <div className="glass rounded-xl overflow-hidden">
             {transactions && transactions.length > 0 ? (
               <div className="divide-y divide-border/30">
                 {transactions.map((tx) => (
@@ -202,11 +199,11 @@ export default function Billing() {
                 ))}
               </div>
             ) : (
-              <CardContent className="py-8 text-center text-muted-foreground text-sm">
+              <div className="py-8 text-center text-muted-foreground text-sm">
                 No transactions yet
-              </CardContent>
+              </div>
             )}
-          </Card>
+          </div>
         </div>
       </div>
     </FutureDashboardLayout>

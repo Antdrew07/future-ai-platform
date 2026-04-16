@@ -1,194 +1,150 @@
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { getLoginUrl } from "@/const";
-import { Link } from "wouter";
+import { motion } from "framer-motion";
 import {
-  Bot, Zap, Shield, Globe, Code2, Brain, ArrowRight, CheckCircle2,
-  Sparkles, Terminal, Database, Cpu, Users, BarChart3, Key, ChevronRight,
-  Play, Star, TrendingUp, Layers, Rocket, Lock, RefreshCw, GitBranch,
-  MessageSquare, FileText, Search, Workflow
+  ArrowRight,
+  Bot,
+  Brain,
+  Code2,
+  CreditCard,
+  FileText,
+  Globe,
+  Image,
+  Key,
+  Layers,
+  LineChart,
+  Lock,
+  Search,
+  Shield,
+  Sparkles,
+  Terminal,
+  Users,
+  Zap,
 } from "lucide-react";
+import { Link } from "wouter";
 
-const FEATURES = [
-  {
-    icon: Brain,
-    title: "Autonomous Task Execution",
-    description: "Agents that think, plan, and execute multi-step tasks end-to-end — fully autonomous, powered by Future's proprietary AI.",
-    color: "text-violet-400",
-    bg: "bg-violet-500/10",
-  },
-  {
-    icon: Globe,
-    title: "Live Web Intelligence",
-    description: "Real-time web search, page reading, and data extraction. Agents stay current with the latest information.",
-    color: "text-blue-400",
-    bg: "bg-blue-500/10",
-  },
-  {
-    icon: Code2,
-    title: "Code Execution Engine",
-    description: "Write, run, and iterate on Python, JavaScript, and bash code. Build full applications autonomously.",
-    color: "text-emerald-400",
-    bg: "bg-emerald-500/10",
-  },
-  {
-    icon: Cpu,
-    title: "Multi-Model LLM Routing",
-    description: "Future-1 Ultra, Pro, Code, Mini, and Fast — route tasks to the best Future model automatically.",
-    color: "text-cyan-400",
-    bg: "bg-cyan-500/10",
-  },
-  {
-    icon: BarChart3,
-    title: "Full Observability",
-    description: "Track every token, tool call, and credit. Real-time analytics with step-by-step execution logs.",
-    color: "text-orange-400",
-    bg: "bg-orange-500/10",
-  },
-  {
-    icon: Key,
-    title: "Programmatic API Access",
-    description: "Deploy agents and call them via REST API. Build products on top of Future with your own API keys.",
-    color: "text-pink-400",
-    bg: "bg-pink-500/10",
-  },
-  {
-    icon: Users,
-    title: "Team Collaboration",
-    description: "Invite teammates, share agents, and collaborate with granular role-based access control.",
-    color: "text-yellow-400",
-    bg: "bg-yellow-500/10",
-  },
-  {
-    icon: Layers,
-    title: "Templates Marketplace",
-    description: "Discover, clone, and publish agent templates. Monetize your best agents in the community marketplace.",
-    color: "text-indigo-400",
-    bg: "bg-indigo-500/10",
-  },
-  {
-    icon: Shield,
-    title: "Enterprise Security",
-    description: "SOC 2-ready infrastructure, encrypted secrets, isolated execution environments, and audit logs.",
-    color: "text-teal-400",
-    bg: "bg-teal-500/10",
-  },
-];
+import { useEffect, useRef, useState } from "react";
+
+const ICON_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310419663029617589/m5GbkNTBEjcM6aS7UZa8ie/future-favicon-jKAia25Lk6hjbXvQ6q4uKZ.webp";
+
+function AnimatedCounter({ target, suffix = "", prefix = "" }: { target: number; suffix?: string; prefix?: string }) {
+  const [count, setCount] = useState(0);
+  const ref = useRef<HTMLDivElement>(null);
+  const hasAnimated = useRef(false);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !hasAnimated.current) {
+          hasAnimated.current = true;
+          const duration = 2000;
+          const steps = 60;
+          const increment = target / steps;
+          let current = 0;
+          const timer = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+              setCount(target);
+              clearInterval(timer);
+            } else {
+              setCount(Math.floor(current));
+            }
+          }, duration / steps);
+        }
+      },
+      { threshold: 0.5 }
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [target]);
+
+  return (
+    <div ref={ref} className="text-2xl md:text-3xl font-heading font-bold gradient-text">
+      {prefix}{count}{suffix}
+    </div>
+  );
+}
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.25, 0.4, 0.25, 1] as [number, number, number, number] } },
+};
+
+const stagger = {
+  visible: { transition: { staggerChildren: 0.12 } },
+};
 
 const TOOLS = [
-  { icon: Search, label: "Web Search", desc: "Real-time search" },
-  { icon: Code2, label: "Code Execute", desc: "Python, JS, Bash" },
-  { icon: FileText, label: "File Manager", desc: "Read & write files" },
-  { icon: Globe, label: "API Calls", desc: "Any HTTP endpoint" },
-  { icon: Brain, label: "Data Analysis", desc: "Structured insights" },
-  { icon: Sparkles, label: "Image Gen", desc: "AI image creation" },
+  { icon: Search, name: "Web Search", desc: "Real-time internet research" },
+  { icon: Code2, name: "Code Execution", desc: "Write and run code live" },
+  { icon: FileText, name: "File Operations", desc: "Create, read, manage files" },
+  { icon: Globe, name: "API Calls", desc: "Connect to any external API" },
+  { icon: Brain, name: "Data Analysis", desc: "Analyze and interpret data" },
+  { icon: Image, name: "Image Generation", desc: "Create visuals from text" },
+  { icon: Terminal, name: "System Commands", desc: "Execute shell operations" },
+  { icon: Layers, name: "Multi-Step Tasks", desc: "Chain complex workflows" },
 ];
 
 const MODELS = [
-  { name: "Future-1 Ultra", provider: "Future AI", tier: "Ultra", color: "text-pink-400", desc: "Full autonomous mode" },
-  { name: "Future-1 Pro", provider: "Future AI", tier: "Premium", color: "text-emerald-400", desc: "Multimodal, fast reasoning" },
-  { name: "Future-1 Code", provider: "Future AI", tier: "Premium", color: "text-orange-400", desc: "Exceptional at coding & analysis" },
-  { name: "Future-1 Mini", provider: "Future AI", tier: "Standard", color: "text-blue-400", desc: "Fast & cost-effective" },
-  { name: "Future-1 Fast", provider: "Future AI", tier: "Standard", color: "text-violet-400", desc: "Fastest response times" },
+  { name: "Future-1 Ultra", tier: "Ultra", desc: "Most powerful autonomous agent", color: "from-violet-500 to-blue-500" },
+  { name: "Future-1 Pro", tier: "Premium", desc: "Advanced reasoning engine", color: "from-blue-500 to-cyan-400" },
+  { name: "Future-1 Code", tier: "Premium", desc: "Specialized for code tasks", color: "from-cyan-400 to-emerald-400" },
+  { name: "Future-1 Mini", tier: "Standard", desc: "Fast and efficient", color: "from-emerald-400 to-yellow-400" },
+  { name: "Future-1 Fast", tier: "Standard", desc: "Instant responses", color: "from-yellow-400 to-orange-400" },
 ];
 
-const STEPS = [
-  {
-    step: "01",
-    icon: Terminal,
-    title: "Define Your Agent",
-    desc: "Write a system prompt, choose a Future model, and toggle the tools your agent needs. No code required.",
-  },
-  {
-    step: "02",
-    icon: Rocket,
-    title: "Deploy in One Click",
-    desc: "Instantly deploy your agent. Get a shareable link, embed widget, or REST API endpoint — all ready immediately.",
-  },
-  {
-    step: "03",
-    icon: Workflow,
-    title: "Run Autonomous Tasks",
-    desc: "Give your agent a task. Watch it think, plan, search the web, write code, and deliver results step by step.",
-  },
-];
-
-const STATS = [
-  { value: "10M+", label: "Tasks Executed" },
-  { value: "50K+", label: "Agents Deployed" },
-  { value: "5", label: "LLM Providers" },
-  { value: "99.9%", label: "Uptime SLA" },
+const FEATURES = [
+  { icon: Bot, title: "No-Code Agent Builder", desc: "Design autonomous agents with a visual editor. Configure tools, memory, and behavior without writing a single line of code." },
+  { icon: Zap, title: "Autonomous Execution", desc: "Agents think, plan, and execute multi-step tasks independently. Watch them work in real-time with live streaming logs." },
+  { icon: LineChart, title: "Usage Analytics", desc: "Track every task, token, and credit in real-time. Beautiful dashboards with deep insights into agent performance." },
+  { icon: CreditCard, title: "Credit System", desc: "Flexible pay-as-you-go credits with subscription plans. Transparent pricing per model tier." },
+  { icon: Key, title: "API Access", desc: "Programmatic access to your deployed agents via REST API. Build agent-powered products at scale." },
+  { icon: Users, title: "Team Collaboration", desc: "Invite team members, share agents, and collaborate on complex workflows together." },
+  { icon: Shield, title: "Enterprise Security", desc: "Role-based access control, audit logs, and secure multi-tenant architecture." },
+  { icon: Lock, title: "Templates Marketplace", desc: "Browse, publish, and monetize agent templates. Build once, sell to the community." },
 ];
 
 const PLANS = [
-  {
-    name: "Free",
-    price: "$0",
-    period: "/month",
-    credits: "100 credits",
-    features: ["3 agents", "Basic tools", "Community support", "Shareable links"],
-    cta: "Start Free",
-    highlight: false,
-  },
-  {
-    name: "Pro",
-    price: "$49",
-    period: "/month",
-    credits: "8,000 credits",
-    features: ["Unlimited agents", "All tools", "Priority support", "API access", "Team collaboration", "Advanced analytics"],
-    cta: "Start Pro",
-    highlight: true,
-  },
-  {
-    name: "Enterprise",
-    price: "$199",
-    period: "/month",
-    credits: "50,000 credits",
-    features: ["Everything in Pro", "Dedicated support", "Custom integrations", "SLA guarantee", "White-label options", "SSO"],
-    cta: "Contact Sales",
-    highlight: false,
-  },
+  { name: "Free", price: "$0", period: "/mo", credits: "100 credits", features: ["1 agent", "Basic tools", "Community support"], highlight: false },
+  { name: "Starter", price: "$19", period: "/mo", credits: "2,000 credits", features: ["5 agents", "All tools", "Priority support", "API access"], highlight: false },
+  { name: "Pro", price: "$49", period: "/mo", credits: "8,000 credits", features: ["Unlimited agents", "All tools", "Priority support", "API access", "Team features"], highlight: true },
+  { name: "Enterprise", price: "$199", period: "/mo", credits: "50,000 credits", features: ["Unlimited everything", "Dedicated support", "Custom models", "SSO", "SLA"], highlight: false },
 ];
 
 export default function Home() {
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      {/* ─── Navigation ─────────────────────────────────────────────────────── */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
-        <div className="container flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center glow-primary">
-              <Sparkles className="w-4 h-4 text-primary-foreground" />
-            </div>
-            <span className="font-bold text-lg tracking-tight">Future</span>
+    <div className="min-h-screen bg-background text-foreground overflow-hidden">
+      {/* ═══ NAVBAR ═══ */}
+      <nav className="fixed top-0 left-0 right-0 z-50 glass-strong">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-3">
+            <img src={ICON_URL} alt="Future" className="h-8 w-8" />
+            <span className="text-lg font-heading font-bold tracking-tight">Future</span>
           </Link>
-
-          <div className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
-            <Link href="/gallery" className="hover:text-foreground transition-colors">Gallery</Link>
-            <Link href="/templates" className="hover:text-foreground transition-colors">Templates</Link>
-            <Link href="/pricing" className="hover:text-foreground transition-colors">Pricing</Link>
+          <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
             <a href="#features" className="hover:text-foreground transition-colors">Features</a>
             <a href="#models" className="hover:text-foreground transition-colors">Models</a>
+            <a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a>
+            <Link href="/gallery" className="hover:text-foreground transition-colors">Gallery</Link>
           </div>
-
           <div className="flex items-center gap-3">
             {isAuthenticated ? (
               <Link href="/dashboard">
-                <Button size="sm" className="glow-primary">
-                  Dashboard <ArrowRight className="w-3 h-3 ml-1" />
+                <Button className="bg-primary hover:bg-primary/90 glow-subtle text-sm font-medium px-5">
+                  Dashboard <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                 </Button>
               </Link>
             ) : (
               <>
                 <a href={getLoginUrl()}>
-                  <Button variant="ghost" size="sm">Sign in</Button>
+                  <Button variant="ghost" className="text-sm text-muted-foreground hover:text-foreground">Sign In</Button>
                 </a>
                 <a href={getLoginUrl()}>
-                  <Button size="sm" className="glow-primary">
-                    Start for free
+                  <Button className="bg-primary hover:bg-primary/90 glow-subtle text-sm font-medium px-5">
+                    Get Started <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                   </Button>
                 </a>
               </>
@@ -197,387 +153,319 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* ─── Hero ──────────────────────────────────────────────────────────── */}
-      <section className="pt-32 pb-20 px-4 relative overflow-hidden">
-        <div className="absolute top-20 left-1/4 w-96 h-96 rounded-full opacity-10 blur-3xl"
-          style={{ background: "oklch(0.65 0.22 280)" }} />
-        <div className="absolute top-40 right-1/4 w-64 h-64 rounded-full opacity-8 blur-3xl"
-          style={{ background: "oklch(0.65 0.18 200)" }} />
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-40 opacity-5 blur-3xl"
-          style={{ background: "oklch(0.65 0.22 280)" }} />
+      {/* ═══ HERO ═══ */}
+      <section className="relative min-h-screen flex items-center justify-center pt-16">
+        {/* Animated gradient orbs */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full blur-[120px] float" style={{ background: "oklch(0.65 0.27 285 / 0.12)" }} />
+          <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full blur-[100px] float" style={{ background: "oklch(0.65 0.20 250 / 0.08)", animationDelay: "-3s" }} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[150px] float" style={{ background: "oklch(0.80 0.15 85 / 0.05)", animationDelay: "-1.5s" }} />
+        </div>
+        {/* Grid pattern */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{
+          backgroundImage: `linear-gradient(oklch(0.65 0.27 285 / 0.3) 1px, transparent 1px), linear-gradient(90deg, oklch(0.65 0.27 285 / 0.3) 1px, transparent 1px)`,
+          backgroundSize: '60px 60px'
+        }} />
 
-        <div className="container text-center relative z-10">
-          <Badge variant="secondary" className="mb-6 px-4 py-1.5 text-xs font-medium border border-primary/30 bg-primary/10 text-primary">
-            <Sparkles className="w-3 h-3 mr-1.5" />
-            The Autonomous AI Agent Ecosystem
-          </Badge>
+        <motion.div
+          className="relative z-10 max-w-5xl mx-auto px-6 text-center"
+          initial="hidden"
+          animate="visible"
+          variants={stagger}
+        >
+          <motion.div variants={fadeUp} className="mb-6">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-medium glass border-gradient">
+              <Sparkles className="h-3.5 w-3.5 text-gold" />
+              <span className="gradient-text-gold">The Future of AI is Here</span>
+            </span>
+          </motion.div>
 
-          <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-6 leading-none">
-            AI Agents That
+          <motion.h1 variants={fadeUp} className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-heading font-bold tracking-tight leading-[0.95]">
+            <span className="text-foreground">Build </span>
+            <span className="gradient-text">Autonomous</span>
             <br />
-            <span className="gradient-text">Do the Work</span>
-          </h1>
+            <span className="text-foreground">AI Agents</span>
+          </motion.h1>
 
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-4 leading-relaxed">
-            Build and deploy autonomous AI agents powered by <strong className="text-foreground">Future's proprietary AI</strong>.
-            They browse the web, write code, manage files, and complete complex tasks — end to end.
-          </p>
-          <p className="text-base text-muted-foreground max-w-xl mx-auto mb-10">
-            No code required. Deploy in seconds. Scale to millions.
-          </p>
+          <motion.p variants={fadeUp} className="mt-6 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            Create intelligent agents that browse the web, write code, manage files, and complete
+            complex tasks — all powered by Future's proprietary AI engine.
+          </motion.p>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-            <a href={getLoginUrl()}>
-              <Button size="lg" className="h-12 px-8 text-base font-semibold glow-primary">
-                <Zap className="w-4 h-4 mr-2" />
-                Start Building Free
+          <motion.div variants={fadeUp} className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a href={isAuthenticated ? "/dashboard" : getLoginUrl()}>
+              <Button size="lg" className="bg-primary hover:bg-primary/90 glow-primary text-base font-semibold px-8 py-6 rounded-xl">
+                Start Building Free <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </a>
-            <Link href="/gallery">
-              <Button variant="outline" size="lg" className="h-12 px-8 text-base">
-                <Play className="w-4 h-4 mr-2" />
-                Explore Agent Gallery
+            <a href="#features">
+              <Button size="lg" variant="outline" className="text-base font-medium px-8 py-6 rounded-xl border-border/50 bg-transparent hover:bg-accent">
+                Explore Platform
               </Button>
-            </Link>
-          </div>
+            </a>
+          </motion.div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl mx-auto">
-            {STATS.map((stat) => (
-              <div key={stat.label} className="text-center">
-                <div className="text-2xl font-bold gradient-text">{stat.value}</div>
-                <div className="text-xs text-muted-foreground mt-1">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
+          {/* Stats with animated counters */}
+          <motion.div variants={fadeUp} className="mt-16 grid grid-cols-3 gap-8 max-w-lg mx-auto">
+            <div className="text-center">
+              <AnimatedCounter target={8} suffix="+" />
+              <div className="text-xs text-muted-foreground mt-1">Built-in Tools</div>
+            </div>
+            <div className="text-center">
+              <AnimatedCounter target={5} />
+              <div className="text-xs text-muted-foreground mt-1">AI Models</div>
+            </div>
+            <div className="text-center">
+              <AnimatedCounter target={99} suffix=".9%" />
+              <div className="text-xs text-muted-foreground mt-1">Uptime</div>
+            </div>
+          </motion.div>
+        </motion.div>
+
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
       </section>
 
-      {/* ─── Live Demo Terminal ─────────────────────────────────────────────── */}
-      <section className="py-12 px-4">
-        <div className="container">
-          <div className="rounded-2xl border border-border/50 overflow-hidden glass max-w-4xl mx-auto">
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-border/50 bg-card/50">
-              <div className="w-3 h-3 rounded-full bg-destructive/60" />
-              <div className="w-3 h-3 rounded-full" style={{ background: "oklch(0.75 0.18 80 / 0.6)" }} />
-              <div className="w-3 h-3 rounded-full" style={{ background: "oklch(0.65 0.18 160 / 0.6)" }} />
-              <span className="ml-3 text-xs text-muted-foreground font-mono">future — autonomous execution</span>
-              <div className="ml-auto flex items-center gap-1.5">
-                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-xs text-emerald-400 font-mono">live</span>
-              </div>
-            </div>
-            <div className="p-6 font-mono text-sm space-y-3 bg-card/30">
-              <div className="flex items-start gap-3">
-                <span className="text-primary">›</span>
-                <span className="text-foreground">Research the top 5 AI startups in 2025 and write a detailed investor brief</span>
-              </div>
-              <div className="flex items-start gap-3 text-muted-foreground">
-                <span className="text-violet-400">◆</span>
-                <span><span className="text-violet-400">Thinking:</span> Breaking task into subtasks — search, analyze, synthesize, format...</span>
-              </div>
-              <div className="flex items-start gap-3 text-muted-foreground">
-                <span className="text-cyan-400">⚡</span>
-                <span><span className="text-cyan-400">web_search:</span> "top AI startups 2025 funding valuation"</span>
-              </div>
-              <div className="flex items-start gap-3 text-muted-foreground">
-                <span style={{ color: "oklch(0.65 0.18 160)" }}>✓</span>
-                <span style={{ color: "oklch(0.65 0.18 160)" }}>Found 18 sources. Extracting funding data, team info, and product details...</span>
-              </div>
-              <div className="flex items-start gap-3 text-muted-foreground">
-                <span className="text-cyan-400">⚡</span>
-                <span><span className="text-cyan-400">web_search:</span> "AI startup Series A B C 2025 valuations"</span>
-              </div>
-              <div className="flex items-start gap-3 text-muted-foreground">
-                <span className="text-cyan-400">⚡</span>
-                <span><span className="text-cyan-400">code_execute:</span> Generating structured analysis with comparison tables...</span>
-              </div>
-              <div className="flex items-start gap-3 text-muted-foreground">
-                <span className="text-cyan-400">⚡</span>
-                <span><span className="text-cyan-400">write_file:</span> investor_brief_2025.md (3,800 words)</span>
-              </div>
-              <div className="flex items-start gap-3">
-                <span style={{ color: "oklch(0.75 0.18 80)" }}>★</span>
-                <span className="text-foreground">Complete: <span className="text-primary">investor_brief_2025.md</span> — 5 companies, funding rounds, market analysis, risk assessment</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground pt-2 border-t border-border/30">
-                <span>6 steps</span>
-                <span>•</span>
-                <span>18.3s</span>
-                <span>•</span>
-                <span>1,240 credits</span>
-                <span>•</span>
-                <span>Future-1 Pro</span>
-                <span className="ml-auto flex items-center gap-1" style={{ color: "oklch(0.65 0.18 160)" }}>
-                  <div className="w-2 h-2 rounded-full" style={{ background: "oklch(0.65 0.18 160)" }} />
-                  Completed
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* ═══ TOOLS ARSENAL ═══ */}
+      <section className="relative py-24 px-6">
+        <div className="max-w-6xl mx-auto">
+          <motion.div className="text-center mb-16" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}>
+            <motion.p variants={fadeUp} className="text-sm font-medium gradient-text-gold uppercase tracking-widest mb-3">Capabilities</motion.p>
+            <motion.h2 variants={fadeUp} className="text-3xl md:text-5xl font-heading font-bold">
+              Everything Your Agent Needs
+            </motion.h2>
+            <motion.p variants={fadeUp} className="mt-4 text-muted-foreground max-w-xl mx-auto">
+              A complete toolkit for autonomous task execution. Your agents can do anything a human can do on a computer.
+            </motion.p>
+          </motion.div>
 
-      {/* ─── Tool Arsenal ──────────────────────────────────────────────────── */}
-      <section className="py-16 px-4">
-        <div className="container">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl font-bold mb-3">
-              Every Tool Your Agent Needs
-            </h2>
-            <p className="text-muted-foreground max-w-lg mx-auto">
-              Future agents come equipped with a full arsenal of tools — no plugins or integrations required.
-            </p>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 max-w-4xl mx-auto">
+          <motion.div
+            className="grid grid-cols-2 md:grid-cols-4 gap-4"
+            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}
+          >
             {TOOLS.map((tool) => (
-              <div key={tool.label} className="p-4 rounded-xl border border-border/50 bg-card/50 text-center hover:border-primary/30 transition-colors">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mx-auto mb-2">
-                  <tool.icon className="w-5 h-5 text-primary" />
+              <motion.div
+                key={tool.name}
+                variants={fadeUp}
+                className="glass card-hover rounded-xl p-5 text-center group"
+              >
+                <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                  <tool.icon className="h-5 w-5 text-primary" />
                 </div>
-                <div className="text-sm font-semibold">{tool.label}</div>
-                <div className="text-xs text-muted-foreground mt-0.5">{tool.desc}</div>
-              </div>
+                <h3 className="font-heading font-semibold text-sm">{tool.name}</h3>
+                <p className="text-xs text-muted-foreground mt-1">{tool.desc}</p>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* ─── Models ────────────────────────────────────────────────────────── */}
-      <section id="models" className="py-16 px-4 border-y border-border/30">
-        <div className="container">
-          <div className="text-center mb-10">
-            <Badge variant="secondary" className="mb-4 border border-border bg-secondary/50">
-              Multi-Model Support
-            </Badge>
-            <h2 className="text-3xl font-bold mb-3">
-              Powered by the <span className="gradient-text">World's Best AI</span>
-            </h2>
-            <p className="text-muted-foreground max-w-lg mx-auto">
-              Choose the right model for each agent. Future's proprietary model suite covers every use case — from lightning-fast responses to full autonomous task execution.
-            </p>
-          </div>
-          <div className="grid md:grid-cols-5 gap-4 max-w-5xl mx-auto">
+      <div className="divider-gradient mx-auto max-w-4xl" />
+
+      {/* ═══ MODELS ═══ */}
+      <section id="models" className="relative py-24 px-6">
+        <div className="max-w-6xl mx-auto">
+          <motion.div className="text-center mb-16" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}>
+            <motion.p variants={fadeUp} className="text-sm font-medium text-primary uppercase tracking-widest mb-3">AI Models</motion.p>
+            <motion.h2 variants={fadeUp} className="text-3xl md:text-5xl font-heading font-bold">
+              Proprietary Intelligence
+            </motion.h2>
+            <motion.p variants={fadeUp} className="mt-4 text-muted-foreground max-w-xl mx-auto">
+              Five purpose-built models, each optimized for different workloads. From ultra-powerful reasoning to lightning-fast responses.
+            </motion.p>
+          </motion.div>
+
+          <motion.div
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4"
+            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}
+          >
             {MODELS.map((model) => (
-              <div key={model.name} className="p-4 rounded-xl border border-border/50 bg-card/50 hover:border-primary/20 transition-colors">
-                <div className={`text-xs font-bold mb-2 ${model.color}`}>{model.tier}</div>
-                <div className="font-semibold text-sm mb-1">{model.name}</div>
-                <div className="text-xs text-muted-foreground mb-2">{model.provider}</div>
-                <div className="text-xs text-muted-foreground leading-relaxed">{model.desc}</div>
-              </div>
+              <motion.div
+                key={model.name}
+                variants={fadeUp}
+                className="glass card-hover rounded-xl p-5 relative overflow-hidden group"
+              >
+                <div className={`absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r ${model.color}`} />
+                <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">{model.tier}</span>
+                <h3 className="font-heading font-bold text-base mt-2">{model.name}</h3>
+                <p className="text-xs text-muted-foreground mt-1">{model.desc}</p>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* ─── How It Works ──────────────────────────────────────────────────── */}
-      <section id="how-it-works" className="py-24 px-4">
-        <div className="container">
-          <div className="text-center mb-16">
-            <Badge variant="secondary" className="mb-4 border border-border bg-secondary/50">
-              Simple by design
-            </Badge>
-            <h2 className="text-4xl font-bold mb-4">
-              From idea to <span className="gradient-text">deployed agent</span> in minutes
-            </h2>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            {STEPS.map((step, i) => (
-              <div key={step.step} className="relative">
-                {i < STEPS.length - 1 && (
-                  <div className="hidden md:block absolute top-8 left-full w-full h-px bg-gradient-to-r from-border to-transparent z-0" />
-                )}
-                <div className="relative z-10 text-center space-y-4">
-                  <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto">
-                    <step.icon className="w-7 h-7 text-primary" />
-                  </div>
-                  <div className="text-4xl font-black text-muted-foreground/20">{step.step}</div>
-                  <h3 className="font-bold text-lg">{step.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{step.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <div className="divider-gradient mx-auto max-w-4xl" />
 
-      {/* ─── Features ──────────────────────────────────────────────────────── */}
-      <section id="features" className="py-24 px-4 border-t border-border/30">
-        <div className="container">
-          <div className="text-center mb-16">
-            <Badge variant="secondary" className="mb-4 border border-border bg-secondary/50">
-              Everything you need
-            </Badge>
-            <h2 className="text-4xl font-bold mb-4">
-              Built for <span className="gradient-text">serious builders</span>
-            </h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">
-              From no-code agent creation to enterprise-grade API access — Future scales with your ambition.
-            </p>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* ═══ FEATURES ═══ */}
+      <section id="features" className="relative py-24 px-6">
+        <div className="max-w-6xl mx-auto">
+          <motion.div className="text-center mb-16" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}>
+            <motion.p variants={fadeUp} className="text-sm font-medium text-cyan uppercase tracking-widest mb-3">Platform</motion.p>
+            <motion.h2 variants={fadeUp} className="text-3xl md:text-5xl font-heading font-bold">
+              Built for Scale
+            </motion.h2>
+          </motion.div>
+
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}
+          >
             {FEATURES.map((feature) => (
-              <div key={feature.title}
-                className="p-6 rounded-xl border border-border/50 bg-card/50 hover:border-primary/30 hover:bg-card transition-all duration-300 group">
-                <div className={`w-10 h-10 rounded-lg ${feature.bg} flex items-center justify-center mb-4`}>
-                  <feature.icon className={`w-5 h-5 ${feature.color}`} />
+              <motion.div
+                key={feature.title}
+                variants={fadeUp}
+                className="glass card-hover rounded-xl p-6 group"
+              >
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                  <feature.icon className="h-5 w-5 text-primary" />
                 </div>
-                <h3 className="font-semibold text-base mb-2">{feature.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
-              </div>
+                <h3 className="font-heading font-semibold text-sm mb-2">{feature.title}</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">{feature.desc}</p>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         </div>
       </section>
 
-      {/* ─── Pricing Preview ───────────────────────────────────────────────── */}
-      <section className="py-24 px-4 border-t border-border/30">
-        <div className="container">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">
-              Simple, <span className="gradient-text">transparent pricing</span>
-            </h2>
-            <p className="text-muted-foreground max-w-lg mx-auto">
-              Start free. Scale as you grow. No surprise charges — credits only deduct when your agents actually run.
-            </p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+      <div className="divider-gradient mx-auto max-w-4xl" />
+
+      {/* ═══ HOW IT WORKS ═══ */}
+      <section className="relative py-24 px-6">
+        <div className="max-w-4xl mx-auto">
+          <motion.div className="text-center mb-16" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}>
+            <motion.p variants={fadeUp} className="text-sm font-medium gradient-text-gold uppercase tracking-widest mb-3">Process</motion.p>
+            <motion.h2 variants={fadeUp} className="text-3xl md:text-5xl font-heading font-bold">
+              Three Steps to Intelligence
+            </motion.h2>
+          </motion.div>
+
+          <motion.div
+            className="space-y-6"
+            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}
+          >
+            {[
+              { step: "01", title: "Design Your Agent", desc: "Configure your agent's personality, tools, and behavior using our no-code builder. Choose a model tier and set permissions." },
+              { step: "02", title: "Deploy Instantly", desc: "Your agent goes live immediately. Share it via a link, embed it on your site, or access it through our API." },
+              { step: "03", title: "Watch It Work", desc: "Submit tasks and watch your agent think, plan, and execute in real-time. Every step is streamed live to your workspace." },
+            ].map((item) => (
+              <motion.div
+                key={item.step}
+                variants={fadeUp}
+                className="glass card-hover rounded-xl p-8 flex items-start gap-6"
+              >
+                <span className="text-4xl font-heading font-bold gradient-text-gold shrink-0">{item.step}</span>
+                <div>
+                  <h3 className="font-heading font-semibold text-lg">{item.title}</h3>
+                  <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{item.desc}</p>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      <div className="divider-gradient mx-auto max-w-4xl" />
+
+      {/* ═══ PRICING ═══ */}
+      <section id="pricing" className="relative py-24 px-6">
+        <div className="max-w-6xl mx-auto">
+          <motion.div className="text-center mb-16" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}>
+            <motion.p variants={fadeUp} className="text-sm font-medium text-primary uppercase tracking-widest mb-3">Pricing</motion.p>
+            <motion.h2 variants={fadeUp} className="text-3xl md:text-5xl font-heading font-bold">
+              Simple, Transparent Pricing
+            </motion.h2>
+            <motion.p variants={fadeUp} className="mt-4 text-muted-foreground max-w-xl mx-auto">
+              Start free. Scale as you grow. No hidden fees.
+            </motion.p>
+          </motion.div>
+
+          <motion.div
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
+            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}
+          >
             {PLANS.map((plan) => (
-              <div key={plan.name} className={`p-6 rounded-2xl border transition-all duration-300 ${
-                plan.highlight
-                  ? "border-primary bg-primary/5 shadow-lg shadow-primary/10"
-                  : "border-border/50 bg-card/50"
-              }`}>
+              <motion.div
+                key={plan.name}
+                variants={fadeUp}
+                className={`rounded-xl p-6 card-hover relative ${
+                  plan.highlight
+                    ? "glass-strong border-gradient glow-subtle"
+                    : "glass"
+                }`}
+              >
                 {plan.highlight && (
-                  <Badge className="mb-3 bg-primary text-primary-foreground text-xs">Most Popular</Badge>
-                )}
-                <div className="mb-4">
-                  <div className="text-lg font-bold">{plan.name}</div>
-                  <div className="flex items-baseline gap-1 mt-1">
-                    <span className="text-3xl font-black">{plan.price}</span>
-                    <span className="text-muted-foreground text-sm">{plan.period}</span>
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <span className="px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-primary text-primary-foreground">
+                      Most Popular
+                    </span>
                   </div>
-                  <div className="text-sm text-primary mt-1">{plan.credits} included</div>
+                )}
+                <h3 className="font-heading font-semibold text-sm text-muted-foreground">{plan.name}</h3>
+                <div className="mt-3 flex items-baseline gap-1">
+                  <span className="text-3xl font-heading font-bold">{plan.price}</span>
+                  <span className="text-sm text-muted-foreground">{plan.period}</span>
                 </div>
-                <ul className="space-y-2 mb-6">
+                <p className="text-xs text-primary mt-1 font-medium">{plan.credits}</p>
+                <div className="mt-5 space-y-2.5">
                   {plan.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+                    <div key={f} className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <div className="w-1 h-1 rounded-full bg-primary shrink-0" />
                       {f}
-                    </li>
+                    </div>
                   ))}
-                </ul>
-                <a href={getLoginUrl()}>
-                  <Button className={`w-full ${plan.highlight ? "glow-primary" : ""}`} variant={plan.highlight ? "default" : "outline"}>
-                    {plan.cta}
-                  </Button>
-                </a>
-              </div>
-            ))}
-          </div>
-          <div className="text-center mt-8">
-            <Link href="/pricing">
-              <Button variant="ghost" size="sm" className="text-muted-foreground">
-                View full pricing details <ChevronRight className="w-3.5 h-3.5 ml-1" />
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── CTA ───────────────────────────────────────────────────────────── */}
-      <section className="py-24 px-4 border-t border-border/30">
-        <div className="container">
-          <div className="relative rounded-3xl overflow-hidden border border-primary/20 bg-primary/5 p-12 text-center">
-            <div className="absolute inset-0 opacity-5"
-              style={{ background: "radial-gradient(ellipse at center, oklch(0.65 0.22 280), transparent 70%)" }} />
-            <div className="relative z-10 space-y-6">
-              <Badge variant="secondary" className="border border-primary/30 bg-primary/10 text-primary px-4 py-1.5">
-                <Rocket className="w-3 h-3 mr-1.5" />
-                Start building today
-              </Badge>
-              <h2 className="text-5xl font-black tracking-tight">
-                The future of work is
-                <br />
-                <span className="gradient-text">autonomous agents</span>
-              </h2>
-              <p className="text-xl text-muted-foreground max-w-lg mx-auto">
-                Join thousands of builders deploying AI agents that work 24/7 on their behalf.
-              </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <a href={getLoginUrl()}>
-                  <Button size="lg" className="h-14 px-10 text-lg font-bold glow-primary">
-                    <Sparkles className="w-5 h-5 mr-2" />
-                    Start Free — No Credit Card
-                  </Button>
-                </a>
-                <Link href="/gallery">
-                  <Button variant="outline" size="lg" className="h-14 px-10 text-lg">
-                    Explore Gallery
-                    <ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
-                </Link>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                100 free credits on signup · No credit card required · Deploy in under 2 minutes
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ─── Footer ────────────────────────────────────────────────────────── */}
-      <footer className="border-t border-border/50 py-12 px-4">
-        <div className="container">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
-            <div className="col-span-2 md:col-span-1">
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
-                  <Sparkles className="w-3.5 h-3.5 text-primary-foreground" />
                 </div>
-                <span className="font-bold">Future</span>
-              </div>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                The autonomous AI agent ecosystem. Build, deploy, and scale AI agents powered by Future's proprietary AI.
-              </p>
-            </div>
-            <div>
-              <div className="font-semibold text-sm mb-3">Platform</div>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><Link href="/gallery" className="hover:text-foreground transition-colors">Agent Gallery</Link></li>
-                <li><Link href="/templates" className="hover:text-foreground transition-colors">Templates</Link></li>
-                <li><Link href="/pricing" className="hover:text-foreground transition-colors">Pricing</Link></li>
-                <li><a href={getLoginUrl()} className="hover:text-foreground transition-colors">Sign Up</a></li>
-              </ul>
-            </div>
-            <div>
-              <div className="font-semibold text-sm mb-3">Developers</div>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><span className="cursor-default">API Reference</span></li>
-                <li><span className="cursor-default">SDKs</span></li>
-                <li><span className="cursor-default">Webhooks</span></li>
-                <li><span className="cursor-default">Status</span></li>
-              </ul>
-            </div>
-            <div>
-              <div className="font-semibold text-sm mb-3">Company</div>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li><span className="cursor-default">About</span></li>
-                <li><span className="cursor-default">Blog</span></li>
-                <li><span className="cursor-default">Careers</span></li>
-                <li><span className="cursor-default">Contact</span></li>
-              </ul>
-            </div>
+                <a href={isAuthenticated ? "/billing" : getLoginUrl()} className="block mt-6">
+                  <Button
+                    className={`w-full text-xs font-medium ${
+                      plan.highlight
+                        ? "bg-primary hover:bg-primary/90"
+                        : "bg-secondary hover:bg-secondary/80 text-secondary-foreground"
+                    }`}
+                    size="sm"
+                  >
+                    {plan.price === "$0" ? "Start Free" : "Get Started"}
+                  </Button>
+                </a>
+              </motion.div>
+            ))}
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ═══ CTA ═══ */}
+      <section className="relative py-24 px-6">
+        <div className="max-w-3xl mx-auto text-center">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}>
+            <motion.h2 variants={fadeUp} className="text-3xl md:text-5xl font-heading font-bold">
+              Ready to Build the <span className="gradient-text">Future</span>?
+            </motion.h2>
+            <motion.p variants={fadeUp} className="mt-4 text-muted-foreground text-lg">
+              Join thousands of builders creating the next generation of AI-powered products.
+            </motion.p>
+            <motion.div variants={fadeUp} className="mt-8">
+              <a href={isAuthenticated ? "/dashboard" : getLoginUrl()}>
+                <Button size="lg" className="bg-primary hover:bg-primary/90 glow-primary text-base font-semibold px-10 py-6 rounded-xl">
+                  Get Started — It's Free <Sparkles className="ml-2 h-4 w-4" />
+                </Button>
+              </a>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ═══ FOOTER ═══ */}
+      <div className="divider-gradient mx-auto max-w-4xl" />
+      <footer className="relative border-t border-border/30 py-12 px-6">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-3">
+            <img src={ICON_URL} alt="Future" className="h-6 w-6 opacity-60" />
+            <span className="text-sm text-muted-foreground">&copy; {new Date().getFullYear()} Future. All rights reserved.</span>
           </div>
-          <div className="border-t border-border/50 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="text-sm text-muted-foreground">
-              © 2025 Future AI. All rights reserved.
-            </div>
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
-              <span className="cursor-default hover:text-foreground transition-colors">Privacy Policy</span>
-              <span className="cursor-default hover:text-foreground transition-colors">Terms of Service</span>
-              <span className="cursor-default hover:text-foreground transition-colors">Security</span>
-            </div>
+          <div className="flex items-center gap-6 text-xs text-muted-foreground">
+            <a href="#" className="hover:text-foreground transition-colors">Privacy</a>
+            <a href="#" className="hover:text-foreground transition-colors">Terms</a>
+            <a href="#" className="hover:text-foreground transition-colors">Documentation</a>
+            <a href="#" className="hover:text-foreground transition-colors">Status</a>
           </div>
         </div>
       </footer>

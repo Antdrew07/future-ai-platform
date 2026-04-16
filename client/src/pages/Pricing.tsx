@@ -46,7 +46,7 @@ export default function Pricing() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-border/50 px-6 py-4 flex items-center justify-between">
+      <header className="border-b border-white/[0.04] px-6 py-4 flex items-center justify-between backdrop-blur-xl">
         <Link href="/" className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
             <Sparkles className="w-4 h-4 text-primary-foreground" />
@@ -86,22 +86,22 @@ export default function Pricing() {
         {/* Plans */}
         <div className="grid md:grid-cols-3 gap-6 mb-16">
           {PLANS.map((plan) => (
-            <Card key={plan.name} className={`relative ${plan.highlight ? "border-primary/50 bg-primary/5 shadow-lg shadow-primary/10" : "bg-card/50 border-border/50"}`}>
+            <div key={plan.name} className={`relative glass rounded-xl ${plan.highlight ? "border-primary/30 ring-1 ring-primary/20 shadow-lg shadow-primary/10" : ""}`}>
               {plan.highlight && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                   <Badge className="bg-primary text-primary-foreground text-xs px-3">Most Popular</Badge>
                 </div>
               )}
-              <CardHeader className="pb-4">
-                <CardTitle className="text-base font-semibold">{plan.name}</CardTitle>
+              <div className="px-5 pt-5 pb-4">
+                <h3 className="text-base font-heading font-semibold">{plan.name}</h3>
                 <div className="text-3xl font-black mt-2">
                   {plan.price === 0 ? "Free" : `$${plan.price}`}
                   {plan.price > 0 && <span className="text-sm font-normal text-muted-foreground">/mo</span>}
                 </div>
                 <div className="text-xs text-muted-foreground">{plan.description}</div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/20">
+              </div>
+              <div className="px-5 pb-5 space-y-4">
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-white/[0.03] border border-white/[0.04]">
                   <Zap className="w-4 h-4 text-yellow-400" />
                   <span className="text-sm font-medium">{plan.credits.toLocaleString()} credits/month</span>
                 </div>
@@ -128,8 +128,8 @@ export default function Pricing() {
                     </Button>
                   </a>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           ))}
         </div>
 
@@ -144,13 +144,11 @@ export default function Pricing() {
               { credits: 150000, price: 50 },
               { credits: 500000, price: 150 },
             ].map((pack) => (
-              <Card key={pack.credits} className="bg-card/50 border-border/50 hover:border-primary/30 transition-all">
-                <CardContent className="p-4 text-center">
+              <div key={pack.credits} className="glass card-hover rounded-xl p-4 text-center">
                   <div className="text-lg font-bold">{(pack.credits / 1000).toFixed(0)}K</div>
                   <div className="text-xs text-muted-foreground mb-2">credits</div>
                   <div className="text-xl font-black">${pack.price}</div>
-                </CardContent>
-              </Card>
+              </div>
             ))}
           </div>
           <p className="text-xs text-muted-foreground mt-4">

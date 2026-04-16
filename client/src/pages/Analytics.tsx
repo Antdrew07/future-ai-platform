@@ -77,24 +77,22 @@ export default function Analytics() {
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {statCards.map((card) => (
-            <Card key={card.title} className="bg-card/50 border-border/50">
-              <CardContent className="p-4">
-                <div className={`w-9 h-9 rounded-lg ${card.bg} flex items-center justify-center mb-3`}>
+            <div key={card.title} className="glass card-hover rounded-xl p-4">
+                <div className={`w-9 h-9 rounded-lg ${card.bg} flex items-center justify-center mb-3 ring-1 ring-white/5`}>
                   <card.icon className={`w-4 h-4 ${card.color}`} />
                 </div>
                 <div className="text-2xl font-bold">{card.value}</div>
                 <div className="text-xs text-muted-foreground mt-0.5">{card.title}</div>
-              </CardContent>
-            </Card>
+            </div>
           ))}
         </div>
 
         {/* Credit Usage Chart */}
-        <Card className="bg-card/50 border-border/50">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Credit Usage Over Time</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="glass rounded-xl overflow-hidden">
+          <div className="px-5 pt-5 pb-2">
+            <h3 className="text-sm font-heading font-medium">Credit Usage Over Time</h3>
+          </div>
+          <div className="px-5 pb-5">
             {chartData.length > 0 ? (
               <ResponsiveContainer width="100%" height={220}>
                 <AreaChart data={chartData}>
@@ -113,16 +111,16 @@ export default function Analytics() {
             ) : (
               <div className="h-[220px] flex items-center justify-center text-muted-foreground text-sm">No data for this period</div>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Tasks + Model Breakdown */}
         <div className="grid lg:grid-cols-2 gap-4">
-          <Card className="bg-card/50 border-border/50">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Tasks Per Day</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <div className="glass rounded-xl overflow-hidden">
+            <div className="px-5 pt-5 pb-2">
+              <h3 className="text-sm font-heading font-medium">Tasks Per Day</h3>
+            </div>
+            <div className="px-5 pb-5">
               {chartData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={200}>
                   <BarChart data={chartData}>
@@ -135,14 +133,14 @@ export default function Analytics() {
               ) : (
                 <div className="h-[200px] flex items-center justify-center text-muted-foreground text-sm">No data</div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          <Card className="bg-card/50 border-border/50">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Credits by Model</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <div className="glass rounded-xl overflow-hidden">
+            <div className="px-5 pt-5 pb-2">
+              <h3 className="text-sm font-heading font-medium">Credits by Model</h3>
+            </div>
+            <div className="px-5 pb-5">
               {pieData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={200}>
                   <PieChart>
@@ -158,8 +156,8 @@ export default function Analytics() {
               ) : (
                 <div className="h-[200px] flex items-center justify-center text-muted-foreground text-sm">No model usage data</div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
       </div>
     </FutureDashboardLayout>

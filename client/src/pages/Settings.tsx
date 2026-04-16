@@ -16,16 +16,16 @@ export default function Settings() {
     <FutureDashboardLayout title="Settings" subtitle="Manage your account preferences">
       <div className="p-6 space-y-6 max-w-2xl">
         {/* Profile */}
-        <Card className="bg-card/50 border-border/50">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
+        <div className="glass rounded-xl overflow-hidden">
+          <div className="px-5 pt-5 pb-2">
+            <h3 className="text-sm font-heading font-medium flex items-center gap-2">
               <User className="w-4 h-4 text-primary" />
               Profile
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+            </h3>
+          </div>
+          <div className="px-5 pb-5 space-y-4">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-2xl font-bold text-primary">
+              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-2xl font-bold text-primary ring-1 ring-primary/20">
                 {user?.name?.charAt(0).toUpperCase() ?? "?"}
               </div>
               <div>
@@ -47,19 +47,19 @@ export default function Settings() {
             <Button size="sm" onClick={() => toast.info("Profile update coming soon")}>
               Save Changes
             </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Notifications */}
-        <Card className="bg-card/50 border-border/50">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
+        <div className="glass rounded-xl overflow-hidden">
+          <div className="px-5 pt-5 pb-2">
+            <h3 className="text-sm font-heading font-medium flex items-center gap-2">
               <Bell className="w-4 h-4 text-cyan-400" />
               Notifications
-            </CardTitle>
-            <CardDescription className="text-xs">Choose what updates you receive</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+            </h3>
+            <p className="text-xs text-muted-foreground mt-1">Choose what updates you receive</p>
+          </div>
+          <div className="px-5 pb-5 space-y-4">
             {[
               { label: "Task completions", desc: "Get notified when your agent tasks finish", default: true },
               { label: "Credit alerts", desc: "Alert when balance drops below threshold", default: true },
@@ -74,19 +74,19 @@ export default function Settings() {
                 <Switch defaultChecked={item.default} />
               </div>
             ))}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Security */}
-        <Card className="bg-card/50 border-border/50">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-sm font-medium flex items-center gap-2">
+        <div className="glass rounded-xl overflow-hidden">
+          <div className="px-5 pt-5 pb-2">
+            <h3 className="text-sm font-heading font-medium flex items-center gap-2">
               <Shield className="w-4 h-4 text-emerald-400" />
               Security
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/20">
+            </h3>
+          </div>
+          <div className="px-5 pb-5 space-y-3">
+            <div className="flex items-center justify-between p-3 rounded-lg bg-white/[0.02] border border-white/[0.04]">
               <div>
                 <div className="text-sm font-medium">Login Method</div>
                 <div className="text-xs text-muted-foreground capitalize">{user?.loginMethod ?? "OAuth"}</div>
@@ -96,7 +96,7 @@ export default function Settings() {
                 Change
               </Button>
             </div>
-            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/20">
+            <div className="flex items-center justify-between p-3 rounded-lg bg-white/[0.02] border border-white/[0.04]">
               <div>
                 <div className="text-sm font-medium">Two-Factor Authentication</div>
                 <div className="text-xs text-muted-foreground">Add an extra layer of security</div>
@@ -106,15 +106,15 @@ export default function Settings() {
                 Enable
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Danger Zone */}
-        <Card className="bg-destructive/5 border-destructive/20">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-sm font-medium text-destructive">Danger Zone</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="glass rounded-xl overflow-hidden border-destructive/20">
+          <div className="px-5 pt-5 pb-2">
+            <h3 className="text-sm font-heading font-medium text-destructive">Danger Zone</h3>
+          </div>
+          <div className="px-5 pb-5">
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-sm font-medium">Delete Account</div>
@@ -125,8 +125,8 @@ export default function Settings() {
                 Delete Account
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </FutureDashboardLayout>
   );

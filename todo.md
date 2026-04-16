@@ -125,18 +125,63 @@
 
 ## Proprietary AI Branding (No Third-Party AI Names)
 
-- [ ] Define Future's own model name system (e.g. Future-1, Future-1 Ultra, Future-1 Mini, Future-1 Fast)
-- [ ] Replace all "GPT-4o", "ChatGPT", "OpenAI" references in frontend pages with Future model names
-- [ ] Replace all "Claude", "Claude 3.5", "Anthropic" references in frontend pages with Future model names
-- [ ] Update AgentBuilder model selector — show only Future model names, no vendor names
-- [ ] Update Home.tsx landing page — remove all vendor AI names, use Future branding only
-- [ ] Update Pricing.tsx — remove vendor model names
-- [ ] Update AdminPanel.tsx — show internal model IDs only (admin-facing)
-- [ ] Update AgentWorkspace.tsx — no vendor names in model display
-- [ ] Update AgentList.tsx — no vendor names in model badges
-- [ ] Update Dashboard.tsx — no vendor names in stats/activity
-- [ ] Update Analytics.tsx — no vendor names in charts/labels
-- [ ] Update Templates.tsx and AgentGallery.tsx — no vendor names
-- [ ] Update seed.mjs — model display names use Future branding only
-- [ ] Update llmRouter.ts — internal routing still uses real APIs, but model display names are Future-branded
-- [ ] Update server/routers.ts — any model list returned to frontend uses Future names
+- [x] Define Future's own model name system: Future-1 Ultra, Future-1 Pro, Future-1 Code, Future-1 Mini, Future-1 Fast
+- [x] Replace all "GPT-4o", "ChatGPT", "OpenAI" references in frontend pages with Future model names
+- [x] Replace all "Claude", "Claude 3.5", "Anthropic" references in frontend pages with Future model names
+- [x] Update AgentBuilder model selector — show only Future model names, no vendor names
+- [x] Update Home.tsx landing page — remove all vendor AI names, use Future branding only
+- [x] Update Pricing.tsx — remove vendor model names
+- [x] Update AdminPanel.tsx — show Future model names only
+- [x] Update AgentWorkspace.tsx — no vendor names in model display
+- [x] Update AgentList.tsx — no vendor names in model badges
+- [x] Update Analytics.tsx — no vendor names in charts/labels
+- [x] Update AgentGallery.tsx — no vendor names
+- [x] Update seed.mjs — model display names use Future branding only, provider set to 'future'
+- [x] Update db.ts fallback defaults — all model display names use Future branding
+- [x] Schema migration pushed — provider enum now includes 'future'
+- [x] Database re-seeded with all 5 Future-branded models successfully
+- [x] 29 tests passing, 0 TypeScript errors after all branding changes
+
+## Luxury Visual Rebrand
+
+### Logo & Brand Assets
+- [x] Generate custom Future logo (futuristic, minimal, luxury feel)
+- [x] Upload logo to CDN and set as app logo
+- [x] Generate favicon from logo
+
+### Global Design System
+- [x] Redesign index.css: luxury dark theme with glassmorphism, deep blacks, electric violet, gold accents
+- [x] Premium typography: Space Grotesk headings + Inter body
+- [x] Glass card components with backdrop blur and subtle borders
+- [x] Gradient accent system (violet → blue → gold)
+- [x] Glow effects, subtle animations, cinematic depth
+- [x] Custom scrollbar styling
+
+### Landing Page Redesign
+- [x] Cinematic hero with animated gradient orbs and particle effects
+- [x] Premium feature cards with glass morphism
+- [x] Model showcase with luxury tier cards
+- [x] Animated stats counter section
+- [x] Premium pricing cards with glow borders
+- [x] High-end footer with gradient divider
+
+### Dashboard Redesign
+- [x] Luxury sidebar with glass effect and gradient active states
+- [x] Premium stat cards with gradient borders and glow
+- [x] Redesign all dashboard pages with luxury card components
+- [x] Agent builder with premium model selector cards
+- [x] Agent workspace with cinematic execution feed
+
+### All Pages Redesign
+- [x] Billing page with premium credit pack cards
+- [x] Admin panel with luxury data tables
+- [x] Analytics with premium chart styling
+- [x] Settings, Teams, Templates, Gallery, Onboarding — all luxury UI
+- [x] 29 tests passing, 0 TypeScript errors, dev server running clean
+
+## Luxury Rebrand Gaps (Fix)
+
+- [x] Upload generated logo/favicon to CDN (logo: future-logo_e02304b5.png, favicon: future-favicon_934ff57c.png)
+- [x] Implement animated numeric counters on landing page stats section (IntersectionObserver-based)
+- [x] Footer with gradient divider in Home.tsx verified and implemented
+- [x] Upgrade AgentWorkspace execution feed cards with luxury glass styling (StepCard + ArtifactsPanel)

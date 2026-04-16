@@ -222,23 +222,23 @@ function StepCard({ step }: { step: AgentStep }) {
   const [expanded, setExpanded] = useState(step.type === "complete" || step.type === "error");
 
   return (
-    <div className={`rounded-lg border ${getStepBorderColor(step)} bg-white/[0.02] overflow-hidden`}>
+    <div className={`rounded-xl border ${getStepBorderColor(step)} backdrop-blur-xl bg-white/[0.03] overflow-hidden shadow-lg shadow-black/10 transition-all duration-300 hover:bg-white/[0.05] hover:shadow-xl hover:shadow-black/20`}>
       <button
-        className="w-full flex items-center gap-3 p-3 text-left hover:bg-white/[0.03] transition-colors"
+        className="w-full flex items-center gap-3 p-4 text-left transition-colors"
         onClick={() => setExpanded(e => !e)}
       >
-        <div className="shrink-0">{getStepIcon(step)}</div>
+        <div className="shrink-0 w-9 h-9 rounded-lg bg-white/[0.05] flex items-center justify-center border border-white/[0.06]">{getStepIcon(step)}</div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-white/90 truncate">{step.title}</p>
-          <p className="text-xs text-white/40 mt-0.5">
+          <p className="text-[10px] text-white/30 mt-0.5 font-mono">
             {new Date(step.timestamp).toLocaleTimeString()}
           </p>
         </div>
         {step.type === "thinking" ? (
-          <div className="flex gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce" style={{ animationDelay: "0ms" }} />
-            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce" style={{ animationDelay: "150ms" }} />
-            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-bounce" style={{ animationDelay: "300ms" }} />
+          <div className="flex gap-1.5 items-center px-2 py-1 rounded-full bg-violet-500/10 border border-violet-500/20">
+            <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "0ms" }} />
+            <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "150ms" }} />
+            <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "300ms" }} />
           </div>
         ) : (
           expanded ? <ChevronDown className="w-4 h-4 text-white/30 shrink-0" /> : <ChevronRight className="w-4 h-4 text-white/30 shrink-0" />
@@ -246,7 +246,7 @@ function StepCard({ step }: { step: AgentStep }) {
       </button>
 
       {expanded && step.content && (
-        <div className="px-3 pb-3 border-t border-white/5">
+        <div className="px-4 pb-4 border-t border-white/[0.04]">
           <div className="mt-3">
             <StepContentRenderer step={step} />
           </div>
@@ -255,7 +255,7 @@ function StepCard({ step }: { step: AgentStep }) {
               {step.artifacts.map((artifact, i) => (
                 <button
                   key={i}
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-300 hover:bg-emerald-500/20 transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg backdrop-blur-sm bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-300 hover:bg-emerald-500/20 transition-all hover:shadow-md hover:shadow-emerald-500/5"
                   onClick={() => {
                     const blob = new Blob([artifact.content], { type: artifact.type });
                     const url = URL.createObjectURL(blob);
@@ -285,16 +285,18 @@ function ArtifactsPanel({ steps }: { steps: AgentStep[] }) {
   if (allArtifacts.length === 0) return null;
 
   return (
-    <div className="border-t border-white/[0.06] bg-white/[0.01] px-4 py-3">
-      <div className="flex items-center gap-2 mb-2">
-        <Download className="w-3.5 h-3.5 text-white/30" />
-        <span className="text-xs font-medium text-white/50">Output Files ({allArtifacts.length})</span>
+    <div className="border-t border-white/[0.04] backdrop-blur-xl bg-white/[0.02] px-5 py-4">
+      <div className="flex items-center gap-2 mb-3">
+        <div className="w-6 h-6 rounded-md bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
+          <Download className="w-3 h-3 text-emerald-400" />
+        </div>
+        <span className="text-xs font-semibold text-white/60 tracking-wide uppercase">Output Files ({allArtifacts.length})</span>
       </div>
       <div className="flex flex-wrap gap-2">
         {allArtifacts.map((artifact, i) => (
           <button
             key={i}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-300 hover:bg-emerald-500/20 transition-colors"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl backdrop-blur-sm bg-emerald-500/10 border border-emerald-500/15 text-xs text-emerald-300 hover:bg-emerald-500/20 transition-all hover:shadow-md hover:shadow-emerald-500/5 font-medium"
             onClick={() => {
               const blob = new Blob([artifact.content], { type: artifact.type });
               const url = URL.createObjectURL(blob);
@@ -305,7 +307,7 @@ function ArtifactsPanel({ steps }: { steps: AgentStep[] }) {
               URL.revokeObjectURL(url);
             }}
           >
-            <FileText className="w-3 h-3" />
+            <FileText className="w-3.5 h-3.5" />
             {artifact.name}
           </button>
         ))}
@@ -458,7 +460,7 @@ export default function AgentWorkspace() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0a0a0f]">
+      <div className="min-h-screen flex items-center justify-center bg-[#06060a]">
         <div className="text-center">
           <Bot className="w-12 h-12 text-white/20 mx-auto mb-4" />
           <p className="text-white/50">Please log in to use agents</p>
@@ -468,9 +470,9 @@ export default function AgentWorkspace() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-[#0a0a0f] overflow-hidden">
+    <div className="h-screen flex flex-col bg-[#06060a] overflow-hidden">
       {/* ── Header ── */}
-      <header className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.06] shrink-0">
+      <header className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.06] shrink-0 backdrop-blur-xl bg-white/[0.01]">
         <Button
           variant="ghost"
           size="icon"
@@ -481,7 +483,7 @@ export default function AgentWorkspace() {
         </Button>
 
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-blue-600 flex items-center justify-center">
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-blue-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
             <Bot className="w-4 h-4 text-white" />
           </div>
           <div>
