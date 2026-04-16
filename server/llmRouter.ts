@@ -304,9 +304,11 @@ export async function routeLLMCall(opts: LLMRouterOptions): Promise<LLMRouterRes
   }
 
   // ── Credit calculation ──
-  const inputCredits = Math.ceil(result.inputTokens * model.creditsPerInputToken * 1000);
-  const outputCredits = Math.ceil(result.outputTokens * model.creditsPerOutputToken * 1000);
-  const toolCallCredits = Math.ceil((result.toolCalls?.length ?? 0) * model.creditsPerToolCall * 100);
+  // Credits are stored as whole numbers. Rates are credits-per-1k-tokens.
+  // e.g. future-agent-1: 0.001 credits/token = 1 credit per 1000 tokens
+  const inputCredits = Math.ceil((result.inputTokens / 1000) * model.creditsPerInputToken);
+  const outputCredits = Math.ceil((result.outputTokens / 1000) * model.creditsPerOutputToken);
+  const toolCallCredits = Math.ceil((result.toolCalls?.length ?? 0) * model.creditsPerToolCall);
   const totalCredits = Math.max(1, inputCredits + outputCredits + toolCallCredits);
 
   // ── Deduct credits ──
@@ -342,8 +344,8 @@ export function calculateCreditCost(
   toolCalls = 0,
   pricing: { creditsPerInputToken: number; creditsPerOutputToken: number; creditsPerToolCall: number }
 ): number {
-  const inputCredits = Math.ceil(inputTokens * pricing.creditsPerInputToken * 1000);
-  const outputCredits = Math.ceil(outputTokens * pricing.creditsPerOutputToken * 1000);
-  const toolCredits = Math.ceil(toolCalls * pricing.creditsPerToolCall * 100);
+  const inputCredits = Math.ceil((inputTokens / 1000) * pricing.creditsPerInputToken);
+  const outputCredits = Math.ceil((outputTokens / 1000) * pricing.creditsPerOutputToken);
+  const toolCredits = Math.ceil(toolCalls * pricing.creditsPerToolCall);
   return Math.max(1, inputCredits + outputCredits + toolCredits);
 }

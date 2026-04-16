@@ -215,3 +215,19 @@
 - [x] Grant 100 free credits to every new user on registration (in auth.register procedure)
 - [x] Seed existing users who have 0 credits with 100 free credits via DB migration script
 - [x] Show free credit balance clearly in the workspace UI so users know they have credits
+
+## Agent Workspace Bug Fixes
+
+- [x] Fix: completed agent steps stuck on "Agent is thinking..." — final answer never renders in step card
+- [x] Fix: step card should show actual LLM response text when status is complete
+
+## Full Platform Audit
+
+- [x] Fix agent engine: steps stuck on "Agent is thinking..." — final answer never rendered
+- [x] Fix agent SSE stream: ensure "complete" event carries finalAnswer and renders in conversation
+- [x] Audit agent execution loop in server (agentEngine or routers.ts)
+- [x] Audit auth flow: register, login, logout, session persistence
+- [x] Audit billing/credits: balance display, Stripe checkout, webhook
+- [x] Audit dashboard: agents list, task history, analytics
+- [x] Audit routing: all pages reachable, no dead links
+- [x] Run full vitest suite and confirm 0 failures

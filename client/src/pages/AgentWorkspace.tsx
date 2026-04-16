@@ -218,8 +218,18 @@ function StepContentRenderer({ step }: { step: AgentStep }) {
 
 // ─── Step Card Component ──────────────────────────────────────────────────────
 
-function StepCard({ step }: { step: AgentStep }) {
-  const [expanded, setExpanded] = useState(step.type === "complete" || step.type === "error");
+function StepCard({ step, isLast }: { step: AgentStep; isLast?: boolean }) {
+  // Auto-expand complete/error steps, and also the last step when task is done
+  const [expanded, setExpanded] = useState(
+    step.type === "complete" || step.type === "error" || (isLast === true && step.type !== "thinking")
+  );
+
+  // Re-expand if this step becomes the last complete step
+  useEffect(() => {
+    if (step.type === "complete" || step.type === "error") {
+      setExpanded(true);
+    }
+  }, [step.type]);
 
   return (
     <div className={`rounded-xl border ${getStepBorderColor(step)} backdrop-blur-xl bg-white/[0.03] overflow-hidden shadow-lg shadow-black/10 transition-all duration-300 hover:bg-white/[0.05] hover:shadow-xl hover:shadow-black/20`}>
@@ -397,60 +407,92 @@ export default function AgentWorkspace() {
 
       if (!response.body) throw new Error("No response body");
 
-      // Read SSE stream
+      // Read SSE stream — robust multi-chunk parser
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
+      const processSSEBuffer = (buf: string) => {
+        // Split on double-newline (SSE message boundary)
+        const messages = buf.split(/\n\n/);
+        // Last element may be incomplete — return it as the new buffer
+        const remaining = messages.pop() ?? "";
 
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() ?? "";
+        for (const message of messages) {
+          if (!message.trim()) continue;
+          let eventType = "";
+          let dataLine = "";
 
-        let eventType = "";
-        let dataLine = "";
-
-        for (const line of lines) {
-          if (line.startsWith("event: ")) {
-            eventType = line.slice(7).trim();
-          } else if (line.startsWith("data: ")) {
-            dataLine = line.slice(6).trim();
-          } else if (line === "" && eventType && dataLine) {
-            // Process event
-            try {
-              const data = JSON.parse(dataLine) as Record<string, unknown>;
-
-              if (eventType === "task_created") {
-                setCurrentRun(prev => prev ? { ...prev, taskId: data.taskId as number } : prev);
-              } else if (eventType === "step") {
-                const step = data as unknown as AgentStep;
-                setCurrentRun(prev => prev ? { ...prev, steps: [...prev.steps, step] } : prev);
-              } else if (eventType === "complete") {
-                const finalAnswer = data.finalAnswer as string;
-                setCurrentRun(prev => prev ? {
-                  ...prev,
-                  status: "complete",
-                  finalAnswer,
-                  creditsUsed: data.creditsUsed as number ?? 0,
-                } : prev);
-                setConversationHistory(prev => [...prev, { role: "assistant", content: finalAnswer }]);
-                setIsRunning(false);
-              } else if (eventType === "error") {
-                setCurrentRun(prev => prev ? { ...prev, status: "error" } : prev);
-                toast.error(data.error as string ?? "Agent encountered an error");
-                setIsRunning(false);
-              }
-            } catch {
-              // ignore parse errors
+          for (const line of message.split("\n")) {
+            if (line.startsWith("event: ")) {
+              eventType = line.slice(7).trim();
+            } else if (line.startsWith("data: ")) {
+              dataLine = line.slice(6).trim();
             }
-            eventType = "";
-            dataLine = "";
+          }
+
+          if (!eventType || !dataLine) continue;
+
+          try {
+            const data = JSON.parse(dataLine) as Record<string, unknown>;
+
+            if (eventType === "task_created") {
+              setCurrentRun(prev => prev ? { ...prev, taskId: data.taskId as number } : prev);
+            } else if (eventType === "step") {
+              const step = data as unknown as AgentStep;
+              setCurrentRun(prev => prev ? { ...prev, steps: [...prev.steps, step] } : prev);
+            } else if (eventType === "complete") {
+              const finalAnswer = (data.finalAnswer as string) ?? "";
+              setCurrentRun(prev => prev ? {
+                ...prev,
+                status: "complete",
+                finalAnswer,
+                creditsUsed: (data.creditsUsed as number) ?? 0,
+              } : prev);
+              if (finalAnswer) {
+                setConversationHistory(prev => [...prev, { role: "assistant", content: finalAnswer }]);
+              }
+              setIsRunning(false);
+            } else if (eventType === "error") {
+              setCurrentRun(prev => prev ? { ...prev, status: "error" } : prev);
+              toast.error((data.error as string) ?? "Agent encountered an error");
+              setIsRunning(false);
+            }
+          } catch {
+            // ignore parse errors
           }
         }
+
+        return remaining;
+      };
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) {
+          // Process any remaining buffer on stream close
+          if (buffer.trim()) processSSEBuffer(buffer + "\n\n");
+          break;
+        }
+        buffer += decoder.decode(value, { stream: true });
+        buffer = processSSEBuffer(buffer);
       }
+
+      // Fallback: if stream closed without a complete event, extract final answer from steps
+      setCurrentRun(prev => {
+        if (!prev) return prev;
+        if (prev.status === "complete") return prev;
+        const completeStep = [...prev.steps].reverse().find(s => s.type === "complete");
+        const finalAnswer = completeStep?.content ?? prev.finalAnswer ?? "";
+        if (finalAnswer) {
+          // Also push to conversation history
+          setConversationHistory(hist => {
+            if (hist[hist.length - 1]?.role === "assistant") return hist;
+            return [...hist, { role: "assistant", content: finalAnswer }];
+          });
+        }
+        return { ...prev, status: "complete", finalAnswer };
+      });
+      setIsRunning(false);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Unknown error";
       toast.error(msg);
@@ -704,8 +746,8 @@ export default function AgentWorkspace() {
                   </span>
                 </div>
 
-                {currentRun.steps.map(step => (
-                  <StepCard key={step.id} step={step} />
+                {currentRun.steps.map((step, idx) => (
+                  <StepCard key={step.id} step={step} isLast={idx === currentRun.steps.length - 1} />
                 ))}
 
                 {isRunning && (
