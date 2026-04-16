@@ -234,11 +234,11 @@
 
 ## Dashboard Redesign — Manus-Style
 
-- [ ] Replace current Dashboard.tsx with a minimal home screen: greeting, central prompt box, suggestion chips, recent tasks
-- [ ] Simplify FutureDashboardLayout sidebar — fewer items, cleaner look
-- [ ] Prompt box on dashboard navigates to workspace with task pre-filled
-- [ ] Suggestion chips: practical tasks (Build a website, Write code, Research, Analyze data, etc.)
-- [ ] Recent tasks section shows last 5 tasks with status and quick-resume link
+- [x] Replace current Dashboard.tsx with a minimal home screen: greeting, central prompt box, suggestion chips, recent tasks
+- [x] Simplify FutureDashboardLayout sidebar — fewer items, cleaner look
+- [x] Prompt box on dashboard navigates to workspace with task pre-filled
+- [x] Suggestion chips: practical tasks (Build a website, Write code, Research, Analyze data, etc.)
+- [x] Recent tasks section shows last 5 tasks with status and quick-resume link
 
 ## Light Theme Redesign
 
@@ -247,3 +247,7 @@
 - [x] Update Dashboard home screen for light theme
 - [x] Update SignIn and SignUp pages for light theme
 - [x] Ensure all text is readable on light backgrounds
+
+## Simplified Suggestion Chips
+
+- [x] Update Dashboard and Onboarding suggestion chips to concrete real-world tasks (Build iOS app, Launch a business, Build a website, etc.)

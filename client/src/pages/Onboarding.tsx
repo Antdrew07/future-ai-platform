@@ -4,10 +4,10 @@ import { Button } from "@/components/ui/button";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import {
-  Sparkles, Globe, Code2, Cpu, ArrowRight,
+  Sparkles, Globe, Code2, ArrowRight,
   CheckCircle2, Bot, Play, Rocket, Send,
-  Globe2, FileCode2, BarChart2, Presentation,
-  Workflow, Pencil, Search, ShoppingCart,
+  Smartphone, Briefcase, ShoppingBag,
+  TrendingUp, FileText, Megaphone,
 } from "lucide-react";
 
 const STEPS = [
@@ -16,44 +16,52 @@ const STEPS = [
   { id: 3, title: "Ready" },
 ];
 
-// Practical suggestion chips — Manus/twin-style
+// Practical suggestion chips — real-world goals
 const SUGGESTIONS = [
-  { icon: Globe2,        label: "Build a website",         prompt: "Build a modern website for my business. I'll describe what I need." },
-  { icon: FileCode2,     label: "Write & run code",        prompt: "Write and run code to solve a problem for me." },
-  { icon: Search,        label: "Research a topic",        prompt: "Research a topic thoroughly and give me a comprehensive summary." },
-  { icon: BarChart2,     label: "Analyze data",            prompt: "Analyze a dataset and give me insights and visualizations." },
-  { icon: Presentation,  label: "Create a presentation",   prompt: "Create a polished presentation or slide deck for me." },
-  { icon: Workflow,      label: "Automate a workflow",     prompt: "Help me automate a repetitive task or workflow." },
-  { icon: ShoppingCart,  label: "Build an online store",   prompt: "Help me set up an e-commerce store or product listing." },
-  { icon: Pencil,        label: "Write content",           prompt: "Write high-quality content — blog posts, emails, copy, or reports." },
+  { icon: Globe,        label: "Build a website",          prompt: "Build a modern, professional website for my business. I'll describe what I need." },
+  { icon: Smartphone,   label: "Build an iOS app",         prompt: "Help me build an iOS app. I'll describe the idea and you'll guide me through the full process." },
+  { icon: Smartphone,   label: "Build an Android app",    prompt: "Help me build an Android app. I'll describe the idea and you'll guide me through the full process." },
+  { icon: Briefcase,    label: "Launch a business",        prompt: "Help me launch a business. I'll describe my idea and you'll help with the plan, branding, and first steps." },
+  { icon: ShoppingBag,  label: "Build an online store",    prompt: "Help me set up an online store with product listings, payments, and a great shopping experience." },
+  { icon: TrendingUp,   label: "Grow my social media",     prompt: "Help me grow my social media presence. I'll tell you about my brand and goals." },
+  { icon: Megaphone,    label: "Create a marketing plan",  prompt: "Create a comprehensive marketing plan for my business or product." },
+  { icon: FileText,     label: "Write a business plan",    prompt: "Write a detailed business plan for my idea, including market analysis, financials, and strategy." },
+  { icon: Rocket,       label: "Launch a SaaS product",    prompt: "Help me launch a SaaS product — from idea validation to landing page to first users." },
+  { icon: Code2,        label: "Write & run code",          prompt: "Write and run code to solve a problem for me. I'll describe what I need." },
 ];
 
 // Map a task prompt to a sensible agent name + system prompt
 function buildAgent(task: string) {
   const lower = task.toLowerCase();
-  if (lower.includes("website") || lower.includes("web app") || lower.includes("landing")) {
+  if (lower.includes("ios") || lower.includes("iphone") || lower.includes("swift")) {
+    return { name: "iOS Developer", systemPrompt: "You are an expert iOS developer. Guide users through building iOS apps — from idea to architecture, Swift code, and App Store submission." };
+  }
+  if (lower.includes("android") || lower.includes("kotlin") || lower.includes("google play")) {
+    return { name: "Android Developer", systemPrompt: "You are an expert Android developer. Guide users through building Android apps — from idea to architecture, Kotlin code, and Play Store submission." };
+  }
+  if (lower.includes("website") || lower.includes("web app") || lower.includes("landing") || lower.includes("saas")) {
     return { name: "Web Builder", systemPrompt: "You are an expert web developer. Build clean, modern websites and web apps based on user requirements. Write code, explain your choices, and iterate until the user is satisfied." };
+  }
+  if (lower.includes("business") || lower.includes("launch") || lower.includes("startup") || lower.includes("entrepreneur")) {
+    return { name: "Business Advisor", systemPrompt: "You are a seasoned business advisor and entrepreneur. Help users launch businesses — from idea validation, business plans, branding, legal setup, to finding first customers." };
+  }
+  if (lower.includes("store") || lower.includes("shop") || lower.includes("ecommerce") || lower.includes("product")) {
+    return { name: "E-Commerce Builder", systemPrompt: "You are an e-commerce specialist. Help set up online stores, product listings, payment systems, and great shopping experiences." };
+  }
+  if (lower.includes("social media") || lower.includes("instagram") || lower.includes("tiktok") || lower.includes("grow")) {
+    return { name: "Social Media Strategist", systemPrompt: "You are a social media growth expert. Help users build their brand, create content strategies, and grow their audience across platforms." };
+  }
+  if (lower.includes("marketing") || lower.includes("campaign") || lower.includes("advertis")) {
+    return { name: "Marketing Strategist", systemPrompt: "You are a marketing expert. Create comprehensive marketing plans, campaigns, and growth strategies tailored to the user's business and audience." };
+  }
+  if (lower.includes("business plan") || lower.includes("plan") || lower.includes("financ")) {
+    return { name: "Business Planner", systemPrompt: "You are an expert business planner. Write detailed, investor-ready business plans with market analysis, financial projections, and actionable strategies." };
   }
   if (lower.includes("code") || lower.includes("script") || lower.includes("program")) {
     return { name: "Code Engineer", systemPrompt: "You are an expert software engineer. Write clean, well-documented code, explain your approach, and execute it to verify correctness." };
   }
   if (lower.includes("research") || lower.includes("summary") || lower.includes("report")) {
     return { name: "Research Assistant", systemPrompt: "You are a research assistant. Search the web thoroughly, gather information from multiple sources, and produce a well-structured, comprehensive report." };
-  }
-  if (lower.includes("data") || lower.includes("analyz") || lower.includes("dataset") || lower.includes("chart")) {
-    return { name: "Data Analyst", systemPrompt: "You are a data analyst. Analyze data thoroughly, identify patterns and trends, and present findings clearly with actionable insights and visualizations." };
-  }
-  if (lower.includes("presentation") || lower.includes("slide") || lower.includes("deck")) {
-    return { name: "Presentation Designer", systemPrompt: "You are an expert at creating compelling presentations. Design clear, visually appealing slide decks with strong narratives and concise content." };
-  }
-  if (lower.includes("automat") || lower.includes("workflow") || lower.includes("task")) {
-    return { name: "Automation Agent", systemPrompt: "You are an automation expert. Identify repetitive tasks, design efficient workflows, and build scripts or integrations to automate them." };
-  }
-  if (lower.includes("store") || lower.includes("shop") || lower.includes("ecommerce") || lower.includes("product")) {
-    return { name: "E-Commerce Builder", systemPrompt: "You are an e-commerce specialist. Help set up online stores, product listings, and shopping experiences." };
-  }
-  if (lower.includes("write") || lower.includes("content") || lower.includes("blog") || lower.includes("copy")) {
-    return { name: "Content Writer", systemPrompt: "You are a skilled content writer. Produce high-quality, engaging written content tailored to the audience and purpose." };
   }
   return { name: "AI Assistant", systemPrompt: "You are a highly capable AI assistant. Complete tasks thoroughly, explain your reasoning, and ask clarifying questions when needed." };
 }
@@ -164,7 +172,7 @@ export default function Onboarding() {
                 {[
                   { icon: Globe, label: "Web Search", gradient: "from-blue-500/20 to-cyan-500/20" },
                   { icon: Code2, label: "Code Execution", gradient: "from-emerald-500/20 to-green-500/20" },
-                  { icon: Cpu, label: "Multi-Model AI", gradient: "from-violet-500/20 to-purple-500/20" },
+                  { icon: Bot, label: "Multi-Model AI", gradient: "from-violet-500/20 to-purple-500/20" },
                 ].map((item) => (
                   <div key={item.label} className="glass rounded-xl p-4 text-center">
                     <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${item.gradient} flex items-center justify-center mx-auto mb-2 ring-1 ring-white/[0.06]`}>
