@@ -1,10 +1,9 @@
 /**
- * Future AI Platform — Agent Workspace
- * 
+ * Future AI Platform — Agent Workspace (Light Theme)
+ *
  * Full-screen autonomous task execution interface:
  * - Left: Chat panel (task input + conversation history)
  * - Right: Live execution feed (steps, tool calls, results)
- * - Bottom: File artifacts panel
  */
 
 import { useState, useRef, useEffect, useCallback } from "react";
@@ -15,14 +14,13 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { Streamdown } from "streamdown";
 import {
   Bot, Send, Loader2, Search, Code2, FileText, Globe, Zap,
   CheckCircle2, XCircle, ChevronDown, ChevronRight, Copy,
   Download, ArrowLeft, Sparkles, Terminal, Image, Database,
-  RefreshCw, AlertCircle, Cpu, Clock, Coins
+  AlertCircle, Cpu, Clock, Coins
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -53,46 +51,57 @@ interface TaskRun {
 
 function getToolIcon(toolName?: string) {
   switch (toolName) {
-    case "web_search": return <Search className="w-4 h-4 text-blue-400" />;
-    case "code_execute": return <Code2 className="w-4 h-4 text-green-400" />;
+    case "web_search": return <Search className="w-4 h-4 text-blue-500" />;
+    case "code_execute": return <Code2 className="w-4 h-4 text-emerald-500" />;
     case "read_file":
-    case "write_file": return <FileText className="w-4 h-4 text-yellow-400" />;
-    case "api_call": return <Globe className="w-4 h-4 text-purple-400" />;
-    case "analyze_data": return <Database className="w-4 h-4 text-cyan-400" />;
-    case "generate_image": return <Image className="w-4 h-4 text-pink-400" />;
-    case "task_complete": return <CheckCircle2 className="w-4 h-4 text-emerald-400" />;
-    default: return <Zap className="w-4 h-4 text-orange-400" />;
+    case "write_file": return <FileText className="w-4 h-4 text-amber-500" />;
+    case "api_call": return <Globe className="w-4 h-4 text-violet-500" />;
+    case "analyze_data": return <Database className="w-4 h-4 text-cyan-500" />;
+    case "generate_image": return <Image className="w-4 h-4 text-pink-500" />;
+    case "task_complete": return <CheckCircle2 className="w-4 h-4 text-emerald-500" />;
+    default: return <Zap className="w-4 h-4 text-orange-500" />;
   }
 }
 
 function getStepIcon(step: AgentStep) {
-  if (step.isError) return <XCircle className="w-4 h-4 text-red-400" />;
+  if (step.isError) return <XCircle className="w-4 h-4 text-red-500" />;
   switch (step.type) {
-    case "thinking": return <Cpu className="w-4 h-4 text-indigo-400 animate-pulse" />;
+    case "thinking": return <Cpu className="w-4 h-4 text-indigo-500 animate-pulse" />;
     case "tool_call": return getToolIcon(step.toolName);
-    case "tool_result": return step.isError ? <XCircle className="w-4 h-4 text-red-400" /> : <CheckCircle2 className="w-4 h-4 text-emerald-400" />;
-    case "complete": return <Sparkles className="w-4 h-4 text-yellow-400" />;
-    case "error": return <AlertCircle className="w-4 h-4 text-red-400" />;
-    default: return <Bot className="w-4 h-4 text-blue-400" />;
+    case "tool_result": return step.isError ? <XCircle className="w-4 h-4 text-red-500" /> : <CheckCircle2 className="w-4 h-4 text-emerald-500" />;
+    case "complete": return <Sparkles className="w-4 h-4 text-amber-500" />;
+    case "error": return <AlertCircle className="w-4 h-4 text-red-500" />;
+    default: return <Bot className="w-4 h-4 text-blue-500" />;
   }
 }
 
 function getStepBorderColor(step: AgentStep): string {
-  if (step.isError) return "border-red-500/30";
+  if (step.isError) return "border-red-200";
   switch (step.type) {
-    case "thinking": return "border-indigo-500/30";
-    case "tool_call": return "border-blue-500/30";
-    case "tool_result": return step.isError ? "border-red-500/30" : "border-emerald-500/30";
-    case "complete": return "border-yellow-500/30";
-    case "error": return "border-red-500/30";
-    default: return "border-white/10";
+    case "thinking": return "border-indigo-200";
+    case "tool_call": return "border-blue-200";
+    case "tool_result": return step.isError ? "border-red-200" : "border-emerald-200";
+    case "complete": return "border-amber-200";
+    case "error": return "border-red-200";
+    default: return "border-border";
+  }
+}
+
+function getStepBg(step: AgentStep): string {
+  if (step.isError) return "bg-red-50";
+  switch (step.type) {
+    case "thinking": return "bg-indigo-50/50";
+    case "tool_call": return "bg-blue-50/50";
+    case "tool_result": return step.isError ? "bg-red-50" : "bg-emerald-50/50";
+    case "complete": return "bg-amber-50/50";
+    case "error": return "bg-red-50";
+    default: return "bg-white";
   }
 }
 
 // ─── Specialized Tool Result Renderers ───────────────────────────────────────
 
 function SearchResultRenderer({ content }: { content: string }) {
-  // Parse search results: lines starting with [N] are result items
   const lines = content.split("\n");
   const results: { title: string; snippet: string; url: string }[] = [];
   let current: { title: string; snippet: string; url: string } | null = null;
@@ -112,18 +121,18 @@ function SearchResultRenderer({ content }: { content: string }) {
   if (current) results.push(current);
 
   if (results.length === 0) {
-    return <div className="text-sm text-white/60 font-mono whitespace-pre-wrap">{content.slice(0, 600)}</div>;
+    return <div className="text-sm text-gray-600 font-mono whitespace-pre-wrap">{content.slice(0, 600)}</div>;
   }
 
   return (
     <div className="space-y-2">
       {results.slice(0, 5).map((r, i) => (
-        <div key={i} className="rounded-md bg-blue-500/5 border border-blue-500/15 p-2.5">
-          <p className="text-xs font-semibold text-blue-300 truncate">{r.title}</p>
-          <p className="text-xs text-white/55 mt-0.5 line-clamp-2">{r.snippet}</p>
+        <div key={i} className="rounded-md bg-blue-50 border border-blue-200 p-2.5">
+          <p className="text-xs font-semibold text-blue-700 truncate">{r.title}</p>
+          <p className="text-xs text-gray-600 mt-0.5 line-clamp-2">{r.snippet}</p>
           {r.url && (
             <a href={r.url} target="_blank" rel="noreferrer"
-              className="text-xs text-blue-400/70 hover:text-blue-300 truncate block mt-1">
+              className="text-xs text-blue-500 hover:text-blue-700 truncate block mt-1">
               {r.url.slice(0, 60)}{r.url.length > 60 ? "..." : ""}
             </a>
           )}
@@ -135,26 +144,25 @@ function SearchResultRenderer({ content }: { content: string }) {
 
 function CodeOutputRenderer({ content, toolName }: { content: string; toolName?: string }) {
   const isExec = toolName === "code_execute";
-  // Detect language from code blocks
   const langMatch = content.match(/```(\w+)/);
   const lang = langMatch ? langMatch[1] : "";
   const codeContent = content.replace(/```\w*\n?/g, "").replace(/```/g, "").trim();
 
   return (
-    <div className="rounded-md overflow-hidden border border-green-500/20">
-      <div className="flex items-center justify-between px-3 py-1.5 bg-green-500/5 border-b border-green-500/15">
+    <div className="rounded-md overflow-hidden border border-emerald-200">
+      <div className="flex items-center justify-between px-3 py-1.5 bg-emerald-50 border-b border-emerald-200">
         <div className="flex items-center gap-1.5">
-          <Terminal className="w-3 h-3 text-green-400" />
-          <span className="text-xs text-green-400/80">{isExec ? "Output" : lang || "Code"}</span>
+          <Terminal className="w-3 h-3 text-emerald-600" />
+          <span className="text-xs text-emerald-700">{isExec ? "Output" : lang || "Code"}</span>
         </div>
         <button
-          className="text-xs text-white/30 hover:text-white/60"
+          className="text-xs text-gray-400 hover:text-gray-600"
           onClick={() => { navigator.clipboard.writeText(codeContent); }}
         >
           <Copy className="w-3 h-3" />
         </button>
       </div>
-      <pre className="text-xs text-green-300/80 p-3 overflow-x-auto max-h-48 font-mono whitespace-pre-wrap">
+      <pre className="text-xs text-gray-700 bg-gray-50 p-3 overflow-x-auto max-h-48 font-mono whitespace-pre-wrap">
         {codeContent.slice(0, 2000)}{codeContent.length > 2000 ? "\n... (truncated)" : ""}
       </pre>
     </div>
@@ -164,16 +172,16 @@ function CodeOutputRenderer({ content, toolName }: { content: string; toolName?:
 function FileTreeRenderer({ content }: { content: string }) {
   const lines = content.split("\n").filter(Boolean);
   return (
-    <div className="rounded-md bg-yellow-500/5 border border-yellow-500/15 p-3">
+    <div className="rounded-md bg-amber-50 border border-amber-200 p-3">
       <div className="flex items-center gap-1.5 mb-2">
-        <FileText className="w-3 h-3 text-yellow-400" />
-        <span className="text-xs text-yellow-400/80">File Contents</span>
+        <FileText className="w-3 h-3 text-amber-600" />
+        <span className="text-xs text-amber-700">File Contents</span>
       </div>
       <div className="space-y-0.5 max-h-40 overflow-y-auto">
         {lines.slice(0, 30).map((line, i) => (
-          <div key={i} className="text-xs text-white/60 font-mono">{line}</div>
+          <div key={i} className="text-xs text-gray-600 font-mono">{line}</div>
         ))}
-        {lines.length > 30 && <div className="text-xs text-white/30">... {lines.length - 30} more lines</div>}
+        {lines.length > 30 && <div className="text-xs text-gray-400">... {lines.length - 30} more lines</div>}
       </div>
     </div>
   );
@@ -182,35 +190,27 @@ function FileTreeRenderer({ content }: { content: string }) {
 function StepContentRenderer({ step }: { step: AgentStep }) {
   const { toolName, content, type } = step;
 
-  // Web search results
   if (toolName === "web_search" && type === "tool_result") {
     return <SearchResultRenderer content={content} />;
   }
-
-  // Code execution output or code blocks
   if ((toolName === "code_execute" || (content.includes("```") && type === "tool_call")) && content.trim()) {
     return <CodeOutputRenderer content={content} toolName={toolName} />;
   }
-
-  // File read/write
   if ((toolName === "read_file" || toolName === "write_file") && type === "tool_result") {
     return <FileTreeRenderer content={content} />;
   }
-
-  // API call result — show as JSON
   if (toolName === "api_call" && type === "tool_result") {
     let pretty = content;
     try { pretty = JSON.stringify(JSON.parse(content), null, 2); } catch { /* not JSON */ }
     return (
-      <pre className="text-xs text-purple-300/80 bg-purple-500/5 border border-purple-500/15 rounded-md p-3 overflow-x-auto max-h-48 font-mono whitespace-pre-wrap">
+      <pre className="text-xs text-violet-700 bg-violet-50 border border-violet-200 rounded-md p-3 overflow-x-auto max-h-48 font-mono whitespace-pre-wrap">
         {pretty.slice(0, 1500)}{pretty.length > 1500 ? "\n... (truncated)" : ""}
       </pre>
     );
   }
 
-  // Default: markdown
   return (
-    <div className="text-sm text-white/70 prose prose-invert max-w-none prose-sm">
+    <div className="text-sm text-gray-700 prose prose-sm max-w-none">
       <Streamdown>{content}</Streamdown>
     </div>
   );
@@ -219,12 +219,10 @@ function StepContentRenderer({ step }: { step: AgentStep }) {
 // ─── Step Card Component ──────────────────────────────────────────────────────
 
 function StepCard({ step, isLast }: { step: AgentStep; isLast?: boolean }) {
-  // Auto-expand complete/error steps, and also the last step when task is done
   const [expanded, setExpanded] = useState(
     step.type === "complete" || step.type === "error" || (isLast === true && step.type !== "thinking")
   );
 
-  // Re-expand if this step becomes the last complete step
   useEffect(() => {
     if (step.type === "complete" || step.type === "error") {
       setExpanded(true);
@@ -232,31 +230,31 @@ function StepCard({ step, isLast }: { step: AgentStep; isLast?: boolean }) {
   }, [step.type]);
 
   return (
-    <div className={`rounded-xl border ${getStepBorderColor(step)} backdrop-blur-xl bg-white/[0.03] overflow-hidden shadow-lg shadow-black/10 transition-all duration-300 hover:bg-white/[0.05] hover:shadow-xl hover:shadow-black/20`}>
+    <div className={`rounded-xl border ${getStepBorderColor(step)} ${getStepBg(step)} overflow-hidden shadow-sm transition-all duration-300`}>
       <button
-        className="w-full flex items-center gap-3 p-4 text-left transition-colors"
+        className="w-full flex items-center gap-3 p-3.5 text-left"
         onClick={() => setExpanded(e => !e)}
       >
-        <div className="shrink-0 w-9 h-9 rounded-lg bg-white/[0.05] flex items-center justify-center border border-white/[0.06]">{getStepIcon(step)}</div>
+        <div className="shrink-0 w-8 h-8 rounded-lg bg-white flex items-center justify-center border border-border shadow-sm">{getStepIcon(step)}</div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-white/90 truncate">{step.title}</p>
-          <p className="text-[10px] text-white/30 mt-0.5 font-mono">
+          <p className="text-sm font-medium text-foreground truncate">{step.title}</p>
+          <p className="text-[10px] text-muted-foreground mt-0.5 font-mono">
             {new Date(step.timestamp).toLocaleTimeString()}
           </p>
         </div>
         {step.type === "thinking" ? (
-          <div className="flex gap-1.5 items-center px-2 py-1 rounded-full bg-violet-500/10 border border-violet-500/20">
-            <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "0ms" }} />
-            <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "150ms" }} />
-            <span className="w-1.5 h-1.5 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "300ms" }} />
+          <div className="flex gap-1 items-center px-2 py-1 rounded-full bg-indigo-100 border border-indigo-200">
+            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-bounce" style={{ animationDelay: "0ms" }} />
+            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-bounce" style={{ animationDelay: "150ms" }} />
+            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-bounce" style={{ animationDelay: "300ms" }} />
           </div>
         ) : (
-          expanded ? <ChevronDown className="w-4 h-4 text-white/30 shrink-0" /> : <ChevronRight className="w-4 h-4 text-white/30 shrink-0" />
+          expanded ? <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" /> : <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
         )}
       </button>
 
       {expanded && step.content && (
-        <div className="px-4 pb-4 border-t border-white/[0.04]">
+        <div className="px-4 pb-4 border-t border-border/50">
           <div className="mt-3">
             <StepContentRenderer step={step} />
           </div>
@@ -265,7 +263,7 @@ function StepCard({ step, isLast }: { step: AgentStep; isLast?: boolean }) {
               {step.artifacts.map((artifact, i) => (
                 <button
                   key={i}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg backdrop-blur-sm bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-300 hover:bg-emerald-500/20 transition-all hover:shadow-md hover:shadow-emerald-500/5"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-700 hover:bg-emerald-100 transition-all"
                   onClick={() => {
                     const blob = new Blob([artifact.content], { type: artifact.type });
                     const url = URL.createObjectURL(blob);
@@ -295,18 +293,18 @@ function ArtifactsPanel({ steps }: { steps: AgentStep[] }) {
   if (allArtifacts.length === 0) return null;
 
   return (
-    <div className="border-t border-white/[0.04] backdrop-blur-xl bg-white/[0.02] px-5 py-4">
+    <div className="border-t border-border bg-white px-5 py-4">
       <div className="flex items-center gap-2 mb-3">
-        <div className="w-6 h-6 rounded-md bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
-          <Download className="w-3 h-3 text-emerald-400" />
+        <div className="w-6 h-6 rounded-md bg-emerald-100 flex items-center justify-center border border-emerald-200">
+          <Download className="w-3 h-3 text-emerald-600" />
         </div>
-        <span className="text-xs font-semibold text-white/60 tracking-wide uppercase">Output Files ({allArtifacts.length})</span>
+        <span className="text-xs font-semibold text-foreground tracking-wide uppercase">Output Files ({allArtifacts.length})</span>
       </div>
       <div className="flex flex-wrap gap-2">
         {allArtifacts.map((artifact, i) => (
           <button
             key={i}
-            className="flex items-center gap-2 px-3.5 py-2 rounded-xl backdrop-blur-sm bg-emerald-500/10 border border-emerald-500/15 text-xs text-emerald-300 hover:bg-emerald-500/20 transition-all hover:shadow-md hover:shadow-emerald-500/5 font-medium"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-700 hover:bg-emerald-100 transition-all font-medium"
             onClick={() => {
               const blob = new Blob([artifact.content], { type: artifact.type });
               const url = URL.createObjectURL(blob);
@@ -330,7 +328,7 @@ function ArtifactsPanel({ steps }: { steps: AgentStep[] }) {
 
 export default function AgentWorkspace() {
   const { agentId } = useParams<{ agentId: string }>();
-  const [location, navigate] = useLocation();
+  const [, navigate] = useLocation();
   const { user, isAuthenticated } = useAuth();
 
   const [input, setInput] = useState(() => {
@@ -347,23 +345,16 @@ export default function AgentWorkspace() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const eventSourceRef = useRef<EventSource | null>(null);
 
-  // Load agent info
   const { data: agentList } = trpc.agents.list.useQuery();
   const agent = agentList?.find(a => a.id === parseInt(agentId ?? "0"));
-
-  // Credit balance
   const { data: creditData } = trpc.credits.balance.useQuery(undefined, { refetchInterval: 30000 });
 
-  // Auto-scroll steps
   useEffect(() => {
     stepsEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [currentRun?.steps.length]);
 
-  // Cleanup on unmount
   useEffect(() => {
-    return () => {
-      eventSourceRef.current?.close();
-    };
+    return () => { eventSourceRef.current?.close(); };
   }, []);
 
   const runTask = useCallback(async () => {
@@ -372,11 +363,8 @@ export default function AgentWorkspace() {
     const userMessage = input.trim();
     setInput("");
     setIsRunning(true);
-
-    // Add user message to conversation
     setConversationHistory(prev => [...prev, { role: "user", content: userMessage }]);
 
-    // Initialize run state
     const newRun: TaskRun = {
       taskId: 0,
       status: "running",
@@ -388,7 +376,6 @@ export default function AgentWorkspace() {
     setCurrentRun(newRun);
 
     try {
-      // Start the agent task via POST + SSE
       const response = await fetch("/api/agent/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -407,15 +394,12 @@ export default function AgentWorkspace() {
 
       if (!response.body) throw new Error("No response body");
 
-      // Read SSE stream — robust multi-chunk parser
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
 
       const processSSEBuffer = (buf: string) => {
-        // Split on double-newline (SSE message boundary)
         const messages = buf.split(/\n\n/);
-        // Last element may be incomplete — return it as the new buffer
         const remaining = messages.pop() ?? "";
 
         for (const message of messages) {
@@ -424,11 +408,8 @@ export default function AgentWorkspace() {
           let dataLine = "";
 
           for (const line of message.split("\n")) {
-            if (line.startsWith("event: ")) {
-              eventType = line.slice(7).trim();
-            } else if (line.startsWith("data: ")) {
-              dataLine = line.slice(6).trim();
-            }
+            if (line.startsWith("event: ")) eventType = line.slice(7).trim();
+            else if (line.startsWith("data: ")) dataLine = line.slice(6).trim();
           }
 
           if (!eventType || !dataLine) continue;
@@ -443,12 +424,7 @@ export default function AgentWorkspace() {
               setCurrentRun(prev => prev ? { ...prev, steps: [...prev.steps, step] } : prev);
             } else if (eventType === "complete") {
               const finalAnswer = (data.finalAnswer as string) ?? "";
-              setCurrentRun(prev => prev ? {
-                ...prev,
-                status: "complete",
-                finalAnswer,
-                creditsUsed: (data.creditsUsed as number) ?? 0,
-              } : prev);
+              setCurrentRun(prev => prev ? { ...prev, status: "complete", finalAnswer, creditsUsed: (data.creditsUsed as number) ?? 0 } : prev);
               if (finalAnswer) {
                 setConversationHistory(prev => [...prev, { role: "assistant", content: finalAnswer }]);
               }
@@ -458,9 +434,7 @@ export default function AgentWorkspace() {
               toast.error((data.error as string) ?? "Agent encountered an error");
               setIsRunning(false);
             }
-          } catch {
-            // ignore parse errors
-          }
+          } catch { /* ignore parse errors */ }
         }
 
         return remaining;
@@ -469,7 +443,6 @@ export default function AgentWorkspace() {
       while (true) {
         const { done, value } = await reader.read();
         if (done) {
-          // Process any remaining buffer on stream close
           if (buffer.trim()) processSSEBuffer(buffer + "\n\n");
           break;
         }
@@ -477,14 +450,12 @@ export default function AgentWorkspace() {
         buffer = processSSEBuffer(buffer);
       }
 
-      // Fallback: if stream closed without a complete event, extract final answer from steps
       setCurrentRun(prev => {
         if (!prev) return prev;
         if (prev.status === "complete") return prev;
         const completeStep = [...prev.steps].reverse().find(s => s.type === "complete");
         const finalAnswer = completeStep?.content ?? prev.finalAnswer ?? "";
         if (finalAnswer) {
-          // Also push to conversation history
           setConversationHistory(hist => {
             if (hist[hist.length - 1]?.role === "assistant") return hist;
             return [...hist, { role: "assistant", content: finalAnswer }];
@@ -510,45 +481,45 @@ export default function AgentWorkspace() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#06060a]">
+      <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
-          <Bot className="w-12 h-12 text-white/20 mx-auto mb-4" />
-          <p className="text-white/50">Please log in to use agents</p>
+          <Bot className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+          <p className="text-muted-foreground">Please log in to use agents</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="h-screen flex flex-col bg-[#06060a] overflow-hidden">
+    <div className="h-screen flex flex-col bg-background overflow-hidden">
       {/* ── Header ── */}
-      <header className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.06] shrink-0 backdrop-blur-xl bg-white/[0.01]">
+      <header className="flex items-center gap-3 px-4 py-3 border-b border-border bg-white shrink-0">
         <Button
           variant="ghost"
           size="icon"
-          className="text-white/50 hover:text-white h-8 w-8"
+          className="text-muted-foreground hover:text-foreground h-8 w-8"
           onClick={() => navigate("/dashboard/agents")}
         >
           <ArrowLeft className="w-4 h-4" />
         </Button>
 
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-blue-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
-            <Bot className="w-4 h-4 text-white" />
+          <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
+            <Bot className="w-4 h-4 text-primary" />
           </div>
           <div>
-            <h1 className="text-sm font-semibold text-white">{agent?.name ?? "Loading..."}</h1>
-            <p className="text-xs text-white/40">{agent?.modelId ?? "AI Agent"}</p>
+            <h1 className="text-sm font-semibold text-foreground">{agent?.name ?? "Loading..."}</h1>
+            <p className="text-xs text-muted-foreground">{agent?.modelId ?? "AI Agent"}</p>
           </div>
         </div>
 
         <div className="flex-1" />
 
         {currentRun && (
-          <div className="flex items-center gap-3 text-xs text-white/40">
+          <div className="flex items-center gap-3 text-xs text-muted-foreground">
             {currentRun.status === "running" && (
               <span className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 Running
               </span>
             )}
@@ -570,14 +541,14 @@ export default function AgentWorkspace() {
         {creditData !== undefined && (
           <div className={`flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full border ${
             creditData <= 10
-              ? "border-red-500/30 bg-red-500/10 text-red-400"
-              : "border-violet-500/20 bg-violet-500/10 text-violet-300"
+              ? "border-red-200 bg-red-50 text-red-600"
+              : "border-primary/20 bg-primary/5 text-primary"
           }`}>
             <Coins className="w-3 h-3" />
             <span>{creditData} credits</span>
           </div>
         )}
-        <Badge variant="outline" className="text-xs border-white/10 text-white/40">
+        <Badge variant="outline" className="text-xs border-border text-muted-foreground">
           {agent?.webSearchEnabled && "Search "}
           {agent?.codeExecutionEnabled && "Code "}
           {agent?.apiCallsEnabled && "API"}
@@ -588,18 +559,17 @@ export default function AgentWorkspace() {
       <div className="flex-1 flex overflow-hidden">
 
         {/* ── Left: Chat Panel ── */}
-        <div className="w-[420px] shrink-0 flex flex-col border-r border-white/[0.06]">
-          {/* Conversation history */}
+        <div className="w-[420px] shrink-0 flex flex-col border-r border-border bg-white">
           <ScrollArea className="flex-1 p-4">
             {conversationHistory.length === 0 && !isRunning && (
               <div className="flex flex-col items-center justify-center h-full py-16 text-center">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500/20 to-blue-600/20 border border-violet-500/20 flex items-center justify-center mb-4">
-                  <Sparkles className="w-8 h-8 text-violet-400" />
+                <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-4">
+                  <Sparkles className="w-8 h-8 text-primary" />
                 </div>
-                <h2 className="text-lg font-semibold text-white mb-2">
+                <h2 className="text-lg font-semibold text-foreground mb-2">
                   {agent?.name ?? "AI Agent"}
                 </h2>
-                <p className="text-sm text-white/40 max-w-xs">
+                <p className="text-sm text-muted-foreground max-w-xs">
                   {agent?.description ?? "An autonomous AI agent that can search the web, write code, and complete complex tasks."}
                 </p>
                 <div className="mt-6 flex flex-wrap gap-2 justify-center">
@@ -611,7 +581,7 @@ export default function AgentWorkspace() {
                   ].map(suggestion => (
                     <button
                       key={suggestion}
-                      className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs text-white/60 hover:bg-white/10 hover:text-white/80 transition-colors text-left"
+                      className="px-3 py-1.5 rounded-full bg-muted border border-border text-xs text-muted-foreground hover:bg-accent hover:text-foreground transition-colors text-left"
                       onClick={() => setInput(suggestion)}
                     >
                       {suggestion}
@@ -625,17 +595,17 @@ export default function AgentWorkspace() {
               {conversationHistory.map((msg, i) => (
                 <div key={i} className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
                   {msg.role === "assistant" && (
-                    <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-blue-600 flex items-center justify-center shrink-0 mt-0.5">
-                      <Bot className="w-4 h-4 text-white" />
+                    <div className="w-7 h-7 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 mt-0.5">
+                      <Bot className="w-4 h-4 text-primary" />
                     </div>
                   )}
                   <div className={`max-w-[85%] rounded-xl px-4 py-3 text-sm ${
                     msg.role === "user"
-                      ? "bg-violet-600/80 text-white ml-auto"
-                      : "bg-white/[0.05] border border-white/[0.08] text-white/85"
+                      ? "bg-primary text-primary-foreground ml-auto"
+                      : "bg-muted border border-border text-foreground"
                   }`}>
                     {msg.role === "assistant" ? (
-                      <div className="prose prose-invert prose-sm max-w-none">
+                      <div className="prose prose-sm max-w-none text-foreground">
                         <Streamdown>{msg.content}</Streamdown>
                       </div>
                     ) : (
@@ -647,14 +617,14 @@ export default function AgentWorkspace() {
 
               {isRunning && conversationHistory[conversationHistory.length - 1]?.role === "user" && (
                 <div className="flex gap-3">
-                  <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-blue-600 flex items-center justify-center shrink-0">
-                    <Bot className="w-4 h-4 text-white" />
+                  <div className="w-7 h-7 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                    <Bot className="w-4 h-4 text-primary" />
                   </div>
-                  <div className="bg-white/[0.05] border border-white/[0.08] rounded-xl px-4 py-3">
+                  <div className="bg-muted border border-border rounded-xl px-4 py-3">
                     <div className="flex gap-1">
-                      <span className="w-2 h-2 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "0ms" }} />
-                      <span className="w-2 h-2 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "150ms" }} />
-                      <span className="w-2 h-2 rounded-full bg-violet-400 animate-bounce" style={{ animationDelay: "300ms" }} />
+                      <span className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "0ms" }} />
+                      <span className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "150ms" }} />
+                      <span className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "300ms" }} />
                     </div>
                   </div>
                 </div>
@@ -663,7 +633,7 @@ export default function AgentWorkspace() {
           </ScrollArea>
 
           {/* Input area */}
-          <div className="p-4 border-t border-white/[0.06]">
+          <div className="p-4 border-t border-border bg-white">
             <div className="relative">
               <Textarea
                 ref={inputRef}
@@ -671,12 +641,12 @@ export default function AgentWorkspace() {
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Give your agent a task... (Enter to send, Shift+Enter for new line)"
-                className="min-h-[80px] max-h-[200px] resize-none bg-white/[0.04] border-white/10 text-white placeholder:text-white/25 text-sm pr-12 rounded-xl focus:border-violet-500/50 focus:ring-violet-500/20"
+                className="min-h-[80px] max-h-[200px] resize-none bg-background border-border text-foreground placeholder:text-muted-foreground text-sm pr-12 rounded-xl focus:border-primary/50"
                 disabled={isRunning}
               />
               <Button
                 size="icon"
-                className="absolute right-2 bottom-2 h-8 w-8 bg-violet-600 hover:bg-violet-700 rounded-lg"
+                className="absolute right-2 bottom-2 h-8 w-8 bg-primary hover:bg-primary/90 rounded-lg"
                 onClick={runTask}
                 disabled={!input.trim() || isRunning}
               >
@@ -687,26 +657,26 @@ export default function AgentWorkspace() {
                 )}
               </Button>
             </div>
-            <p className="text-xs text-white/25 mt-2 text-center">
+            <p className="text-xs text-muted-foreground mt-2 text-center">
               Agent can search the web, write code, call APIs, and more
             </p>
           </div>
         </div>
 
         {/* ── Right: Execution Feed ── */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-white/[0.06]">
+        <div className="flex-1 flex flex-col overflow-hidden bg-gray-50">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-white">
             <div className="flex items-center gap-2">
-              <Terminal className="w-4 h-4 text-white/30" />
-              <span className="text-sm font-medium text-white/60">Execution Log</span>
+              <Terminal className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm font-medium text-foreground">Execution Log</span>
               {currentRun && (
                 <Badge
                   variant="outline"
                   className={`text-xs ml-1 ${
-                    currentRun.status === "running" ? "border-green-500/30 text-green-400" :
-                    currentRun.status === "complete" ? "border-emerald-500/30 text-emerald-400" :
-                    currentRun.status === "error" ? "border-red-500/30 text-red-400" :
-                    "border-white/10 text-white/30"
+                    currentRun.status === "running" ? "border-emerald-300 text-emerald-600 bg-emerald-50" :
+                    currentRun.status === "complete" ? "border-emerald-300 text-emerald-600 bg-emerald-50" :
+                    currentRun.status === "error" ? "border-red-300 text-red-600 bg-red-50" :
+                    "border-border text-muted-foreground"
                   }`}
                 >
                   {currentRun.status === "running" ? "Running" :
@@ -716,31 +686,30 @@ export default function AgentWorkspace() {
               )}
             </div>
             {currentRun && currentRun.steps.length > 0 && (
-              <span className="text-xs text-white/30">{currentRun.steps.length} steps</span>
+              <span className="text-xs text-muted-foreground">{currentRun.steps.length} steps</span>
             )}
           </div>
 
           <ScrollArea className="flex-1 p-4" id="exec-scroll">
             {!currentRun && (
               <div className="flex flex-col items-center justify-center h-full text-center py-16">
-                <div className="w-12 h-12 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-center mb-4">
-                  <Terminal className="w-6 h-6 text-white/20" />
+                <div className="w-12 h-12 rounded-xl bg-white border border-border flex items-center justify-center mb-4 shadow-sm">
+                  <Terminal className="w-6 h-6 text-muted-foreground" />
                 </div>
-                <p className="text-sm text-white/30">Execution steps will appear here</p>
-                <p className="text-xs text-white/20 mt-1">Send a task to see the agent work in real-time</p>
+                <p className="text-sm text-muted-foreground">Execution steps will appear here</p>
+                <p className="text-xs text-muted-foreground/60 mt-1">Send a task to see the agent work in real-time</p>
               </div>
             )}
 
             {currentRun && (
               <div className="space-y-2">
-                {/* Task header */}
-                <div className="flex items-center gap-2 mb-4 pb-3 border-b border-white/[0.06]">
+                <div className="flex items-center gap-2 mb-4 pb-3 border-b border-border">
                   <div className={`w-2 h-2 rounded-full ${
-                    currentRun.status === "running" ? "bg-green-400 animate-pulse" :
-                    currentRun.status === "complete" ? "bg-emerald-400" :
-                    currentRun.status === "error" ? "bg-red-400" : "bg-white/20"
+                    currentRun.status === "running" ? "bg-emerald-500 animate-pulse" :
+                    currentRun.status === "complete" ? "bg-emerald-500" :
+                    currentRun.status === "error" ? "bg-red-500" : "bg-muted-foreground"
                   }`} />
-                  <span className="text-xs text-white/40">
+                  <span className="text-xs text-muted-foreground">
                     Task #{currentRun.taskId} · {currentRun.steps.length} steps
                     {currentRun.creditsUsed > 0 && ` · ${currentRun.creditsUsed} credits used`}
                   </span>
@@ -751,9 +720,9 @@ export default function AgentWorkspace() {
                 ))}
 
                 {isRunning && (
-                  <div className="flex items-center gap-3 p-3 rounded-lg border border-indigo-500/20 bg-indigo-500/5">
-                    <Loader2 className="w-4 h-4 text-indigo-400 animate-spin shrink-0" />
-                    <span className="text-sm text-indigo-300/70">Agent is working...</span>
+                  <div className="flex items-center gap-3 p-3 rounded-lg border border-indigo-200 bg-indigo-50">
+                    <Loader2 className="w-4 h-4 text-indigo-500 animate-spin shrink-0" />
+                    <span className="text-sm text-indigo-700">Agent is working...</span>
                   </div>
                 )}
 

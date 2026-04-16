@@ -133,7 +133,7 @@ export default function AgentBuilder() {
       subtitle={agentId ? existingAgent?.name : "Configure your autonomous AI agent"}>
       <div className="flex flex-col h-full">
         {/* Toolbar */}
-        <div className="flex items-center gap-3 px-6 py-3 border-b border-border/30 glass-strong flex-shrink-0">
+        <div className="flex items-center gap-3 px-6 py-3 border-b border-border/30 bg-white border-b border-border flex-shrink-0">
           <Link href="/dashboard/agents">
             <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground">
               <ArrowLeft className="w-3.5 h-3.5 mr-1.5" />
@@ -189,7 +189,7 @@ export default function AgentBuilder() {
           <div className="flex-1 overflow-auto p-6">
             <div className="max-w-3xl mx-auto space-y-6">
               {/* Basic Info */}
-              <div className="glass rounded-xl overflow-hidden">
+              <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden">
                 <div className="px-5 pt-5 pb-2">
                   <h3 className="text-sm font-heading font-semibold flex items-center gap-2">
                     <Bot className="w-4 h-4 text-primary" />
@@ -213,7 +213,7 @@ export default function AgentBuilder() {
               </div>
 
               {/* System Prompt */}
-              <div className="glass rounded-xl overflow-hidden">
+              <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden">
                 <div className="px-5 pt-5 pb-2">
                   <h3 className="text-sm font-heading font-semibold flex items-center gap-2">
                     <Brain className="w-4 h-4 text-violet-400" />
@@ -248,7 +248,7 @@ Be thorough, accurate, and helpful."
               </div>
 
               {/* Model Selection */}
-              <div className="glass rounded-xl overflow-hidden">
+              <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden">
                 <div className="px-5 pt-5 pb-2">
                   <h3 className="text-sm font-heading font-semibold flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-cyan-400" />
@@ -322,7 +322,7 @@ Be thorough, accurate, and helpful."
               </div>
 
               {/* Tools */}
-              <div className="glass rounded-xl overflow-hidden">
+              <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden">
                 <div className="px-5 pt-5 pb-2">
                   <h3 className="text-sm font-heading font-semibold flex items-center gap-2">
                     <Code2 className="w-4 h-4 text-emerald-400" />
@@ -358,7 +358,7 @@ Be thorough, accurate, and helpful."
               </div>
 
               {/* Visibility */}
-              <div className="glass rounded-xl overflow-hidden">
+              <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden">
                 <div className="px-5 pt-5 pb-2">
                   <h3 className="text-sm font-heading font-semibold flex items-center gap-2">
                     <Globe className="w-4 h-4 text-cyan-400" />

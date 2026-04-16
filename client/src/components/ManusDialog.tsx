@@ -50,10 +50,10 @@ export function ManusDialog({
       open={onOpenChange ? open : internalOpen}
       onOpenChange={handleOpenChange}
     >
-      <DialogContent className="py-5 bg-[#0d0d14] rounded-2xl w-[400px] shadow-2xl border border-white/10 backdrop-blur-2xl p-0 gap-0 text-center">
+      <DialogContent className="py-5 bg-white rounded-2xl w-[400px] shadow-2xl border border-border p-0 gap-0 text-center">
         <div className="flex flex-col items-center gap-3 p-6 pt-10">
           {logo ? (
-            <div className="w-14 h-14 bg-white/5 rounded-xl border border-white/10 flex items-center justify-center">
+            <div className="w-14 h-14 bg-muted rounded-xl border border-border flex items-center justify-center">
               <img src={logo} alt="App logo" className="w-9 h-9 rounded-md" />
             </div>
           ) : (
@@ -63,16 +63,16 @@ export function ManusDialog({
           )}
 
           {title ? (
-            <DialogTitle className="text-xl font-bold text-white tracking-tight">
+            <DialogTitle className="text-xl font-bold text-foreground tracking-tight">
               {title}
             </DialogTitle>
           ) : (
-            <DialogTitle className="text-xl font-bold text-white tracking-tight">
+            <DialogTitle className="text-xl font-bold text-foreground tracking-tight">
               Welcome to Future
             </DialogTitle>
           )}
 
-          <DialogDescription className="text-sm text-white/50 leading-5">
+          <DialogDescription className="text-sm text-muted-foreground leading-5">
             Sign in to build and deploy autonomous AI agents
           </DialogDescription>
         </div>

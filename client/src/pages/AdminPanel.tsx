@@ -12,9 +12,9 @@ import {
 } from "lucide-react";
 
 const MODEL_TIERS: Record<string, { label: string; color: string }> = {
-  ultra: { label: "Ultra", color: "text-amber-400 bg-amber-400/10 border-amber-400/20" },
-  premium: { label: "Premium", color: "text-violet-400 bg-violet-400/10 border-violet-400/20" },
-  standard: { label: "Standard", color: "text-blue-400 bg-blue-400/10 border-blue-400/20" },
+  ultra: { label: "Ultra", color: "text-amber-600 bg-amber-50 border-amber-200" },
+  premium: { label: "Premium", color: "text-violet-600 bg-violet-50 border-violet-200" },
+  standard: { label: "Standard", color: "text-blue-600 bg-blue-50 border-blue-200" },
 };
 
 const MODELS = [
@@ -46,8 +46,8 @@ export default function AdminPanel() {
       <FutureDashboardLayout title="Admin" subtitle="System administration">
         <div className="flex items-center justify-center h-[60vh]">
           <div className="text-center">
-            <Shield className="w-12 h-12 text-white/10 mx-auto mb-4" />
-            <p className="text-white/40 text-sm">Access restricted to administrators</p>
+            <Shield className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground text-sm">Access restricted to administrators</p>
           </div>
         </div>
       </FutureDashboardLayout>
@@ -76,78 +76,77 @@ export default function AdminPanel() {
         {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
           {statCards.map((s) => (
-            <div key={s.label} className="glass rounded-xl p-4 relative overflow-hidden">
-              <div className={`absolute inset-0 bg-gradient-to-br ${s.color} opacity-50`} />
-              <div className="relative">
-                <s.icon className="w-4 h-4 text-white/30 mb-2" />
-                <div className="text-xl font-heading font-bold text-white">{typeof s.value === "number" ? s.value.toLocaleString() : s.value}</div>
-                <div className="text-[10px] text-white/40 mt-0.5">{s.label}</div>
+            <div key={s.label} className="bg-white border border-border rounded-xl p-4 shadow-sm">
+              <div>
+                <s.icon className="w-4 h-4 text-muted-foreground mb-2" />
+                <div className="text-xl font-heading font-bold text-foreground">{typeof s.value === "number" ? s.value.toLocaleString() : s.value}</div>
+                <div className="text-[10px] text-muted-foreground mt-0.5">{s.label}</div>
               </div>
             </div>
           ))}
         </div>
 
         {/* Users Management */}
-        <div className="glass rounded-xl overflow-hidden">
+        <div className="bg-white border border-border rounded-xl overflow-hidden shadow-sm">
           <div className="px-5 pt-5 pb-4 flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-heading font-semibold text-white flex items-center gap-2">
+              <h3 className="text-sm font-heading font-semibold text-foreground flex items-center gap-2">
                 <Shield className="w-4 h-4 text-primary" />
                 User Management
               </h3>
-              <p className="text-xs text-white/40 mt-0.5">{(users ?? []).length} registered users</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{(users ?? []).length} registered users</p>
             </div>
             <div className="relative w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/30" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
               <Input
                 placeholder="Search users..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-9 h-8 text-xs bg-white/[0.03] border-white/[0.06]"
+                className="pl-9 h-8 text-xs bg-background border-border text-foreground"
               />
             </div>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
-                <tr className="border-t border-white/[0.04]">
-                  <th className="text-left px-5 py-2.5 text-white/30 font-medium">User</th>
-                  <th className="text-left px-5 py-2.5 text-white/30 font-medium">Role</th>
-                  <th className="text-right px-5 py-2.5 text-white/30 font-medium">Credits</th>
-                  <th className="text-right px-5 py-2.5 text-white/30 font-medium">Joined</th>
-                  <th className="text-right px-5 py-2.5 text-white/30 font-medium">Actions</th>
+                <tr className="border-t border-border bg-muted/50">
+                  <th className="text-left px-5 py-2.5 text-muted-foreground font-medium">User</th>
+                  <th className="text-left px-5 py-2.5 text-muted-foreground font-medium">Role</th>
+                  <th className="text-right px-5 py-2.5 text-muted-foreground font-medium">Credits</th>
+                  <th className="text-right px-5 py-2.5 text-muted-foreground font-medium">Joined</th>
+                  <th className="text-right px-5 py-2.5 text-muted-foreground font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredUsers.map((u) => (
-                  <tr key={u.id} className="border-t border-white/[0.03] hover:bg-white/[0.02] transition-colors">
+                  <tr key={u.id} className="border-t border-border hover:bg-muted/30 transition-colors">
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500/20 to-blue-500/20 flex items-center justify-center text-xs font-bold text-white/60 ring-1 ring-white/[0.06]">
+                        <div className="w-7 h-7 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-xs font-bold text-primary">
                           {(u.name ?? u.email ?? "?").charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <div className="font-medium text-white/80">{u.name ?? "—"}</div>
-                          <div className="text-white/30">{u.email ?? "—"}</div>
+                          <div className="font-medium text-foreground">{u.name ?? "—"}</div>
+                          <div className="text-muted-foreground">{u.email ?? "—"}</div>
                         </div>
                       </div>
                     </td>
                     <td className="px-5 py-3">
-                      <Badge variant="outline" className={`text-[10px] ${u.role === "admin" ? "border-amber-400/30 text-amber-400" : "border-white/10 text-white/40"}`}>
+                      <Badge variant="outline" className={`text-[10px] ${u.role === "admin" ? "border-amber-200 text-amber-600 bg-amber-50" : "border-border text-muted-foreground"}`}>
                         {u.role}
                       </Badge>
                     </td>
-                    <td className="px-5 py-3 text-right font-mono text-white/60">
+                    <td className="px-5 py-3 text-right font-mono text-foreground">
                       {(u.creditBalance ?? 0).toLocaleString()}
                     </td>
-                    <td className="px-5 py-3 text-right text-white/30">
+                    <td className="px-5 py-3 text-right text-muted-foreground">
                       {new Date(u.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-5 py-3 text-right">
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-6 text-[10px] text-white/40 hover:text-white"
+                        className="h-6 text-[10px] text-muted-foreground hover:text-foreground"
                         onClick={() => {
                           const amount = prompt("Credits to add:");
                           if (amount && !isNaN(Number(amount))) {
@@ -168,41 +167,41 @@ export default function AdminPanel() {
               </tbody>
             </table>
             {filteredUsers.length === 0 && (
-              <div className="text-center py-8 text-white/30 text-sm">No users found</div>
+              <div className="text-center py-8 text-muted-foreground text-sm">No users found</div>
             )}
           </div>
         </div>
 
         {/* Model Pricing */}
-        <div className="glass rounded-xl overflow-hidden">
+        <div className="bg-white border border-border rounded-xl overflow-hidden shadow-sm">
           <div className="px-5 pt-5 pb-4">
-            <h3 className="text-sm font-heading font-semibold text-white flex items-center gap-2">
-              <DollarSign className="w-4 h-4 text-amber-400" />
+            <h3 className="text-sm font-heading font-semibold text-foreground flex items-center gap-2">
+              <DollarSign className="w-4 h-4 text-amber-500" />
               Model Credit Pricing
             </h3>
-            <p className="text-xs text-white/40 mt-0.5">Credits per 1,000 tokens</p>
+            <p className="text-xs text-muted-foreground mt-0.5">Credits per 1,000 tokens</p>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
               <thead>
-                <tr className="border-t border-white/[0.04]">
-                  <th className="text-left px-5 py-2.5 text-white/30 font-medium">Model</th>
-                  <th className="text-left px-5 py-2.5 text-white/30 font-medium">Tier</th>
-                  <th className="text-right px-5 py-2.5 text-white/30 font-medium">Input Cost</th>
-                  <th className="text-right px-5 py-2.5 text-white/30 font-medium">Output Cost</th>
+                <tr className="border-t border-border bg-muted/50">
+                  <th className="text-left px-5 py-2.5 text-muted-foreground font-medium">Model</th>
+                  <th className="text-left px-5 py-2.5 text-muted-foreground font-medium">Tier</th>
+                  <th className="text-right px-5 py-2.5 text-muted-foreground font-medium">Input Cost</th>
+                  <th className="text-right px-5 py-2.5 text-muted-foreground font-medium">Output Cost</th>
                 </tr>
               </thead>
               <tbody>
                 {MODELS.map((m) => {
                   const tier = MODEL_TIERS[m.tier] ?? MODEL_TIERS.standard;
                   return (
-                    <tr key={m.name} className="border-t border-white/[0.03] hover:bg-white/[0.02] transition-colors">
+                    <tr key={m.name} className="border-t border-border hover:bg-muted/30 transition-colors">
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-6 h-6 rounded-md bg-white/[0.03] flex items-center justify-center ring-1 ring-white/[0.06]">
-                            <m.icon className="w-3 h-3 text-white/40" />
+                          <div className="w-6 h-6 rounded-md bg-muted flex items-center justify-center border border-border">
+                            <m.icon className="w-3 h-3 text-muted-foreground" />
                           </div>
-                          <span className="font-medium text-white/80">{m.name}</span>
+                          <span className="font-medium text-foreground">{m.name}</span>
                         </div>
                       </td>
                       <td className="px-5 py-3">
@@ -210,8 +209,8 @@ export default function AdminPanel() {
                           {tier.label}
                         </Badge>
                       </td>
-                      <td className="px-5 py-3 text-right font-mono text-white/60">{m.input} credits</td>
-                      <td className="px-5 py-3 text-right font-mono text-white/60">{m.output} credits</td>
+                      <td className="px-5 py-3 text-right font-mono text-foreground">{m.input} credits</td>
+                      <td className="px-5 py-3 text-right font-mono text-foreground">{m.output} credits</td>
                     </tr>
                   );
                 })}

@@ -10,17 +10,18 @@ import {
   TrendingUp, FileText, Megaphone,
 } from "lucide-react";
 
+const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310419663029617589/m5GbkNTBEjcM6aS7UZa8ie/future-logo_dd9d650b.png";
+
 const STEPS = [
   { id: 1, title: "Welcome" },
   { id: 2, title: "What to build" },
   { id: 3, title: "Ready" },
 ];
 
-// Practical suggestion chips — real-world goals
 const SUGGESTIONS = [
   { icon: Globe,        label: "Build a website",          prompt: "Build a modern, professional website for my business. I'll describe what I need." },
   { icon: Smartphone,   label: "Build an iOS app",         prompt: "Help me build an iOS app. I'll describe the idea and you'll guide me through the full process." },
-  { icon: Smartphone,   label: "Build an Android app",    prompt: "Help me build an Android app. I'll describe the idea and you'll guide me through the full process." },
+  { icon: Smartphone,   label: "Build an Android app",     prompt: "Help me build an Android app. I'll describe the idea and you'll guide me through the full process." },
   { icon: Briefcase,    label: "Launch a business",        prompt: "Help me launch a business. I'll describe my idea and you'll help with the plan, branding, and first steps." },
   { icon: ShoppingBag,  label: "Build an online store",    prompt: "Help me set up an online store with product listings, payments, and a great shopping experience." },
   { icon: TrendingUp,   label: "Grow my social media",     prompt: "Help me grow my social media presence. I'll tell you about my brand and goals." },
@@ -30,7 +31,6 @@ const SUGGESTIONS = [
   { icon: Code2,        label: "Write & run code",          prompt: "Write and run code to solve a problem for me. I'll describe what I need." },
 ];
 
-// Map a task prompt to a sensible agent name + system prompt
 function buildAgent(task: string) {
   const lower = task.toLowerCase();
   if (lower.includes("ios") || lower.includes("iphone") || lower.includes("swift")) {
@@ -40,28 +40,25 @@ function buildAgent(task: string) {
     return { name: "Android Developer", systemPrompt: "You are an expert Android developer. Guide users through building Android apps — from idea to architecture, Kotlin code, and Play Store submission." };
   }
   if (lower.includes("website") || lower.includes("web app") || lower.includes("landing") || lower.includes("saas")) {
-    return { name: "Web Builder", systemPrompt: "You are an expert web developer. Build clean, modern websites and web apps based on user requirements. Write code, explain your choices, and iterate until the user is satisfied." };
+    return { name: "Web Builder", systemPrompt: "You are an expert web developer. Build clean, modern websites and web apps based on user requirements." };
   }
   if (lower.includes("business") || lower.includes("launch") || lower.includes("startup") || lower.includes("entrepreneur")) {
-    return { name: "Business Advisor", systemPrompt: "You are a seasoned business advisor and entrepreneur. Help users launch businesses — from idea validation, business plans, branding, legal setup, to finding first customers." };
+    return { name: "Business Advisor", systemPrompt: "You are a seasoned business advisor. Help users launch businesses — from idea validation, business plans, branding, legal setup, to finding first customers." };
   }
   if (lower.includes("store") || lower.includes("shop") || lower.includes("ecommerce") || lower.includes("product")) {
     return { name: "E-Commerce Builder", systemPrompt: "You are an e-commerce specialist. Help set up online stores, product listings, payment systems, and great shopping experiences." };
   }
   if (lower.includes("social media") || lower.includes("instagram") || lower.includes("tiktok") || lower.includes("grow")) {
-    return { name: "Social Media Strategist", systemPrompt: "You are a social media growth expert. Help users build their brand, create content strategies, and grow their audience across platforms." };
+    return { name: "Social Media Strategist", systemPrompt: "You are a social media growth expert. Help users build their brand, create content strategies, and grow their audience." };
   }
   if (lower.includes("marketing") || lower.includes("campaign") || lower.includes("advertis")) {
-    return { name: "Marketing Strategist", systemPrompt: "You are a marketing expert. Create comprehensive marketing plans, campaigns, and growth strategies tailored to the user's business and audience." };
+    return { name: "Marketing Strategist", systemPrompt: "You are a marketing expert. Create comprehensive marketing plans, campaigns, and growth strategies." };
   }
   if (lower.includes("business plan") || lower.includes("plan") || lower.includes("financ")) {
-    return { name: "Business Planner", systemPrompt: "You are an expert business planner. Write detailed, investor-ready business plans with market analysis, financial projections, and actionable strategies." };
+    return { name: "Business Planner", systemPrompt: "You are an expert business planner. Write detailed, investor-ready business plans with market analysis and financial projections." };
   }
   if (lower.includes("code") || lower.includes("script") || lower.includes("program")) {
     return { name: "Code Engineer", systemPrompt: "You are an expert software engineer. Write clean, well-documented code, explain your approach, and execute it to verify correctness." };
-  }
-  if (lower.includes("research") || lower.includes("summary") || lower.includes("report")) {
-    return { name: "Research Assistant", systemPrompt: "You are a research assistant. Search the web thoroughly, gather information from multiple sources, and produce a well-structured, comprehensive report." };
   }
   return { name: "AI Assistant", systemPrompt: "You are a highly capable AI assistant. Complete tasks thoroughly, explain your reasoning, and ask clarifying questions when needed." };
 }
@@ -112,16 +109,14 @@ export default function Onboarding() {
   };
 
   return (
-    <div className="min-h-screen bg-[#06060a] flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.04]">
+      <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-white">
         <div className="flex items-center gap-2.5">
-          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-500 to-blue-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
-            <Sparkles className="w-3.5 h-3.5 text-white" />
-          </div>
-          <span className="font-heading font-bold text-white text-sm">Future</span>
+          <img src={LOGO_URL} alt="Future" className="w-8 h-8 object-contain" />
+          <span className="font-heading font-bold text-foreground text-sm">Future</span>
         </div>
-        <Button variant="ghost" size="sm" className="text-xs text-white/40 hover:text-white" onClick={() => navigate("/dashboard")}>
+        <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-foreground" onClick={() => navigate("/dashboard")}>
           Skip for now
         </Button>
       </div>
@@ -133,17 +128,17 @@ export default function Onboarding() {
             <div className="flex items-center gap-2">
               <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
                 step > s.id
-                  ? "bg-gradient-to-br from-violet-500 to-blue-600 text-white"
+                  ? "bg-primary text-primary-foreground"
                   : step === s.id
-                  ? "ring-2 ring-violet-500/50 bg-violet-500/10 text-violet-300"
-                  : "bg-white/[0.03] ring-1 ring-white/[0.06] text-white/20"
+                  ? "ring-2 ring-primary/40 bg-primary/10 text-primary"
+                  : "bg-muted ring-1 ring-border text-muted-foreground"
               }`}>
                 {step > s.id ? <CheckCircle2 className="w-3.5 h-3.5" /> : s.id}
               </div>
-              <span className={`hidden sm:block text-xs font-medium ${step >= s.id ? "text-white/70" : "text-white/20"}`}>{s.title}</span>
+              <span className={`hidden sm:block text-xs font-medium ${step >= s.id ? "text-foreground" : "text-muted-foreground"}`}>{s.title}</span>
             </div>
             {i < STEPS.length - 1 && (
-              <div className={`w-10 h-0.5 rounded-full ${step > s.id ? "bg-gradient-to-r from-violet-500 to-blue-600" : "bg-white/[0.06]"}`} />
+              <div className={`w-10 h-0.5 rounded-full ${step > s.id ? "bg-primary" : "bg-border"}`} />
             )}
           </div>
         ))}
@@ -157,48 +152,48 @@ export default function Onboarding() {
           {step === 1 && (
             <div className="text-center space-y-8">
               <div className="space-y-4">
-                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-violet-500 to-blue-600 flex items-center justify-center mx-auto shadow-2xl shadow-violet-500/30">
-                  <Sparkles className="w-10 h-10 text-white" />
+                <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto border border-primary/20">
+                  <img src={LOGO_URL} alt="Future" className="w-14 h-14 object-contain" />
                 </div>
-                <h1 className="text-3xl md:text-4xl font-heading font-bold text-white">
+                <h1 className="text-3xl md:text-4xl font-heading font-bold text-foreground">
                   Welcome to <span className="gradient-text">Future</span>
                 </h1>
-                <p className="text-sm text-white/40 max-w-md mx-auto leading-relaxed">
+                <p className="text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
                   Your autonomous AI that browses the web, writes code, manages files, and completes complex tasks — all on your behalf.
                 </p>
               </div>
 
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { icon: Globe, label: "Web Search", gradient: "from-blue-500/20 to-cyan-500/20" },
-                  { icon: Code2, label: "Code Execution", gradient: "from-emerald-500/20 to-green-500/20" },
-                  { icon: Bot, label: "Multi-Model AI", gradient: "from-violet-500/20 to-purple-500/20" },
+                  { icon: Globe, label: "Web Search", bg: "bg-blue-50", iconColor: "text-blue-600" },
+                  { icon: Code2, label: "Code Execution", bg: "bg-emerald-50", iconColor: "text-emerald-600" },
+                  { icon: Bot, label: "Multi-Model AI", bg: "bg-violet-50", iconColor: "text-violet-600" },
                 ].map((item) => (
-                  <div key={item.label} className="glass rounded-xl p-4 text-center">
-                    <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${item.gradient} flex items-center justify-center mx-auto mb-2 ring-1 ring-white/[0.06]`}>
-                      <item.icon className="w-5 h-5 text-white/50" />
+                  <div key={item.label} className="bg-white border border-border rounded-xl p-4 text-center shadow-sm">
+                    <div className={`w-10 h-10 rounded-lg ${item.bg} flex items-center justify-center mx-auto mb-2`}>
+                      <item.icon className={`w-5 h-5 ${item.iconColor}`} />
                     </div>
-                    <span className="text-xs font-medium text-white/60">{item.label}</span>
+                    <span className="text-xs font-medium text-foreground">{item.label}</span>
                   </div>
                 ))}
               </div>
 
-              <Button size="lg" className="h-11 px-10 glow-primary font-heading font-semibold" onClick={() => setStep(2)}>
+              <Button size="lg" className="h-11 px-10 bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-semibold" onClick={() => setStep(2)}>
                 Get Started <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </div>
           )}
 
-          {/* Step 2: Task Prompt — Manus-style */}
+          {/* Step 2: Task Prompt */}
           {step === 2 && (
             <div className="space-y-6">
               <div className="text-center space-y-2">
-                <h2 className="text-2xl font-heading font-bold text-white">What can I help you with?</h2>
-                <p className="text-xs text-white/40">Describe your task and Future will get to work</p>
+                <h2 className="text-2xl font-heading font-bold text-foreground">What can I help you with?</h2>
+                <p className="text-xs text-muted-foreground">Describe your task and Future will get to work</p>
               </div>
 
               {/* Main prompt box */}
-              <div className="glass rounded-2xl border border-white/[0.08] overflow-hidden focus-within:border-violet-500/40 transition-colors duration-200">
+              <div className="bg-white border border-border rounded-2xl overflow-hidden shadow-sm focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/10 transition-all duration-200">
                 <textarea
                   ref={textareaRef}
                   value={task}
@@ -206,18 +201,18 @@ export default function Onboarding() {
                   onKeyDown={handleKeyDown}
                   placeholder="e.g. Build me a landing page for my SaaS product, or research the latest AI trends and write a report…"
                   rows={4}
-                  className="w-full bg-transparent text-white/90 placeholder:text-white/20 text-sm px-5 pt-5 pb-3 resize-none outline-none font-sans leading-relaxed"
+                  className="w-full bg-transparent text-foreground placeholder:text-muted-foreground text-sm px-5 pt-5 pb-3 resize-none outline-none font-sans leading-relaxed"
                 />
                 <div className="flex items-center justify-between px-4 pb-4">
-                  <span className="text-[11px] text-white/20">Press Enter to start · Shift+Enter for new line</span>
+                  <span className="text-[11px] text-muted-foreground">Press Enter to start · Shift+Enter for new line</span>
                   <button
                     onClick={handleStart}
                     disabled={!task.trim() || createAgent.isPending}
-                    className="flex items-center gap-1.5 h-8 px-4 rounded-lg bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-semibold transition-all duration-200 shadow-lg shadow-violet-500/20"
+                    className="flex items-center gap-1.5 h-8 px-4 rounded-lg bg-primary hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed text-primary-foreground text-xs font-semibold transition-all duration-200 shadow-sm"
                   >
                     {createAgent.isPending ? (
                       <>
-                        <span className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <span className="w-3 h-3 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
                         Starting…
                       </>
                     ) : (
@@ -232,7 +227,7 @@ export default function Onboarding() {
 
               {/* Suggestion chips */}
               <div>
-                <p className="text-[11px] text-white/25 mb-3 text-center uppercase tracking-widest">Or choose a task</p>
+                <p className="text-[11px] text-muted-foreground mb-3 text-center uppercase tracking-widest">Or choose a task</p>
                 <div className="flex flex-wrap gap-2 justify-center">
                   {SUGGESTIONS.map((s) => (
                     <button
@@ -240,8 +235,8 @@ export default function Onboarding() {
                       onClick={() => handleSuggestion(s.prompt)}
                       className={`flex items-center gap-1.5 h-8 px-3.5 rounded-full border text-xs font-medium transition-all duration-150 ${
                         task === s.prompt
-                          ? "border-violet-500/50 bg-violet-500/10 text-violet-300"
-                          : "border-white/[0.08] bg-white/[0.03] text-white/50 hover:border-white/20 hover:text-white/80 hover:bg-white/[0.05]"
+                          ? "border-primary/50 bg-primary/10 text-primary"
+                          : "border-border bg-white text-muted-foreground hover:border-primary/30 hover:text-foreground hover:bg-primary/5"
                       }`}
                     >
                       <s.icon className="w-3 h-3" />
@@ -252,7 +247,7 @@ export default function Onboarding() {
               </div>
 
               <div className="flex justify-center">
-                <Button variant="ghost" size="sm" className="text-xs text-white/30 hover:text-white/60" onClick={() => setStep(1)}>
+                <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-foreground" onClick={() => setStep(1)}>
                   ← Back
                 </Button>
               </div>
@@ -263,40 +258,40 @@ export default function Onboarding() {
           {step === 3 && (
             <div className="text-center space-y-8">
               <div className="space-y-4">
-                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center mx-auto shadow-2xl shadow-emerald-500/30">
-                  <CheckCircle2 className="w-10 h-10 text-white" />
+                <div className="w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center mx-auto border border-emerald-200">
+                  <CheckCircle2 className="w-10 h-10 text-emerald-600" />
                 </div>
-                <h1 className="text-3xl font-heading font-bold text-white">
+                <h1 className="text-3xl font-heading font-bold text-foreground">
                   Your agent is ready!
                 </h1>
-                <p className="text-sm text-white/40 max-w-md mx-auto">
+                <p className="text-sm text-muted-foreground max-w-md mx-auto">
                   Launch the workspace and Future will start working on your task right away.
                 </p>
               </div>
 
-              <div className="glass rounded-xl p-6 max-w-sm mx-auto">
+              <div className="bg-white border border-border rounded-xl p-6 max-w-sm mx-auto shadow-sm">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/20 to-blue-500/20 flex items-center justify-center ring-1 ring-white/[0.06]">
-                    <Bot className="w-5 h-5 text-white/40" />
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
+                    <Bot className="w-5 h-5 text-primary" />
                   </div>
                   <div className="text-left">
-                    <div className="font-heading font-semibold text-white text-sm">{createdAgentName}</div>
-                    <div className="text-[10px] text-white/30">Future-1 Ultra · Ready to run</div>
+                    <div className="font-heading font-semibold text-foreground text-sm">{createdAgentName}</div>
+                    <div className="text-[10px] text-muted-foreground">Future-1 Ultra · Ready to run</div>
                   </div>
                 </div>
                 {task && (
-                  <p className="text-xs text-white/30 mt-3 leading-relaxed line-clamp-2 text-left">{task}</p>
+                  <p className="text-xs text-muted-foreground mt-3 leading-relaxed line-clamp-2 text-left">{task}</p>
                 )}
               </div>
 
               <div className="flex flex-col gap-3 max-w-sm mx-auto">
                 {createdAgentId && (
-                  <Button size="lg" className="h-11 glow-primary font-heading font-semibold" onClick={() => navigate(`/workspace/${createdAgentId}?task=${encodeURIComponent(task)}`)}>
+                  <Button size="lg" className="h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-semibold" onClick={() => navigate(`/workspace/${createdAgentId}?task=${encodeURIComponent(task)}`)}>
                     <Play className="w-4 h-4 mr-2" />
                     Launch Workspace
                   </Button>
                 )}
-                <Button variant="outline" className="h-11 border-white/[0.06] bg-white/[0.02] text-white/60" onClick={() => navigate("/dashboard")}>
+                <Button variant="outline" className="h-11 border-border bg-white text-foreground hover:bg-accent" onClick={() => navigate("/dashboard")}>
                   <Rocket className="w-4 h-4 mr-2" />
                   Go to Dashboard
                 </Button>

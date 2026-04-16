@@ -39,7 +39,7 @@ export default function Billing() {
       <div className="p-6 space-y-6">
         {/* Balance Card */}
         <div className="grid md:grid-cols-3 gap-4">
-          <div className="glass rounded-xl p-5 md:col-span-1 border-primary/20 relative overflow-hidden">
+          <div className="bg-white border border-border rounded-xl shadow-sm p-5 md:col-span-1 border-primary/20 relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent" />
             <div className="relative">
               <div className="flex items-center gap-2 mb-3">
@@ -53,7 +53,7 @@ export default function Billing() {
             </div>
           </div>
 
-          <div className="glass rounded-xl p-5">
+          <div className="bg-white border border-border rounded-xl shadow-sm p-5">
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <TrendingUp className="w-4 h-4 text-emerald-400" />
@@ -66,7 +66,7 @@ export default function Billing() {
             </div>
           </div>
 
-          <div className="glass rounded-xl p-5">
+          <div className="bg-white border border-border rounded-xl shadow-sm p-5">
             <div>
               <div className="flex items-center gap-2 mb-3">
                 <CreditCard className="w-4 h-4 text-cyan-400" />
@@ -132,7 +132,7 @@ export default function Billing() {
         {/* Model Pricing */}
         <div>
           <h2 className="text-base font-semibold mb-4">Credit Costs Per Model</h2>
-          <div className="glass rounded-xl overflow-hidden">
+          <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden">
             <div className="p-0">
               <table className="w-full text-sm">
                 <thead>
@@ -173,7 +173,7 @@ export default function Billing() {
         {/* Transaction History */}
         <div>
           <h2 className="text-base font-semibold mb-4">Transaction History</h2>
-          <div className="glass rounded-xl overflow-hidden">
+          <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden">
             {transactions && transactions.length > 0 ? (
               <div className="divide-y divide-border/30">
                 {transactions.map((tx) => (

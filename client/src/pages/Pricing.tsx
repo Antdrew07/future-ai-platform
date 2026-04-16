@@ -46,7 +46,7 @@ export default function Pricing() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="border-b border-white/[0.04] px-6 py-4 flex items-center justify-between backdrop-blur-xl">
+      <header className="border-b border-border px-6 py-4 flex items-center justify-between bg-white">
         <Link href="/" className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
             <Sparkles className="w-4 h-4 text-primary-foreground" />
@@ -86,7 +86,7 @@ export default function Pricing() {
         {/* Plans */}
         <div className="grid md:grid-cols-3 gap-6 mb-16">
           {PLANS.map((plan) => (
-            <div key={plan.name} className={`relative glass rounded-xl ${plan.highlight ? "border-primary/30 ring-1 ring-primary/20 shadow-lg shadow-primary/10" : ""}`}>
+            <div key={plan.name} className={`relative bg-white border border-border rounded-xl shadow-sm ${plan.highlight ? "border-primary/30 ring-1 ring-primary/20 shadow-lg shadow-primary/10" : ""}`}>
               {plan.highlight && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                   <Badge className="bg-primary text-primary-foreground text-xs px-3">Most Popular</Badge>
@@ -101,14 +101,14 @@ export default function Pricing() {
                 <div className="text-xs text-muted-foreground">{plan.description}</div>
               </div>
               <div className="px-5 pb-5 space-y-4">
-                <div className="flex items-center gap-2 p-3 rounded-lg bg-white/[0.03] border border-white/[0.04]">
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-muted border border-border">
                   <Zap className="w-4 h-4 text-yellow-400" />
                   <span className="text-sm font-medium">{plan.credits.toLocaleString()} credits/month</span>
                 </div>
                 <ul className="space-y-2">
                   {plan.features.map((f) => (
                     <li key={f} className="flex items-center gap-2 text-sm">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
                       {f}
                     </li>
                   ))}
@@ -144,7 +144,7 @@ export default function Pricing() {
               { credits: 150000, price: 50 },
               { credits: 500000, price: 150 },
             ].map((pack) => (
-              <div key={pack.credits} className="glass card-hover rounded-xl p-4 text-center">
+              <div key={pack.credits} className="bg-white border border-border rounded-xl shadow-sm hover:shadow-md transition-all p-4 text-center">
                   <div className="text-lg font-bold">{(pack.credits / 1000).toFixed(0)}K</div>
                   <div className="text-xs text-muted-foreground mb-2">credits</div>
                   <div className="text-xl font-black">${pack.price}</div>

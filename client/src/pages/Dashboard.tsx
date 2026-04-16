@@ -24,10 +24,10 @@ const SUGGESTIONS = [
 ];
 
 function StatusIcon({ status }: { status: string }) {
-  if (status === "completed") return <CheckCircle2 className="w-4 h-4 text-emerald-400" />;
-  if (status === "failed")    return <XCircle className="w-4 h-4 text-red-400" />;
-  if (status === "running")   return <Activity className="w-4 h-4 text-blue-400 animate-pulse" />;
-  return <Clock className="w-4 h-4 text-white/30" />;
+  if (status === "completed") return <CheckCircle2 className="w-4 h-4 text-emerald-500" />;
+  if (status === "failed")    return <XCircle className="w-4 h-4 text-red-500" />;
+  if (status === "running")   return <Activity className="w-4 h-4 text-blue-500 animate-pulse" />;
+  return <Clock className="w-4 h-4 text-muted-foreground" />;
 }
 
 export default function Dashboard() {
@@ -93,7 +93,7 @@ export default function Dashboard() {
           </p>
 
           {/* Prompt Box */}
-          <div className="w-full glass rounded-2xl border border-white/[0.08] shadow-2xl shadow-black/30 overflow-hidden">
+          <div className="w-full bg-white rounded-2xl border border-border shadow-sm overflow-hidden">
             <div className="relative">
               <textarea
                 ref={textareaRef}
@@ -118,12 +118,12 @@ export default function Dashboard() {
             </div>
 
             {/* Suggestion chips */}
-            <div className="px-4 pb-4 flex flex-wrap gap-2 border-t border-white/[0.04] pt-3">
+            <div className="px-4 pb-4 flex flex-wrap gap-2 border-t border-border pt-3">
               {SUGGESTIONS.map(({ icon: Icon, label, prompt }) => (
                 <button
                   key={label}
                   onClick={() => setInput(prompt)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-muted-foreground hover:text-foreground bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.06] hover:border-white/[0.12] transition-all duration-150"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium text-muted-foreground hover:text-foreground bg-muted hover:bg-accent border border-border hover:border-primary/30 transition-all duration-150"
                 >
                   <Icon className="w-3 h-3" />
                   {label}
@@ -146,7 +146,7 @@ export default function Dashboard() {
           {tasksLoading ? (
             <div className="space-y-2">
               {[1,2,3].map(i => (
-                <div key={i} className="h-14 rounded-xl bg-white/[0.03] animate-pulse border border-white/[0.04]" />
+                <div key={i} className="h-14 rounded-xl bg-muted animate-pulse border border-border" />
               ))}
             </div>
           ) : tasks && tasks.length > 0 ? (
@@ -160,8 +160,8 @@ export default function Dashboard() {
               <div className="space-y-1.5">
                 {tasks.map(task => (
                   <Link key={task.id} href={`/dashboard/tasks/${task.id}`}>
-                    <div className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/[0.04] border border-transparent hover:border-white/[0.06] transition-all duration-150 cursor-pointer group">
-                      <div className="w-8 h-8 rounded-lg bg-white/[0.04] flex items-center justify-center flex-shrink-0">
+                    <div className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-accent border border-transparent hover:border-border transition-all duration-150 cursor-pointer group">
+                      <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center flex-shrink-0">
                         <StatusIcon status={task.status} />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -174,10 +174,10 @@ export default function Dashboard() {
                         </div>
                       </div>
                       <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border flex-shrink-0 ${
-                        task.status === "completed" ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" :
-                        task.status === "failed"    ? "text-red-400 bg-red-500/10 border-red-500/20" :
-                        task.status === "running"   ? "text-blue-400 bg-blue-500/10 border-blue-500/20" :
-                        "text-white/30 bg-white/[0.03] border-white/[0.06]"
+                        task.status === "completed" ? "text-emerald-600 bg-emerald-50 border-emerald-200" :
+                        task.status === "failed"    ? "text-red-600 bg-red-50 border-red-200" :
+                        task.status === "running"   ? "text-blue-600 bg-blue-50 border-blue-200" :
+                        "text-muted-foreground bg-muted border-border"
                       }`}>
                         {task.status}
                       </span>
@@ -188,7 +188,7 @@ export default function Dashboard() {
             </>
           ) : (
             <div className="text-center py-8">
-              <div className="w-12 h-12 rounded-2xl glass flex items-center justify-center mx-auto mb-3">
+              <div className="w-12 h-12 rounded-2xl bg-muted border border-border flex items-center justify-center mx-auto mb-3">
                 <Bot className="w-5 h-5 text-muted-foreground/30" />
               </div>
               <p className="text-sm text-muted-foreground/50">Your recent tasks will appear here</p>

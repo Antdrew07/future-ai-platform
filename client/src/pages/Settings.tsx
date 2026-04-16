@@ -16,7 +16,7 @@ export default function Settings() {
     <FutureDashboardLayout title="Settings" subtitle="Manage your account preferences">
       <div className="p-6 space-y-6 max-w-2xl">
         {/* Profile */}
-        <div className="glass rounded-xl overflow-hidden">
+        <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden">
           <div className="px-5 pt-5 pb-2">
             <h3 className="text-sm font-heading font-medium flex items-center gap-2">
               <User className="w-4 h-4 text-primary" />
@@ -51,7 +51,7 @@ export default function Settings() {
         </div>
 
         {/* Notifications */}
-        <div className="glass rounded-xl overflow-hidden">
+        <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden">
           <div className="px-5 pt-5 pb-2">
             <h3 className="text-sm font-heading font-medium flex items-center gap-2">
               <Bell className="w-4 h-4 text-cyan-400" />
@@ -78,7 +78,7 @@ export default function Settings() {
         </div>
 
         {/* Security */}
-        <div className="glass rounded-xl overflow-hidden">
+        <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden">
           <div className="px-5 pt-5 pb-2">
             <h3 className="text-sm font-heading font-medium flex items-center gap-2">
               <Shield className="w-4 h-4 text-emerald-400" />
@@ -86,7 +86,7 @@ export default function Settings() {
             </h3>
           </div>
           <div className="px-5 pb-5 space-y-3">
-            <div className="flex items-center justify-between p-3 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+            <div className="flex items-center justify-between p-3 rounded-lg bg-muted border border-border">
               <div>
                 <div className="text-sm font-medium">Login Method</div>
                 <div className="text-xs text-muted-foreground capitalize">{user?.loginMethod ?? "OAuth"}</div>
@@ -96,7 +96,7 @@ export default function Settings() {
                 Change
               </Button>
             </div>
-            <div className="flex items-center justify-between p-3 rounded-lg bg-white/[0.02] border border-white/[0.04]">
+            <div className="flex items-center justify-between p-3 rounded-lg bg-muted border border-border">
               <div>
                 <div className="text-sm font-medium">Two-Factor Authentication</div>
                 <div className="text-xs text-muted-foreground">Add an extra layer of security</div>
@@ -110,7 +110,7 @@ export default function Settings() {
         </div>
 
         {/* Danger Zone */}
-        <div className="glass rounded-xl overflow-hidden border-destructive/20">
+        <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden border-destructive/20">
           <div className="px-5 pt-5 pb-2">
             <h3 className="text-sm font-heading font-medium text-destructive">Danger Zone</h3>
           </div>

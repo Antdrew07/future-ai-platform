@@ -55,7 +55,7 @@ export default function AgentList() {
         ) : agents && agents.length > 0 ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {agents.map((agent) => (
-              <div key={agent.id} className="glass card-hover rounded-xl p-5 group">
+              <div key={agent.id} className="bg-white border border-border rounded-xl shadow-sm hover:shadow-md transition-all p-5 group">
                   <div className="flex items-start justify-between mb-3">
                     <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center ring-1 ring-primary/20">
                       <Bot className="w-5 h-5 text-primary" />

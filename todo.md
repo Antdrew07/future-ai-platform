@@ -276,13 +276,13 @@
 
 ## Full Rebrand — Real Logo + White Theme + Brand Colors
 
-- [ ] Upload real Future logo (purple/blue/gold gradient) to CDN
-- [ ] Update index.css: white background, brand colors from logo (purple #7B2FFF, blue #3B4FFF, gold #C9A84C)
-- [ ] Replace placeholder logo everywhere with real logo from CDN
-- [ ] Fix suggestion chips to: Build an iOS app, Build an Android app, Build a website, Launch a business, Build an online store, Create a marketing plan, Write a business plan, Write & run code
-- [ ] Remove all black backgrounds — white/light surfaces throughout
-- [ ] Update sign-in/sign-up left panel with logo colors and real logo
-- [ ] Ensure logo is visible on white backgrounds
+- [x] Upload real Future logo (purple/blue/gold gradient) to CDN
+- [x] Update index.css: white background, brand colors from logo (purple #7B2FFF, blue #3B4FFF, gold #C9A84C)
+- [x] Replace placeholder logo everywhere with real logo from CDN
+- [x] Fix suggestion chips to: Build an iOS app, Build an Android app, Build a website, Launch a business, Build an online store, Create a marketing plan, Write a business plan, Write & run code
+- [x] Remove all black backgrounds — white/light surfaces throughout
+- [x] Update sign-in/sign-up left panel with logo colors and real logo
+- [x] Ensure logo is visible on white backgrounds
 
 ## Real Logo Rebrand (Complete)
 
@@ -291,3 +291,15 @@
 - [x] FutureDashboardLayout.tsx — replaced all ICON_URL with LOGO_URL in sidebar header, loading state, and unauthenticated state
 - [x] Home.tsx — replaced ICON_URL with LOGO_URL in navbar and footer
 - [x] TypeScript check: 0 errors after all rebrand changes
+
+## White/Light Theme Conversion (User Request)
+
+- [x] Rewrite index.css: all dark CSS variables → white/light values, remove dark glassmorphism, use clean card shadows
+- [x] Home.tsx: convert dark hero/sections to white background with violet accents
+- [x] FutureDashboardLayout.tsx: white sidebar, light borders, dark text
+- [x] Dashboard.tsx: white background, readable text
+- [x] Onboarding.tsx: remove bg-[#06060a] dark backgrounds → white
+- [x] AgentWorkspace.tsx: remove dark panels → white/light surfaces
+- [x] AgentBuilder.tsx: white background
+- [x] Billing.tsx, Settings.tsx, Analytics.tsx, AdminPanel.tsx: white backgrounds
+- [x] All remaining pages: audit and convert any remaining dark backgrounds (AgentGallery, Teams, Templates, Pricing, ManusDialog)

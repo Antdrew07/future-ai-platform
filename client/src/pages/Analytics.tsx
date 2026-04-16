@@ -77,7 +77,7 @@ export default function Analytics() {
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {statCards.map((card) => (
-            <div key={card.title} className="glass card-hover rounded-xl p-4">
+            <div key={card.title} className="bg-white border border-border rounded-xl shadow-sm hover:shadow-md transition-all p-4">
                 <div className={`w-9 h-9 rounded-lg ${card.bg} flex items-center justify-center mb-3 ring-1 ring-white/5`}>
                   <card.icon className={`w-4 h-4 ${card.color}`} />
                 </div>
@@ -88,7 +88,7 @@ export default function Analytics() {
         </div>
 
         {/* Credit Usage Chart */}
-        <div className="glass rounded-xl overflow-hidden">
+        <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden">
           <div className="px-5 pt-5 pb-2">
             <h3 className="text-sm font-heading font-medium">Credit Usage Over Time</h3>
           </div>
@@ -116,7 +116,7 @@ export default function Analytics() {
 
         {/* Tasks + Model Breakdown */}
         <div className="grid lg:grid-cols-2 gap-4">
-          <div className="glass rounded-xl overflow-hidden">
+          <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden">
             <div className="px-5 pt-5 pb-2">
               <h3 className="text-sm font-heading font-medium">Tasks Per Day</h3>
             </div>
@@ -136,7 +136,7 @@ export default function Analytics() {
             </div>
           </div>
 
-          <div className="glass rounded-xl overflow-hidden">
+          <div className="bg-white border border-border rounded-xl shadow-sm overflow-hidden">
             <div className="px-5 pt-5 pb-2">
               <h3 className="text-sm font-heading font-medium">Credits by Model</h3>
             </div>

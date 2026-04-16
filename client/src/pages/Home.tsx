@@ -246,7 +246,7 @@ export default function Home() {
               <motion.div
                 key={tool.name}
                 variants={fadeUp}
-                className="glass card-hover rounded-xl p-5 text-center group"
+                className="bg-white border border-border rounded-xl shadow-sm hover:shadow-md transition-all p-5 text-center group"
               >
                 <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                   <tool.icon className="h-5 w-5 text-primary" />
@@ -282,7 +282,7 @@ export default function Home() {
               <motion.div
                 key={model.name}
                 variants={fadeUp}
-                className="glass card-hover rounded-xl p-5 relative overflow-hidden group"
+                className="bg-white border border-border rounded-xl shadow-sm hover:shadow-md transition-all p-5 relative overflow-hidden group"
               >
                 <div className={`absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r ${model.color}`} />
                 <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">{model.tier}</span>
@@ -314,7 +314,7 @@ export default function Home() {
               <motion.div
                 key={feature.title}
                 variants={fadeUp}
-                className="glass card-hover rounded-xl p-6 group"
+                className="bg-white border border-border rounded-xl shadow-sm hover:shadow-md transition-all p-6 group"
               >
                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
                   <feature.icon className="h-5 w-5 text-primary" />
@@ -351,7 +351,7 @@ export default function Home() {
               <motion.div
                 key={item.step}
                 variants={fadeUp}
-                className="glass card-hover rounded-xl p-8 flex items-start gap-6"
+                className="bg-white border border-border rounded-xl shadow-sm hover:shadow-md transition-all p-8 flex items-start gap-6"
               >
                 <span className="text-4xl font-heading font-bold gradient-text-gold shrink-0">{item.step}</span>
                 <div>
