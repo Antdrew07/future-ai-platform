@@ -231,3 +231,19 @@
 - [x] Audit dashboard: agents list, task history, analytics
 - [x] Audit routing: all pages reachable, no dead links
 - [x] Run full vitest suite and confirm 0 failures
+
+## Dashboard Redesign — Manus-Style
+
+- [ ] Replace current Dashboard.tsx with a minimal home screen: greeting, central prompt box, suggestion chips, recent tasks
+- [ ] Simplify FutureDashboardLayout sidebar — fewer items, cleaner look
+- [ ] Prompt box on dashboard navigates to workspace with task pre-filled
+- [ ] Suggestion chips: practical tasks (Build a website, Write code, Research, Analyze data, etc.)
+- [ ] Recent tasks section shows last 5 tasks with status and quick-resume link
+
+## Light Theme Redesign
+
+- [x] Redesign global CSS (index.css) to clean white/light theme with violet brand accents
+- [x] Update FutureDashboardLayout sidebar for light theme
+- [x] Update Dashboard home screen for light theme
+- [x] Update SignIn and SignUp pages for light theme
+- [x] Ensure all text is readable on light backgrounds

@@ -12,22 +12,26 @@ import { useState } from "react";
 const ICON_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310419663029617589/m5GbkNTBEjcM6aS7UZa8ie/future-favicon-jKAia25Lk6hjbXvQ6q4uKZ.webp";
 
 const NAV_ITEMS = [
-  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard", exact: true },
-  { href: "/dashboard/agents", icon: Bot, label: "My Agents" },
+  { href: "/dashboard",           icon: LayoutDashboard, label: "Home",      exact: true },
+  { href: "/dashboard/agents",    icon: Bot,             label: "Agents" },
+  { href: "/dashboard/billing",   icon: CreditCard,      label: "Billing" },
+  { href: "/dashboard/settings",  icon: Settings,        label: "Settings" },
+];
+
+const NAV_SECONDARY = [
   { href: "/dashboard/analytics", icon: BarChart3, label: "Analytics" },
-  { href: "/dashboard/billing", icon: CreditCard, label: "Billing" },
-  { href: "/dashboard/api-keys", icon: Key, label: "API Keys" },
-  { href: "/dashboard/teams", icon: Users, label: "Teams" },
-  { href: "/dashboard/settings", icon: Settings, label: "Settings" },
+  { href: "/dashboard/api-keys",  icon: Key,       label: "API Keys" },
+  { href: "/dashboard/teams",     icon: Users,     label: "Teams" },
 ];
 
 interface Props {
   children: React.ReactNode;
   title?: string;
   subtitle?: string;
+  showNewAgent?: boolean;
 }
 
-export default function FutureDashboardLayout({ children, title, subtitle }: Props) {
+export default function FutureDashboardLayout({ children, title, subtitle, showNewAgent = true }: Props) {
   const { user, isAuthenticated, loading, logout } = useAuth({ redirectOnUnauthenticated: true });
   const [location] = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -118,11 +122,29 @@ export default function FutureDashboardLayout({ children, title, subtitle }: Pro
           );
         })}
 
+        {/* Secondary nav */}
+        <div className="divider-gradient my-2" />
+        {NAV_SECONDARY.map((item) => {
+          const active = isActive(item.href, false);
+          return (
+            <Link key={item.href} href={item.href}
+              onClick={() => setMobileOpen(false)}
+              className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 group ${
+                active
+                  ? "glass text-foreground"
+                  : "text-muted-foreground/60 hover:text-foreground hover:bg-accent/40"
+              }`}>
+              <item.icon className={`w-4 h-4 flex-shrink-0 transition-colors ${ active ? "text-primary" : "group-hover:text-primary/60" }`} />
+              {item.label}
+            </Link>
+          );
+        })}
+
         {/* Templates */}
         <Link href="/templates"
           onClick={() => setMobileOpen(false)}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-all duration-200 group">
-          <Store className="w-4 h-4 flex-shrink-0 group-hover:text-primary/70 transition-colors" />
+          className="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-muted-foreground/60 hover:text-foreground hover:bg-accent/40 transition-all duration-200 group">
+          <Store className="w-4 h-4 flex-shrink-0 group-hover:text-primary/60 transition-colors" />
           Templates
         </Link>
 
@@ -200,12 +222,14 @@ export default function FutureDashboardLayout({ children, title, subtitle }: Pro
               </div>
             )}
           </div>
-          <Link href="/dashboard/agents/new">
-            <Button size="sm" className="h-8 text-xs bg-primary hover:bg-primary/90 glow-subtle rounded-lg hidden sm:flex font-medium">
-              <Sparkles className="w-3 h-3 mr-1.5" />
-              New Agent
-            </Button>
-          </Link>
+          {showNewAgent && (
+            <Link href="/dashboard/agents/new">
+              <Button size="sm" className="h-8 text-xs bg-primary hover:bg-primary/90 glow-subtle rounded-lg hidden sm:flex font-medium">
+                <Sparkles className="w-3 h-3 mr-1.5" />
+                New Agent
+              </Button>
+            </Link>
+          )}
         </header>
 
         {/* Page Content */}

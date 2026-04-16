@@ -3,8 +3,9 @@ import { Link, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Eye, EyeOff, Zap } from "lucide-react";
+import { Eye, EyeOff, ArrowRight, Loader2 } from "lucide-react";
+
+const ICON_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310419663029617589/m5GbkNTBEjcM6aS7UZa8ie/future-favicon-jKAia25Lk6hjbXvQ6q4uKZ.webp";
 
 export default function SignIn() {
   const [, navigate] = useLocation();
@@ -14,100 +15,104 @@ export default function SignIn() {
   const [error, setError] = useState("");
 
   const loginMutation = trpc.auth.login.useMutation({
-    onSuccess: () => {
-      navigate("/dashboard");
-    },
-    onError: (err) => {
-      setError(err.message || "Invalid email or password");
-    },
+    onSuccess: () => navigate("/dashboard"),
+    onError: (err) => setError(err.message || "Invalid email or password"),
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    if (!email || !password) {
-      setError("Please fill in all fields");
-      return;
-    }
+    if (!email || !password) { setError("Please fill in all fields"); return; }
     loginMutation.mutate({ email, password });
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Background orbs */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-violet-600/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-blue-600/8 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen flex">
+      {/* Left — violet brand panel */}
+      <div className="hidden lg:flex lg:w-[45%] flex-col justify-between p-12 relative overflow-hidden bg-gradient-to-br from-violet-600 via-violet-700 to-indigo-800">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-indigo-400/20 rounded-full blur-3xl translate-y-1/3 -translate-x-1/4" />
 
-      <div className="w-full max-w-md relative z-10">
         {/* Logo */}
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 mb-6">
-            <img
-              src="https://d2xsxph8kpxj0f.cloudfront.net/310419663029617589/m5GbkNTBEjcM6aS7UZa8ie/future-logo_e02304b5.png"
-              alt="Future"
-              className="h-8 w-auto"
-            />
-            <span className="text-xl font-bold gradient-text font-display">Future</span>
-          </Link>
-          <h1 className="text-2xl font-bold text-white font-display">Welcome back</h1>
-          <p className="text-[#8b8b9a] mt-1 text-sm">Sign in to your Future account</p>
+        <div className="relative z-10 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/20">
+            <img src={ICON_URL} alt="Future" className="w-6 h-6" />
+          </div>
+          <span className="text-white font-heading font-bold text-xl tracking-tight">Future</span>
         </div>
 
-        {/* Card */}
-        <div className="glass rounded-2xl p-8 border border-white/10">
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-[#c4c4d0] text-sm font-medium">
-                Email address
-              </Label>
+        {/* Headline */}
+        <div className="relative z-10 space-y-5">
+          <h1 className="text-4xl font-heading font-bold text-white leading-tight">
+            The AI agent<br />platform built<br />for the future.
+          </h1>
+          <p className="text-white/60 text-base leading-relaxed max-w-sm">
+            Automate complex tasks, build intelligent workflows, and deploy AI agents — all in one place.
+          </p>
+          <div className="flex flex-wrap gap-2 pt-1">
+            {["Web research", "Code execution", "Data analysis", "Automation"].map(f => (
+              <span key={f} className="text-xs font-medium px-3 py-1.5 rounded-full bg-white/10 text-white/80 border border-white/15">
+                {f}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <p className="relative z-10 text-white/25 text-xs">© 2026 Future AI. All rights reserved.</p>
+      </div>
+
+      {/* Right — form */}
+      <div className="flex-1 flex items-center justify-center px-6 py-12 bg-gradient-to-br from-slate-50 via-white to-violet-50/30">
+        <div className="w-full max-w-md space-y-7">
+          {/* Mobile logo */}
+          <div className="lg:hidden flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
+              <img src={ICON_URL} alt="Future" className="w-5 h-5" />
+            </div>
+            <span className="font-heading font-bold text-lg text-foreground">Future</span>
+          </div>
+
+          <div>
+            <h2 className="text-2xl font-heading font-bold text-foreground">Welcome back</h2>
+            <p className="text-sm text-muted-foreground mt-1">Sign in to your Future account</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-foreground/80">Email</label>
               <Input
-                id="email"
                 type="email"
                 placeholder="you@example.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="bg-white/5 border-white/10 text-white placeholder:text-[#555568] focus:border-violet-500 focus:ring-violet-500/20 h-11"
+                onChange={e => setEmail(e.target.value)}
+                className="h-11 bg-white border-border focus:border-primary/50 rounded-xl shadow-sm"
                 autoComplete="email"
-                required
               />
             </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-[#c4c4d0] text-sm font-medium">
-                  Password
-                </Label>
-                <button
-                  type="button"
-                  className="text-xs text-violet-400 hover:text-violet-300 transition-colors"
-                  onClick={() => {}}
-                >
-                  Forgot password?
-                </button>
-              </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-foreground/80">Password</label>
               <div className="relative">
                 <Input
-                  id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="bg-white/5 border-white/10 text-white placeholder:text-[#555568] focus:border-violet-500 focus:ring-violet-500/20 h-11 pr-10"
+                  onChange={e => setPassword(e.target.value)}
+                  className="h-11 bg-white border-border focus:border-primary/50 rounded-xl shadow-sm pr-11"
                   autoComplete="current-password"
-                  required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#555568] hover:text-[#8b8b9a] transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
 
             {error && (
-              <div className="bg-red-500/10 border border-red-500/20 rounded-lg px-4 py-3 text-sm text-red-400">
+              <div className="text-sm text-destructive bg-destructive/8 border border-destructive/15 rounded-xl px-4 py-3">
                 {error}
               </div>
             )}
@@ -115,36 +120,34 @@ export default function SignIn() {
             <Button
               type="submit"
               disabled={loginMutation.isPending}
-              className="w-full h-11 bg-gradient-to-r from-violet-600 to-blue-600 hover:from-violet-500 hover:to-blue-500 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-violet-500/25"
+              className="w-full h-11 bg-primary hover:bg-primary/90 text-white font-semibold rounded-xl shadow-lg shadow-primary/20 transition-all duration-200"
             >
-              {loginMutation.isPending ? (
-                <span className="flex items-center gap-2">
-                  <span className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Signing in…
-                </span>
-              ) : (
-                <span className="flex items-center gap-2">
-                  <Zap className="h-4 w-4" />
-                  Sign In
-                </span>
-              )}
+              {loginMutation.isPending
+                ? <Loader2 className="w-4 h-4 animate-spin" />
+                : <><span>Sign in</span><ArrowRight className="w-4 h-4 ml-1.5" /></>
+              }
             </Button>
           </form>
 
-          <div className="mt-6 text-center text-sm text-[#8b8b9a]">
-            Don't have an account?{" "}
-            <Link href="/signup" className="text-violet-400 hover:text-violet-300 font-medium transition-colors">
-              Create one free
-            </Link>
+          <div className="relative flex items-center gap-3">
+            <div className="flex-1 h-px bg-border/50" />
+            <span className="text-xs text-muted-foreground">New to Future?</span>
+            <div className="flex-1 h-px bg-border/50" />
           </div>
-        </div>
 
-        <p className="text-center text-xs text-[#555568] mt-6">
-          By signing in, you agree to our{" "}
-          <span className="text-[#8b8b9a] hover:text-violet-400 cursor-pointer transition-colors">Terms of Service</span>{" "}
-          and{" "}
-          <span className="text-[#8b8b9a] hover:text-violet-400 cursor-pointer transition-colors">Privacy Policy</span>
-        </p>
+          <Link href="/signup">
+            <Button variant="outline" className="w-full h-11 rounded-xl border-border bg-white hover:bg-accent/40 text-foreground font-medium shadow-sm">
+              Create a free account
+            </Button>
+          </Link>
+
+          <p className="text-center text-xs text-muted-foreground/50">
+            By signing in you agree to our{" "}
+            <span className="text-primary/60 hover:text-primary cursor-pointer transition-colors">Terms</span>{" "}
+            and{" "}
+            <span className="text-primary/60 hover:text-primary cursor-pointer transition-colors">Privacy Policy</span>.
+          </p>
+        </div>
       </div>
     </div>
   );
