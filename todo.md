@@ -273,3 +273,21 @@
 - [x] Add auto-routing: pick best model based on task type (research → Perplexity, code → Claude, fast → Groq)
 - [x] Upgrade model selector UI with capability badges (Web Search, Fast, Long Context, etc.)
 - [x] Validate all 4 API keys with vitest tests
+
+## Full Rebrand — Real Logo + White Theme + Brand Colors
+
+- [ ] Upload real Future logo (purple/blue/gold gradient) to CDN
+- [ ] Update index.css: white background, brand colors from logo (purple #7B2FFF, blue #3B4FFF, gold #C9A84C)
+- [ ] Replace placeholder logo everywhere with real logo from CDN
+- [ ] Fix suggestion chips to: Build an iOS app, Build an Android app, Build a website, Launch a business, Build an online store, Create a marketing plan, Write a business plan, Write & run code
+- [ ] Remove all black backgrounds — white/light surfaces throughout
+- [ ] Update sign-in/sign-up left panel with logo colors and real logo
+- [ ] Ensure logo is visible on white backgrounds
+
+## Real Logo Rebrand (Complete)
+
+- [x] SignIn.tsx — replaced ICON_URL with LOGO_URL (real Future logo), dark gradient left panel (#0d0620→#1a0a3c→#2d1b69→#1a3a8f), gold shimmer accents, feature pills with icons
+- [x] SignUp.tsx — same dark gradient left panel treatment, real logo, gold gradient headline
+- [x] FutureDashboardLayout.tsx — replaced all ICON_URL with LOGO_URL in sidebar header, loading state, and unauthenticated state
+- [x] Home.tsx — replaced ICON_URL with LOGO_URL in navbar and footer
+- [x] TypeScript check: 0 errors after all rebrand changes

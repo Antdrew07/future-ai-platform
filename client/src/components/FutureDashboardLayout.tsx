@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-const ICON_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310419663029617589/m5GbkNTBEjcM6aS7UZa8ie/future-favicon-jKAia25Lk6hjbXvQ6q4uKZ.webp";
+const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310419663029617589/m5GbkNTBEjcM6aS7UZa8ie/future-logo_dd9d650b.png";
 
 const NAV_ITEMS = [
   { href: "/dashboard",           icon: LayoutDashboard, label: "Home",      exact: true },
@@ -46,7 +46,7 @@ export default function FutureDashboardLayout({ children, title, subtitle, showN
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 rounded-2xl glass flex items-center justify-center pulse-glow">
-            <img src={ICON_URL} alt="Future" className="w-6 h-6" />
+            <img src={LOGO_URL} alt="Future" className="w-10 h-10 object-contain" />
           </div>
           <div className="text-sm text-muted-foreground font-medium tracking-wide">Loading...</div>
         </div>
@@ -59,7 +59,7 @@ export default function FutureDashboardLayout({ children, title, subtitle, showN
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center glass rounded-2xl p-10">
           <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-5">
-            <img src={ICON_URL} alt="Future" className="w-7 h-7" />
+            <img src={LOGO_URL} alt="Future" className="w-12 h-12 object-contain" />
           </div>
           <h2 className="text-xl font-heading font-bold mb-2">Welcome to Future</h2>
           <p className="text-sm text-muted-foreground mb-6">Sign in to access your AI workspace</p>
@@ -81,7 +81,7 @@ export default function FutureDashboardLayout({ children, title, subtitle, showN
       {/* Logo */}
       <div className="p-4 border-b border-sidebar-border/50">
         <Link href="/" className="flex items-center gap-3">
-          <img src={ICON_URL} alt="Future" className="w-8 h-8" />
+          <img src={LOGO_URL} alt="Future" className="w-8 h-8 object-contain" />
           <span className="font-heading font-bold text-base tracking-tight text-foreground">Future</span>
         </Link>
       </div>

@@ -26,7 +26,7 @@ import { Link } from "wouter";
 
 import { useEffect, useRef, useState } from "react";
 
-const ICON_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310419663029617589/m5GbkNTBEjcM6aS7UZa8ie/future-favicon-jKAia25Lk6hjbXvQ6q4uKZ.webp";
+const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310419663029617589/m5GbkNTBEjcM6aS7UZa8ie/future-logo_dd9d650b.png";
 
 function AnimatedCounter({ target, suffix = "", prefix = "" }: { target: number; suffix?: string; prefix?: string }) {
   const [count, setCount] = useState(0);
@@ -121,7 +121,7 @@ export default function Home() {
       <nav className="fixed top-0 left-0 right-0 z-50 glass-strong">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <img src={ICON_URL} alt="Future" className="h-8 w-8" />
+            <img src={LOGO_URL} alt="Future" className="h-8 w-8 object-contain" />
             <span className="text-lg font-heading font-bold tracking-tight">Future</span>
           </Link>
           <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
@@ -458,7 +458,7 @@ export default function Home() {
       <footer className="relative border-t border-border/30 py-12 px-6">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
-            <img src={ICON_URL} alt="Future" className="h-6 w-6 opacity-60" />
+            <img src={LOGO_URL} alt="Future" className="h-6 w-6 object-contain opacity-60" />
             <span className="text-sm text-muted-foreground">&copy; {new Date().getFullYear()} Future. All rights reserved.</span>
           </div>
           <div className="flex items-center gap-6 text-xs text-muted-foreground">

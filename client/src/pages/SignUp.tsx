@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff, Sparkles, Loader2 } from "lucide-react";
 
-const ICON_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310419663029617589/m5GbkNTBEjcM6aS7UZa8ie/future-favicon-jKAia25Lk6hjbXvQ6q4uKZ.webp";
+const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310419663029617589/m5GbkNTBEjcM6aS7UZa8ie/future-logo_dd9d650b.png";
 
 export default function SignUp() {
   const [, navigate] = useLocation();
@@ -40,32 +40,35 @@ export default function SignUp() {
 
   return (
     <div className="min-h-screen flex">
-      {/* Left — violet brand panel */}
-      <div className="hidden lg:flex lg:w-[45%] flex-col justify-between p-12 relative overflow-hidden bg-gradient-to-br from-violet-600 via-violet-700 to-indigo-800">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-indigo-400/20 rounded-full blur-3xl translate-y-1/3 -translate-x-1/4" />
+      {/* Left — brand gradient panel */}
+      <div
+        className="hidden lg:flex lg:w-[45%] flex-col justify-between p-12 relative overflow-hidden"
+        style={{ background: "linear-gradient(145deg, #0d0620 0%, #1a0a3c 25%, #2d1b69 55%, #1a3a8f 100%)" }}
+      >
+        <div className="absolute inset-0 opacity-30" style={{ background: "radial-gradient(ellipse at 85% 15%, #C9A84C 0%, transparent 55%), radial-gradient(ellipse at 15% 85%, #7B2FFF 0%, transparent 50%)" }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full opacity-10" style={{ background: "radial-gradient(circle, #C9A84C 0%, transparent 70%)" }} />
 
         {/* Logo */}
         <div className="relative z-10 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/20">
-            <img src={ICON_URL} alt="Future" className="w-6 h-6" />
-          </div>
-          <span className="text-white font-heading font-bold text-xl tracking-tight">Future</span>
+          <img src={LOGO_URL} alt="Future" className="w-12 h-12 object-contain drop-shadow-lg" />
+          <span className="text-white font-heading font-bold text-2xl tracking-tight">Future</span>
         </div>
 
         {/* Headline */}
         <div className="relative z-10 space-y-5">
           <h1 className="text-4xl font-heading font-bold text-white leading-tight">
-            Start building<br />AI agents<br />today — free.
+            Build anything.<br />
+            <span style={{ background: "linear-gradient(90deg, #C9A84C, #f0d080, #C9A84C)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+              Start for free.
+            </span>
           </h1>
           <p className="text-white/60 text-base leading-relaxed max-w-sm">
-            Get 100 free credits on signup. No credit card required. Deploy your first agent in minutes.
+            100 free credits on signup. Build iOS apps, Android apps, websites, and businesses — no credit card needed.
           </p>
-          {/* Social proof */}
           <div className="flex items-center gap-3 pt-2">
             <div className="flex -space-x-2">
               {["V", "A", "J", "M"].map((l, i) => (
-                <div key={i} className="w-8 h-8 rounded-full bg-white/20 border-2 border-violet-600 flex items-center justify-center text-xs font-bold text-white">
+                <div key={i} className="w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-bold text-white" style={{ background: "linear-gradient(135deg, #7B2FFF, #3B4FFF)", borderColor: "rgba(201,168,76,0.4)" }}>
                   {l}
                 </div>
               ))}
@@ -83,7 +86,7 @@ export default function SignUp() {
           {/* Mobile logo */}
           <div className="lg:hidden flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
-              <img src={ICON_URL} alt="Future" className="w-5 h-5" />
+              <img src={LOGO_URL} alt="Future" className="w-7 h-7 object-contain" />
             </div>
             <span className="font-heading font-bold text-lg text-foreground">Future</span>
           </div>
