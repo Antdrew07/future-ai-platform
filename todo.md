@@ -251,3 +251,25 @@
 ## Simplified Suggestion Chips
 
 - [x] Update Dashboard and Onboarding suggestion chips to concrete real-world tasks (Build iOS app, Launch a business, Build a website, etc.)
+
+## Perplexity Sonar Integration
+
+- [ ] Store PERPLEXITY_API_KEY as a secret
+- [ ] Add Perplexity callPerplexity() function to llmRouter.ts
+- [ ] Add sonar-pro and sonar models to provider detection
+- [ ] Seed Perplexity models into model_pricing table
+- [ ] Add Perplexity models to agent model selector UI
+- [ ] Test Perplexity integration end-to-end
+
+## Advanced Multi-Model Integration
+
+- [ ] Add callPerplexity() to llmRouter (sonar-pro, sonar models)
+- [ ] Add callGemini() to llmRouter (gemini-1.5-pro, gemini-2.0-flash)
+- [ ] Add callGroq() to llmRouter (llama-3.3-70b-versatile)
+- [ ] Upgrade callAnthropic() to support claude-opus-4-5 and claude-3-5-sonnet-20241022
+- [ ] Add smart provider detection for all new model prefixes
+- [ ] Seed all new models into model_pricing table with correct credit rates
+- [ ] Upgrade agent loop: smarter system prompt, better multi-step reasoning
+- [ ] Add auto-routing: pick best model based on task type (research → Perplexity, code → Claude, fast → Groq)
+- [ ] Upgrade model selector UI with capability badges (Web Search, Fast, Long Context, etc.)
+- [ ] Validate all 4 API keys with vitest tests

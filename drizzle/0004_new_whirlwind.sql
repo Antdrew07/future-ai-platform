@@ -1,0 +1,1 @@
+ALTER TABLE `model_pricing` MODIFY COLUMN `provider` enum('openai','anthropic','manus','future','custom','perplexity','gemini','groq') NOT NULL;

@@ -22,11 +22,18 @@ import { Link } from "wouter";
 import AgentChatPanel from "@/components/AgentChatPanel";
 
 const MODELS = [
-  { id: "future-agent-1", name: "Future-1 Ultra", provider: "Future AI", tier: "ultra", desc: "Fully autonomous: browses the web, executes code, manages files, and completes complex multi-step tasks end-to-end" },
-  { id: "gpt-4o", name: "Future-1 Pro", provider: "Future AI", tier: "premium", desc: "Multimodal, fast, great for complex reasoning and deep analysis" },
-  { id: "gpt-4o-mini", name: "Future-1 Mini", provider: "Future AI", tier: "standard", desc: "Fastest and most cost-effective model for everyday tasks" },
-  { id: "claude-3-5-sonnet-20241022", name: "Future-1 Code", provider: "Future AI", tier: "premium", desc: "Exceptional at coding, analysis, and nuanced reasoning tasks" },
-  { id: "claude-3-haiku-20240307", name: "Future-1 Fast", provider: "Future AI", tier: "standard", desc: "Lightning-fast responses for simple tasks and high-volume use" },
+  { id: "future-agent-1", name: "Future-1 Ultra", provider: "Future AI", tier: "ultra", badge: "⚡ Default", desc: "Fully autonomous: browses the web, executes code, manages files, and completes complex multi-step tasks end-to-end", tags: ["Autonomous", "Code", "Research"] },
+  { id: "claude-opus-4-5", name: "Future-1 Opus", provider: "Anthropic", tier: "ultra", badge: "🏆 Most Intelligent", desc: "Claude Opus — Anthropic's most powerful model for the hardest problems and deepest analysis", tags: ["Deep Reasoning", "Analysis", "200K ctx"] },
+  { id: "gpt-4o", name: "Future-1 Pro", provider: "OpenAI", tier: "premium", badge: "🧠 Reasoning", desc: "GPT-4o — multimodal, fast, best all-around reasoning with vision support", tags: ["Vision", "Reasoning", "Code"] },
+  { id: "claude-3-5-sonnet-20241022", name: "Future-1 Code", provider: "Anthropic", tier: "premium", badge: "💻 Best for Code", desc: "Claude 3.5 Sonnet — best-in-class for coding, debugging, and technical analysis", tags: ["Code", "Analysis", "200K ctx"] },
+  { id: "sonar-pro", name: "Future Search Pro", provider: "Perplexity", tier: "premium", badge: "🔍 Live Search", desc: "Perplexity Sonar Pro — real-time web search with citations. Best for research and current events", tags: ["Web Search", "Real-time", "Citations"] },
+  { id: "gemini-1.5-pro", name: "Future-1 Long", provider: "Google", tier: "premium", badge: "📚 1M Context", desc: "Gemini 1.5 Pro — 1 million token context window for massive documents, codebases, and long research", tags: ["1M Context", "Vision", "Long Docs"] },
+  { id: "gemini-2.0-flash", name: "Future-1 Flash", provider: "Google", tier: "standard", badge: "🚀 Gemini 2.0", desc: "Gemini 2.0 Flash — Google's latest model, blazing fast with excellent quality", tags: ["Fast", "Vision", "Multimodal"] },
+  { id: "sonar", name: "Future Search", provider: "Perplexity", tier: "standard", badge: "🌐 Web Search", desc: "Perplexity Sonar — fast real-time web search for up-to-date information", tags: ["Web Search", "Real-time"] },
+  { id: "llama-3.3-70b-versatile", name: "Future-1 Speed", provider: "Groq", tier: "standard", badge: "🦙 Open Source", desc: "Llama 3.3 70B on Groq — fastest inference available, open-source model with strong reasoning", tags: ["Ultra Fast", "Open Source"] },
+  { id: "gpt-4o-mini", name: "Future-1 Mini", provider: "OpenAI", tier: "standard", badge: "💨 Fast", desc: "GPT-4o Mini — fastest and most cost-effective for everyday tasks", tags: ["Fast", "Affordable"] },
+  { id: "claude-haiku-4-5", name: "Future-1 Fast", provider: "Anthropic", tier: "standard", badge: "⚡ Ultra Fast", desc: "Claude Haiku — lightning-fast responses for simple tasks and high-volume use", tags: ["Fast", "Chat"] },
+  { id: "llama-3.1-8b-instant", name: "Future-1 Instant", provider: "Groq", tier: "standard", badge: "⚡ Instant", desc: "Llama 3.1 8B on Groq — near-instant responses for simple tasks", tags: ["Instant", "Chat"] },
 ];
 
 const TIER_COLORS: Record<string, string> = {
@@ -253,24 +260,30 @@ Be thorough, accurate, and helpful."
                     {MODELS.map((model) => (
                       <div key={model.id}
                         onClick={() => setForm(f => ({ ...f, modelId: model.id }))}
-                        className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all duration-200 ${
+                        className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all duration-200 ${
                           form.modelId === model.id
                             ? "border-primary/40 bg-primary/5 glow-subtle"
                             : "border-border/30 hover:border-border/50 hover:bg-accent/30"
                         }`}>
-                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
+                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center flex-shrink-0 mt-0.5 ${
                           form.modelId === model.id ? "border-primary" : "border-muted-foreground/30"
                         }`}>
                           {form.modelId === model.id && <div className="w-2 h-2 rounded-full bg-primary" />}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <span className="text-sm font-medium">{model.name}</span>
                             <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${TIER_COLORS[model.tier]}`}>
                               {model.tier}
                             </Badge>
+                            <span className="text-[10px] text-muted-foreground">{model.badge}</span>
                           </div>
-                          <div className="text-xs text-muted-foreground">{model.provider} · {model.desc}</div>
+                          <div className="text-xs text-muted-foreground mt-0.5">{model.provider} · {model.desc}</div>
+                          <div className="flex flex-wrap gap-1 mt-1.5">
+                            {(model as typeof model & { tags?: string[] }).tags?.map(tag => (
+                              <span key={tag} className="text-[10px] px-1.5 py-0.5 rounded-md bg-accent/50 text-muted-foreground border border-border/30">{tag}</span>
+                            ))}
+                          </div>
                         </div>
                       </div>
                     ))}
