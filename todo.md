@@ -48,10 +48,10 @@
 - [x] Final checkpoint and delivery
 
 ## Post-Launch TODO
-- [ ] Claim Stripe sandbox: https://dashboard.stripe.com/claim_sandbox/YWNjdF8xVE1acXhMT0xaalJLdjMzLDE3NzY4ODk2MDEv100JYUHy778 (user action required)
+- [ ] Claim Stripe sandbox: https://dashboard.stripe.com/claim_sandbox/YWNjdF8xVE1acXhMT0xaalJLdjMzLDE3NzY4ODk2MDEv100JYUHy778 *(blocked: requires user to click link — cannot be automated)*
 - [x] Add OpenAI API key in Settings → Secrets (OPENAI_API_KEY) — rotate the compromised key first
 - [x] Add Anthropic API key in Settings → Secrets (ANTHROPIC_API_KEY)
-- [ ] Publish via Manus UI Publish button after claiming Stripe sandbox (user action required)
+- [ ] Publish via Manus UI Publish button after claiming Stripe sandbox *(blocked: requires user to click Publish in Management UI — cannot be automated)*
 
 ## Autonomous Agent Upgrade (Manus-like)
 
@@ -78,8 +78,8 @@
 - [x] Tool result display: web search snippets, code output blocks, file trees
 - [x] Task progress indicator and step counter
 - [x] Output artifacts (downloadable files, reports, images)
-- [ ] Pause / cancel task controls (future enhancement)
-- [ ] Task history with replay (future enhancement)
+- [ ] Pause / cancel task controls *(deferred: future enhancement, not in MVP scope)*
+- [ ] Task history with replay *(deferred: future enhancement, not in MVP scope)*
 
 ### Upgraded Agent Builder
 - [x] Tool permission matrix (which tools each agent can use)
