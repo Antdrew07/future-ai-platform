@@ -472,8 +472,8 @@ export default function Dashboard() {
   const firstName = user?.name?.split(" ")[0] ?? "there";
   const allArtifacts = liveSteps.flatMap(s => s.artifacts ?? []);
 
-  // ── Input Box (shared between home and chat modes) ──────────────────────────
-  const InputBox = () => (
+  // ── Input Box — rendered as JSX directly (NOT a nested component) to preserve focus ──
+  const inputBoxJSX = (
     <div className="shrink-0 px-4 pb-4 pt-2 border-t border-border bg-white">
       <div className="max-w-3xl mx-auto">
         <div className="flex items-end gap-2 bg-gray-50 border border-border rounded-2xl px-4 py-3 focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/10 transition-all shadow-sm">
@@ -564,7 +564,7 @@ export default function Dashboard() {
           </div>
 
           {/* Input always at bottom */}
-          <InputBox />
+          {inputBoxJSX}
         </div>
       </FutureDashboardLayout>
     );
@@ -663,7 +663,7 @@ export default function Dashboard() {
             </div>
 
             {/* Input */}
-            <InputBox />
+            {inputBoxJSX}
           </div>
 
           {/* ── RIGHT: Execution Log + Live Browser ── */}
