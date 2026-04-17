@@ -330,6 +330,9 @@ export default function Dashboard() {
   const [activeBrowser, setActiveBrowser] = useState<{ sessionId: string; liveViewUrl: string } | null>(null);
   // Whether the user has sent at least one message (switches from "home" to "chat" mode)
   const [chatStarted, setChatStarted] = useState(false);
+  // Instant reply: streamed fast acknowledgment before agent steps begin
+  const [instantReplyText, setInstantReplyText] = useState("");
+  const [instantReplyDone, setInstantReplyDone] = useState(false);
 
   const [currentTaskId, setCurrentTaskId] = useState<number | null>(null);
 
@@ -413,6 +416,9 @@ export default function Dashboard() {
     setElapsed(0);
     setActiveBrowser(null);
     setChatStarted(true);
+    setInstantReplyText("");
+    setInstantReplyDone(false);
+    setCurrentTaskId(null);
 
     setMessages(prev => [...prev, {
       id: `user-${Date.now()}`,
@@ -464,6 +470,11 @@ export default function Dashboard() {
             if (eventType === "task_created") {
               const taskCreated = data as { taskId?: number };
               if (taskCreated.taskId) setCurrentTaskId(taskCreated.taskId);
+            } else if (eventType === "instant_reply_token") {
+              const token = (data as { token?: string }).token ?? "";
+              if (token) setInstantReplyText(prev => prev + token);
+            } else if (eventType === "instant_reply_done") {
+              setInstantReplyDone(true);
             } else if (eventType === "step") {
               const step = data as unknown as AgentStep;
               setLiveSteps(prev => [...prev, step]);
@@ -707,7 +718,29 @@ export default function Dashboard() {
                   </div>
                 );
               })}
-              {isRunning && (
+              {/* Instant reply: streamed fast acknowledgment */}
+              {instantReplyText && (
+                <div className="flex gap-3 justify-start">
+                  <div className="w-7 h-7 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 mt-0.5">
+                    <Zap className="w-3.5 h-3.5 text-primary" />
+                  </div>
+                  <div className="bg-blue-50/60 border border-blue-200/60 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[85%]">
+                    <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">{instantReplyText}
+                      {!instantReplyDone && (
+                        <span className="inline-block w-0.5 h-4 bg-primary ml-0.5 animate-pulse align-middle" />
+                      )}
+                    </p>
+                    {instantReplyDone && (
+                      <p className="text-[10px] text-blue-500/70 mt-1.5 flex items-center gap-1">
+                        <Zap className="w-2.5 h-2.5" />
+                        Working on it in the background...
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+              {/* Typing dots only when no instant reply yet */}
+              {isRunning && !instantReplyText && (
                 <div className="flex gap-3 justify-start">
                   <div className="w-7 h-7 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
                     <Bot className="w-3.5 h-3.5 text-primary" />

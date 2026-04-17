@@ -681,6 +681,8 @@ function ChatPanelContent({
   runTask,
   inputRef,
   chatEndRef,
+  instantReplyText,
+  instantReplyDone,
 }: {
   messages: ChatMessage[];
   isRunning: boolean;
@@ -690,6 +692,8 @@ function ChatPanelContent({
   runTask: () => void;
   inputRef: React.RefObject<HTMLTextAreaElement | null>;
   chatEndRef: React.RefObject<HTMLDivElement | null>;
+  instantReplyText?: string;
+  instantReplyDone?: boolean;
 }) {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -770,8 +774,30 @@ function ChatPanelContent({
             );
           })}
 
-          {/* Typing indicator while running */}
-          {isRunning && (
+          {/* Instant reply: streamed fast acknowledgment */}
+          {instantReplyText && (
+            <div className="flex gap-3 justify-start">
+              <div className="w-7 h-7 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 mt-0.5">
+                <Zap className="w-3.5 h-3.5 text-primary" />
+              </div>
+              <div className="bg-blue-50/60 border border-blue-200/60 rounded-2xl rounded-tl-sm px-4 py-3 max-w-[85%]">
+                <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">{instantReplyText}
+                  {!instantReplyDone && (
+                    <span className="inline-block w-0.5 h-4 bg-primary ml-0.5 animate-pulse align-middle" />
+                  )}
+                </p>
+                {instantReplyDone && (
+                  <p className="text-[10px] text-blue-500/70 mt-1.5 flex items-center gap-1">
+                    <Zap className="w-2.5 h-2.5" />
+                    Working on it in the background...
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Typing indicator while running and no instant reply yet */}
+          {isRunning && !instantReplyText && (
             <div className="flex gap-3 justify-start">
               <div className="w-7 h-7 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
                 <Bot className="w-3.5 h-3.5 text-primary" />
@@ -1259,6 +1285,9 @@ export default function AgentWorkspace() {
   const [creditsUsed, setCreditsUsed] = useState(0);
   const [runStartedAt, setRunStartedAt] = useState<number | null>(null);
   const [elapsed, setElapsed] = useState(0);
+  // Instant reply: streamed fast acknowledgment before agent steps begin
+  const [instantReplyText, setInstantReplyText] = useState("");
+  const [instantReplyDone, setInstantReplyDone] = useState(false);
   // Mobile: which tab is active
   const [mobileTab, setMobileTab] = useState<"chat" | "log">("chat");
   // Track if any previewable artifact has been generated (for mobile badge)
@@ -1361,6 +1390,9 @@ export default function AgentWorkspace() {
     setCreditsUsed(0);
     setRunStartedAt(Date.now());
     setElapsed(0);
+    setInstantReplyText("");
+    setInstantReplyDone(false);
+    setCurrentTaskId(null);
     // Clear browser session when starting a new task
     setActiveBrowserSession(null);
 
@@ -1419,6 +1451,13 @@ export default function AgentWorkspace() {
             if (eventType === "task_created") {
               const taskCreated = data as { taskId?: number };
               if (taskCreated.taskId) setCurrentTaskId(taskCreated.taskId);
+            } else if (eventType === "instant_reply_token") {
+              // Stream the fast acknowledgment token-by-token
+              const token = (data as { token?: string }).token ?? "";
+              if (token) setInstantReplyText(prev => prev + token);
+            } else if (eventType === "instant_reply_done") {
+              // Instant reply complete — mark it done so UI can style it differently
+              setInstantReplyDone(true);
             } else if (eventType === "step") {
               const step = data as unknown as AgentStep;
               setLiveSteps(prev => [...prev, step]);
@@ -1641,6 +1680,8 @@ export default function AgentWorkspace() {
             runTask={() => void runTask()}
             inputRef={inputRef}
             chatEndRef={chatEndRef}
+            instantReplyText={instantReplyText}
+            instantReplyDone={instantReplyDone}
           />
         </div>
 

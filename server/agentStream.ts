@@ -14,6 +14,7 @@
 import type { Express, Request, Response } from "express";
 import { runAgentLoop, sendSSE } from "./agentLoop";
 import { getAgentById, createTask, getUserCreditBalance } from "./db";
+import { streamInstantReply } from "./instantReply";
 import { sdk } from "./_core/sdk";
 import type { AgentStep } from "./agentLoop";
 import { execSync } from "child_process";
@@ -149,7 +150,18 @@ export function registerAgentStreamRoutes(app: Express) {
       removeStream(taskId, res);
     });
 
-    // Run the agentic loop
+    // ── Phase 1: Instant acknowledgment reply (~300-500ms) ─────────────────
+    // Stream a fast Groq response immediately so the user gets feedback right away.
+    // The full agent loop runs in parallel after this completes.
+    void streamInstantReply({
+      res,
+      taskId,
+      message,
+      agentSystemPrompt: typeof agent.systemPrompt === "string" ? agent.systemPrompt : undefined,
+      onBroadcast: (event: string, data: unknown) => broadcastToTask(taskId, event, data),
+    });
+
+    // ── Phase 2: Full agent loop (runs in parallel with instant reply) ──────
     try {
       await runAgentLoop({
         taskId,
