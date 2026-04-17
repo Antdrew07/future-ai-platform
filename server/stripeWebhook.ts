@@ -15,6 +15,23 @@ export async function handleStripeWebhook(req: Request, res: Response) {
     return res.status(400).json({ error: "Missing stripe-signature header" });
   }
 
+  // ⚠️ CRITICAL: Detect test events BEFORE signature verification
+  // Test events sent from Stripe Dashboard have id starting with 'evt_test_'
+  // They cannot be signature-verified, so we must check the raw body first
+  let rawBody: string;
+  try {
+    rawBody = (req.body as Buffer).toString("utf8");
+  } catch {
+    rawBody = typeof req.body === "string" ? req.body : JSON.stringify(req.body);
+  }
+  try {
+    const parsed = JSON.parse(rawBody);
+    if (parsed?.id?.startsWith("evt_test_")) {
+      console.log("[Webhook] Test event detected, returning verification response");
+      return res.json({ verified: true });
+    }
+  } catch { /* not JSON, continue to normal verification */ }
+
   let event: Stripe.Event;
 
   try {
@@ -28,7 +45,7 @@ export async function handleStripeWebhook(req: Request, res: Response) {
     return res.status(400).json({ error: "Webhook signature verification failed" });
   }
 
-  // Handle test events
+  // Handle test events (from constructEvent path)
   if (event.id.startsWith("evt_test_")) {
     console.log("[Webhook] Test event detected, returning verification response");
     return res.json({ verified: true });

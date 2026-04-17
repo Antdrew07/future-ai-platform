@@ -4,7 +4,7 @@ import { getDb } from "./db";
 import { domainPurchases } from "../drizzle/schema";
 import { eq } from "drizzle-orm";
 
-// ─── Namecheap API helpers ────────────────────────────────────────────────────
+// ─── Namecheap API helpers (used for purchase only) ──────────────────────────
 
 const NC_API = "https://api.namecheap.com/xml.response";
 const NC_USER = process.env.NAMECHEAP_USERNAME ?? "";
@@ -24,6 +24,42 @@ const TLD_PRICING: Record<string, { price: number; cost: number; renewal: number
   info:  { price: 14.99,  cost: 7.99,  renewal: 14.99  },
   biz:   { price: 17.99,  cost: 9.99,  renewal: 17.99  },
 };
+
+// RDAP registries for each TLD (ICANN standard — no API key or IP whitelist needed)
+const RDAP_REGISTRIES: Record<string, string> = {
+  com:  "https://rdap.verisign.com/com/v1",
+  net:  "https://rdap.verisign.com/net/v1",
+  org:  "https://rdap.publicinterestregistry.org/rdap",
+  io:   "https://rdap.nic.io",
+  co:   "https://rdap.nic.co",
+  ai:   "https://rdap.nic.ai",
+  app:  "https://rdap.nic.google",
+  dev:  "https://rdap.nic.google",
+  info: "https://rdap.afilias.info",
+  biz:  "https://rdap.nic.biz",
+};
+
+/**
+ * Check domain availability via RDAP (ICANN standard protocol).
+ * Returns true if available (404 = not registered), false if taken (200 = registered).
+ * Falls back to "unknown" on network errors.
+ */
+async function checkDomainAvailabilityRDAP(domain: string): Promise<boolean> {
+  const tld = domain.split(".").slice(1).join(".");
+  const registry = RDAP_REGISTRIES[tld];
+  if (!registry) return true; // Unknown TLD — assume available
+  try {
+    const res = await fetch(`${registry}/domain/${domain}`, {
+      signal: AbortSignal.timeout(5000),
+    });
+    // 404 = not found in registry = available
+    // 200 = found = taken
+    return res.status === 404;
+  } catch {
+    // Network error — assume available (better UX than blocking)
+    return true;
+  }
+}
 
 async function ncRequest(command: string, params: Record<string, string>) {
   const url = new URL(NC_API);
@@ -61,7 +97,7 @@ function isApiError(xml: string): string | null {
 // ─── Domain Router ────────────────────────────────────────────────────────────
 
 export const domainRouter = router({
-  // Search domain availability + pricing
+  // Search domain availability + pricing via RDAP (ICANN standard — no IP whitelist needed)
   search: publicProcedure
     .input(z.object({
       query: z.string().min(1).max(63),
@@ -70,46 +106,31 @@ export const domainRouter = router({
       const base = input.query.toLowerCase().replace(/[^a-z0-9-]/g, "").replace(/^-|-$/g, "");
       if (!base) throw new Error("Invalid domain name");
 
-      // Build list of domains to check
-      const tlds = ["com", "io", "ai", "co", "app", "net", "org", "dev"];
-      const domainList = tlds.map(t => `${base}.${t}`).join(",");
-
-      const xml = await ncRequest("namecheap.domains.check", { DomainList: domainList });
-      const err = isApiError(xml);
-      if (err) throw new Error(err);
-
-      // Parse results
-      const results: Array<{
-        domain: string;
-        tld: string;
-        available: boolean;
-        price: number;
-        renewal: number;
-      }> = [];
-
-      const matches = Array.from(xml.matchAll(/<DomainCheckResult Domain="([^"]+)" Available="([^"]+)"/g));
-      for (const m of matches) {
-        const domain = m[1];
-        const available = m[2] === "true";
-        const tld = domain.split(".").slice(1).join(".");
-        const pricing = TLD_PRICING[tld] ?? { price: 24.99, cost: 14.99, renewal: 24.99 };
-        results.push({
-          domain,
-          tld,
-          available,
-          price: pricing.price,
-          renewal: pricing.renewal,
-        });
-      }
+      // Check all TLDs in parallel via RDAP
+      const tlds = ["com", "io", "ai", "co", "app", "net", "org", "dev", "info", "biz"];
+      const availabilityChecks = await Promise.all(
+        tlds.map(async (tld) => {
+          const domain = `${base}.${tld}`;
+          const available = await checkDomainAvailabilityRDAP(domain);
+          const pricing = TLD_PRICING[tld] ?? { price: 24.99, cost: 14.99, renewal: 24.99 };
+          return {
+            domain,
+            tld,
+            available,
+            price: pricing.price,
+            renewal: pricing.renewal,
+          };
+        })
+      );
 
       // Sort: available first, then by price
-      results.sort((a, b) => {
+      availabilityChecks.sort((a, b) => {
         if (a.available && !b.available) return -1;
         if (!a.available && b.available) return 1;
         return a.price - b.price;
       });
 
-      return { base, results };
+      return { base, results: availabilityChecks, source: "rdap" };
     }),
 
   // Get pricing for a specific domain

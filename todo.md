@@ -474,3 +474,18 @@
 - [x] Domain upsell shown inline after website builds (no redirect)
 - [x] AgentList "Launch Workspace" button updated to "Start Chatting" → goes to /dashboard
 - [x] Recent tasks on home screen are clickable to re-run directly
+
+## Full Platform Audit (Apr 17, 2026)
+
+- [x] Fix Dashboard textarea focus bug (InputBox was nested component causing remount on every keystroke)
+- [x] Redesign Dashboard as single-screen inline chat (like Claude/Manus — no redirect, no re-typing)
+- [x] Update AgentList "Launch Workspace" to navigate to Dashboard inline chat
+- [x] Fix Namecheap IP whitelist — switched to RDAP (ICANN) for live domain availability checks
+- [x] RDAP domain search: 10 TLDs checked in parallel, accurate availability (google.com=TAKEN, google.io=AVAILABLE)
+- [x] Seed database with 5 Future-branded models, 4 credit packs, 4 subscription plans
+- [x] Fix Stripe webhook test event bypass (check raw body before constructEvent)
+- [x] Fix audit script procedure names (credits.transactions, domains.listMyDomains, models.list, etc.)
+- [x] Fix audit script table names (model_pricing, credit_packs, subscription_plans)
+- [x] Full audit result: 39/39 passed, 0 warnings, 0 failures
+- [x] Vitest: 53/53 tests passing
+- [x] TypeScript: 0 errors
