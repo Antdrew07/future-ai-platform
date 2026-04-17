@@ -62,7 +62,7 @@ export const AGENT_TOOLS = [
     type: "function" as const,
     function: {
       name: "code_execute",
-      description: "Write and ACTUALLY RUN Python or JavaScript code. Use for calculations, data processing, generating charts, building scripts, creating files, or any computational task. Returns real stdout/stderr output.",
+      description: "Write and ACTUALLY RUN Python or JavaScript code and get real output. Use for: calculations, data processing, generating charts, testing logic, parsing files, making API calls in code, or any task where you need to execute code and see the result. Returns real stdout/stderr. Use this when you need to VERIFY something works. For creating code files the user downloads, use write_file instead.",
       parameters: {
         type: "object",
         properties: {
@@ -79,7 +79,7 @@ export const AGENT_TOOLS = [
     type: "function" as const,
     function: {
       name: "shell_execute",
-      description: "Run shell commands: npm install, git clone, pip install, file operations, build commands, etc. Use for setting up projects, installing dependencies, or running build tools.",
+      description: "Run shell/terminal commands. Use for: installing packages (npm install, pip install), running build tools (npm run build, webpack), git operations, creating directory structures (mkdir), checking file systems, or running project setup scripts. Use code_execute when you need to run logic and get output. Use shell_execute when you need to set up the environment, install dependencies, or run build/compile commands.",
       parameters: {
         type: "object",
         properties: {
@@ -111,7 +111,7 @@ export const AGENT_TOOLS = [
     type: "function" as const,
     function: {
       name: "write_file",
-      description: "Create a file with content. Use for saving code, HTML, text, JSON, Markdown, or any output. The file becomes a downloadable artifact for the user.",
+      description: "PRIMARY tool for all code and file deliverables. Use this to build websites (HTML/CSS/JS), web apps, mobile apps (React Native/Flutter/Swift/Kotlin source code), Python scripts, CLI tools, Chrome extensions, config files, README files, or any text-based output. Each call creates one downloadable file. For a full website or app, call write_file multiple times (once per file: index.html, style.css, app.js, etc.). NEVER use create_presentation for these tasks — always use write_file for code and functional deliverables.",
       parameters: {
         type: "object",
         properties: {
@@ -128,7 +128,7 @@ export const AGENT_TOOLS = [
     type: "function" as const,
     function: {
       name: "export_document",
-      description: "Export content as a downloadable PDF or Markdown document. Use for books, reports, business plans, documentation, essays, or any long-form content the user wants to download.",
+      description: "Export long-form prose content as a downloadable PDF or Markdown document. Use for: books, research reports, business plans, essays, documentation, proposals, cover letters, or any content that is primarily text/prose meant to be read. Do NOT use for code files, websites, or apps — use write_file for those. Do NOT use for slide decks — use create_presentation for those.",
       parameters: {
         type: "object",
         properties: {
