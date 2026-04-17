@@ -336,3 +336,17 @@
 ### MEDIUM — Polish/UX
 - [x] Settings: "Change" login method and "Enable" 2FA — replaced with Reset Password link and "Coming Soon" disabled button
 - [x] AgentGallery: "Try Agent" navigates to /dashboard/agents/new (correct path)
+
+## Landing Page Redesign — Plain Language, Real People
+
+- [x] Rewrite hero: "Tell it what you want. It does the work." — simple, benefit-first
+- [x] Add use-case cards: Build an App (Android + Apple logos), Write a Book, Launch a Business, Build a Website, Create a Marketing Plan, Start an Online Store
+- [x] Add Android + Apple platform logos to app-building section
+- [x] Replace all jargon ("autonomous agents", "tRPC", "LLM") with plain English
+- [x] Add "How it works" section: 3 simple steps (Tell it what you want → It gets to work → You get results)
+- [x] Add social proof / trust section with simple stats + testimonials
+- [x] Update hero CTA: "Start for free — no credit card needed"
+- [x] Update Pricing page headline to match new positioning
+- [x] Update Dashboard suggestion chips to match new use cases
+- [x] Update Onboarding suggestion chips to match new use cases
+- [x] Remove all technical jargon from visible UI text

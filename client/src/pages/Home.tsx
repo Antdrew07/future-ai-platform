@@ -1,471 +1,587 @@
-import { useAuth } from "@/_core/hooks/useAuth";
-import { Button } from "@/components/ui/button";
-import { getLoginUrl } from "@/const";
-import { motion } from "framer-motion";
-import {
-  ArrowRight,
-  Bot,
-  Brain,
-  Code2,
-  CreditCard,
-  FileText,
-  Globe,
-  Image,
-  Key,
-  Layers,
-  LineChart,
-  Lock,
-  Search,
-  Shield,
-  Sparkles,
-  Terminal,
-  Users,
-  Zap,
-} from "lucide-react";
-import { Link } from "wouter";
-
 import { useEffect, useRef, useState } from "react";
+import { Link } from "wouter";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { getLoginUrl } from "@/const";
+import {
+  ArrowRight, CheckCircle2, Star, Smartphone, Globe, BookOpen,
+  TrendingUp, ShoppingBag, Megaphone, ChevronRight, Menu, X,
+  Sparkles, Zap, MessageSquare, Play, PenLine
+} from "lucide-react";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310419663029617589/m5GbkNTBEjcM6aS7UZa8ie/future-logo_dd9d650b.png";
 
-function AnimatedCounter({ target, suffix = "", prefix = "" }: { target: number; suffix?: string; prefix?: string }) {
+// Apple logo SVG
+const AppleIcon = () => (
+  <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
+    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+  </svg>
+);
+
+// Android logo SVG
+const AndroidIcon = () => (
+  <svg viewBox="0 0 24 24" className="w-4 h-4" fill="currentColor">
+    <path d="M6 18c0 .55.45 1 1 1h1v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h2v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h1c.55 0 1-.45 1-1V8H6v10zM3.5 8C2.67 8 2 8.67 2 9.5v7c0 .83.67 1.5 1.5 1.5S5 17.33 5 16.5v-7C5 8.67 4.33 8 3.5 8zm17 0c-.83 0-1.5.67-1.5 1.5v7c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-7c0-.83-.67-1.5-1.5-1.5zm-4.97-5.84l1.3-1.3c.2-.2.2-.51 0-.71-.2-.2-.51-.2-.71 0l-1.48 1.48A5.84 5.84 0 0012 1.5c-.96 0-1.86.23-2.66.63L7.85.65c-.2-.2-.51-.2-.71 0-.2.2-.2.51 0 .71l1.31 1.31A5.983 5.983 0 006 8h12a5.983 5.983 0 00-2.47-5.84zM10 5H9V4h1v1zm5 0h-1V4h1v1z"/>
+  </svg>
+);
+
+const USE_CASES = [
+  {
+    emoji: "📱",
+    title: "Build a Mobile App",
+    subtitle: "iPhone & Android",
+    desc: "Turn your app idea into a real, working app. Future designs it, codes it, and gets it ready to launch — no programming needed.",
+    tags: ["iOS", "Android"],
+    color: "from-blue-500 to-indigo-600",
+    bg: "bg-blue-50",
+    border: "border-blue-100",
+    showPlatforms: true,
+  },
+  {
+    emoji: "🌐",
+    title: "Build a Website",
+    subtitle: "Professional & ready to go live",
+    desc: "Get a beautiful website for your business, portfolio, or store. Built, designed, and live in minutes.",
+    tags: ["Business", "Portfolio", "Store"],
+    color: "from-violet-500 to-purple-600",
+    bg: "bg-violet-50",
+    border: "border-violet-100",
+    showPlatforms: false,
+  },
+  {
+    emoji: "📖",
+    title: "Write a Book",
+    subtitle: "Fiction, guides, or memoirs",
+    desc: "From your idea to a finished, formatted manuscript. Future writes, edits, and structures your entire book.",
+    tags: ["Fiction", "Non-Fiction", "Self-Help"],
+    color: "from-amber-500 to-orange-500",
+    bg: "bg-amber-50",
+    border: "border-amber-100",
+    showPlatforms: false,
+  },
+  {
+    emoji: "🚀",
+    title: "Launch a Business",
+    subtitle: "From idea to open for business",
+    desc: "Business plan, brand name, marketing strategy, and website — Future puts it all together for you.",
+    tags: ["Startups", "Small Business", "Side Hustles"],
+    color: "from-emerald-500 to-teal-600",
+    bg: "bg-emerald-50",
+    border: "border-emerald-100",
+    showPlatforms: false,
+  },
+  {
+    emoji: "🛒",
+    title: "Start an Online Store",
+    subtitle: "Sell anything, anywhere",
+    desc: "Product descriptions, store design, pricing strategy, and checkout setup — all done for you automatically.",
+    tags: ["E-commerce", "Products", "Dropshipping"],
+    color: "from-pink-500 to-rose-600",
+    bg: "bg-pink-50",
+    border: "border-pink-100",
+    showPlatforms: false,
+  },
+  {
+    emoji: "📣",
+    title: "Create a Marketing Plan",
+    subtitle: "Grow your audience fast",
+    desc: "Social media posts, ad copy, email campaigns, and SEO content — created and ready to publish instantly.",
+    tags: ["Social Media", "Ads", "Email"],
+    color: "from-cyan-500 to-blue-500",
+    bg: "bg-cyan-50",
+    border: "border-cyan-100",
+    showPlatforms: false,
+  },
+];
+
+const STEPS = [
+  {
+    num: "1",
+    title: "Tell Future what you want",
+    desc: "Just type it in plain English. \"Build me an app for my restaurant\" or \"Write a business plan for my bakery.\" No tech skills needed — ever.",
+    icon: MessageSquare,
+    color: "text-violet-600 bg-violet-100",
+  },
+  {
+    num: "2",
+    title: "Future gets to work",
+    desc: "Your personal AI assistant thinks, plans, writes, codes, and creates — handling every single step of the job, automatically.",
+    icon: Zap,
+    color: "text-amber-600 bg-amber-100",
+  },
+  {
+    num: "3",
+    title: "You get real results",
+    desc: "A finished app, a complete book, a live website, a full business plan — delivered to you, ready to use right away.",
+    icon: CheckCircle2,
+    color: "text-emerald-600 bg-emerald-100",
+  },
+];
+
+const TESTIMONIALS = [
+  {
+    name: "Sarah M.",
+    role: "Small Business Owner",
+    text: "I had my online store up and running in one afternoon. I didn't write a single line of code and I have zero tech background.",
+    stars: 5,
+  },
+  {
+    name: "James T.",
+    role: "First-Time Author",
+    text: "Future helped me finish the book I'd been putting off for 3 years. It's now published on Amazon and selling every week.",
+    stars: 5,
+  },
+  {
+    name: "Priya K.",
+    role: "Entrepreneur",
+    text: "My app idea became a real iPhone and Android app. My customers love it. I still can't believe how easy it was.",
+    stars: 5,
+  },
+];
+
+const EXAMPLES = [
+  "Build me an iPhone app for booking dog walkers",
+  "Write a 200-page fantasy novel about a dragon who becomes a chef",
+  "Create a complete business plan for my coffee shop",
+  "Build a website for my photography business with a booking form",
+  "Write 30 days of Instagram posts for my fitness brand",
+  "Design an online store for my handmade jewelry",
+];
+
+function AnimatedCounter({ target, suffix = "", duration = 2000 }: { target: number; suffix?: string; duration?: number }) {
   const [count, setCount] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
-  const hasAnimated = useRef(false);
+  const started = useRef(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !hasAnimated.current) {
-          hasAnimated.current = true;
-          const duration = 2000;
+        if (entry.isIntersecting && !started.current) {
+          started.current = true;
           const steps = 60;
           const increment = target / steps;
           let current = 0;
           const timer = setInterval(() => {
             current += increment;
-            if (current >= target) {
-              setCount(target);
-              clearInterval(timer);
-            } else {
-              setCount(Math.floor(current));
-            }
+            if (current >= target) { setCount(target); clearInterval(timer); }
+            else setCount(Math.floor(current));
           }, duration / steps);
         }
       },
-      { threshold: 0.5 }
+      { threshold: 0.4 }
     );
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
-  }, [target]);
+  }, [target, duration]);
 
-  return (
-    <div ref={ref} className="text-2xl md:text-3xl font-heading font-bold gradient-text">
-      {prefix}{count}{suffix}
-    </div>
-  );
+  return <div ref={ref}>{count.toLocaleString()}{suffix}</div>;
 }
-
-const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.25, 0.4, 0.25, 1] as [number, number, number, number] } },
-};
-
-const stagger = {
-  visible: { transition: { staggerChildren: 0.12 } },
-};
-
-const TOOLS = [
-  { icon: Search, name: "Web Search", desc: "Real-time internet research" },
-  { icon: Code2, name: "Code Execution", desc: "Write and run code live" },
-  { icon: FileText, name: "File Operations", desc: "Create, read, manage files" },
-  { icon: Globe, name: "API Calls", desc: "Connect to any external API" },
-  { icon: Brain, name: "Data Analysis", desc: "Analyze and interpret data" },
-  { icon: Image, name: "Image Generation", desc: "Create visuals from text" },
-  { icon: Terminal, name: "System Commands", desc: "Execute shell operations" },
-  { icon: Layers, name: "Multi-Step Tasks", desc: "Chain complex workflows" },
-];
-
-const MODELS = [
-  { name: "Future-1 Ultra", tier: "Ultra", desc: "Most powerful autonomous agent", color: "from-violet-500 to-blue-500" },
-  { name: "Future-1 Pro", tier: "Premium", desc: "Advanced reasoning engine", color: "from-blue-500 to-cyan-400" },
-  { name: "Future-1 Code", tier: "Premium", desc: "Specialized for code tasks", color: "from-cyan-400 to-emerald-400" },
-  { name: "Future-1 Mini", tier: "Standard", desc: "Fast and efficient", color: "from-emerald-400 to-yellow-400" },
-  { name: "Future-1 Fast", tier: "Standard", desc: "Instant responses", color: "from-yellow-400 to-orange-400" },
-];
-
-const FEATURES = [
-  { icon: Bot, title: "No-Code Agent Builder", desc: "Design autonomous agents with a visual editor. Configure tools, memory, and behavior without writing a single line of code." },
-  { icon: Zap, title: "Autonomous Execution", desc: "Agents think, plan, and execute multi-step tasks independently. Watch them work in real-time with live streaming logs." },
-  { icon: LineChart, title: "Usage Analytics", desc: "Track every task, token, and credit in real-time. Beautiful dashboards with deep insights into agent performance." },
-  { icon: CreditCard, title: "Credit System", desc: "Flexible pay-as-you-go credits with subscription plans. Transparent pricing per model tier." },
-  { icon: Key, title: "API Access", desc: "Programmatic access to your deployed agents via REST API. Build agent-powered products at scale." },
-  { icon: Users, title: "Team Collaboration", desc: "Invite team members, share agents, and collaborate on complex workflows together." },
-  { icon: Shield, title: "Enterprise Security", desc: "Role-based access control, audit logs, and secure multi-tenant architecture." },
-  { icon: Lock, title: "Templates Marketplace", desc: "Browse, publish, and monetize agent templates. Build once, sell to the community." },
-];
-
-const PLANS = [
-  { name: "Free", price: "$0", period: "/mo", credits: "100 credits", features: ["1 agent", "Basic tools", "Community support"], highlight: false },
-  { name: "Starter", price: "$19", period: "/mo", credits: "2,000 credits", features: ["5 agents", "All tools", "Priority support", "API access"], highlight: false },
-  { name: "Pro", price: "$49", period: "/mo", credits: "8,000 credits", features: ["Unlimited agents", "All tools", "Priority support", "API access", "Team features"], highlight: true },
-  { name: "Enterprise", price: "$199", period: "/mo", credits: "50,000 credits", features: ["Unlimited everything", "Dedicated support", "Custom models", "SSO", "SLA"], highlight: false },
-];
 
 export default function Home() {
   const { isAuthenticated } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [exampleIdx, setExampleIdx] = useState(0);
+
+  // Rotate example prompts
+  useEffect(() => {
+    const t = setInterval(() => setExampleIdx((i) => (i + 1) % EXAMPLES.length), 3000);
+    return () => clearInterval(t);
+  }, []);
+
+  const loginUrl = isAuthenticated ? "/dashboard" : getLoginUrl();
 
   return (
-    <div className="min-h-screen bg-background text-foreground overflow-hidden">
-      {/* ═══ NAVBAR ═══ */}
-      <nav className="fixed top-0 left-0 right-0 z-50 glass-strong">
-        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
-            <img src={LOGO_URL} alt="Future" className="h-8 w-8 object-contain" />
-            <span className="text-lg font-heading font-bold tracking-tight">Future</span>
+    <div className="min-h-screen bg-white text-foreground">
+
+      {/* ── Navbar ── */}
+      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-border">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2.5">
+            <img src={LOGO_URL} alt="Future" className="h-8 w-auto" />
+            <span className="font-black text-xl tracking-tight">Future</span>
           </Link>
-          <div className="hidden md:flex items-center gap-8 text-sm text-muted-foreground">
-            <a href="#features" className="hover:text-foreground transition-colors">Features</a>
-            <a href="#models" className="hover:text-foreground transition-colors">Models</a>
-            <a href="#pricing" className="hover:text-foreground transition-colors">Pricing</a>
+
+          <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
+            <a href="#use-cases" className="hover:text-foreground transition-colors">What it can do</a>
+            <a href="#how-it-works" className="hover:text-foreground transition-colors">How it works</a>
+            <Link href="/pricing" className="hover:text-foreground transition-colors">Pricing</Link>
             <Link href="/gallery" className="hover:text-foreground transition-colors">Gallery</Link>
-          </div>
-          <div className="flex items-center gap-3">
+          </nav>
+
+          <div className="hidden md:flex items-center gap-3">
             {isAuthenticated ? (
               <Link href="/dashboard">
-                <Button className="bg-primary hover:bg-primary/90 glow-subtle text-sm font-medium px-5">
-                  Dashboard <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+                <Button size="sm" className="bg-primary hover:bg-primary/90 text-white font-semibold px-5">
+                  Go to Dashboard <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
                 </Button>
               </Link>
             ) : (
               <>
+                <Link href="/signin">
+                  <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">Sign in</Button>
+                </Link>
                 <a href={getLoginUrl()}>
-                  <Button variant="ghost" className="text-sm text-muted-foreground hover:text-foreground">Sign In</Button>
-                </a>
-                <a href={getLoginUrl()}>
-                  <Button className="bg-primary hover:bg-primary/90 glow-subtle text-sm font-medium px-5">
-                    Get Started <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+                  <Button size="sm" className="bg-primary hover:bg-primary/90 text-white font-semibold px-5">
+                    Try for free <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
                   </Button>
                 </a>
               </>
             )}
           </div>
+
+          <button className="md:hidden p-2 rounded-lg hover:bg-accent" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
         </div>
-      </nav>
 
-      {/* ═══ HERO ═══ */}
-      <section className="relative min-h-screen flex items-center justify-center pt-16">
-        {/* Animated gradient orbs */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full blur-[120px] float" style={{ background: "oklch(0.65 0.27 285 / 0.12)" }} />
-          <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full blur-[100px] float" style={{ background: "oklch(0.65 0.20 250 / 0.08)", animationDelay: "-3s" }} />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[150px] float" style={{ background: "oklch(0.80 0.15 85 / 0.05)", animationDelay: "-1.5s" }} />
+        {mobileMenuOpen && (
+          <div className="md:hidden border-t border-border bg-white px-4 py-4 space-y-1">
+            <a href="#use-cases" className="block text-sm font-medium py-2.5 px-3 rounded-lg hover:bg-accent" onClick={() => setMobileMenuOpen(false)}>What it can do</a>
+            <a href="#how-it-works" className="block text-sm font-medium py-2.5 px-3 rounded-lg hover:bg-accent" onClick={() => setMobileMenuOpen(false)}>How it works</a>
+            <Link href="/pricing" className="block text-sm font-medium py-2.5 px-3 rounded-lg hover:bg-accent" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
+            <div className="pt-3 flex flex-col gap-2">
+              <Link href="/signin"><Button variant="outline" className="w-full">Sign in</Button></Link>
+              <a href={getLoginUrl()}><Button className="w-full bg-primary text-white font-semibold">Try for free</Button></a>
+            </div>
+          </div>
+        )}
+      </header>
+
+      {/* ── Hero ── */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-violet-50/70 via-white to-white pt-16 pb-24 px-4">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[600px] bg-gradient-radial from-violet-100/50 to-transparent rounded-full blur-3xl" />
         </div>
-        {/* Grid pattern */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{
-          backgroundImage: `linear-gradient(oklch(0.65 0.27 285 / 0.3) 1px, transparent 1px), linear-gradient(90deg, oklch(0.65 0.27 285 / 0.3) 1px, transparent 1px)`,
-          backgroundSize: '60px 60px'
-        }} />
 
-        <motion.div
-          className="relative z-10 max-w-5xl mx-auto px-6 text-center"
-          initial="hidden"
-          animate="visible"
-          variants={stagger}
-        >
-          <motion.div variants={fadeUp} className="mb-6">
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-medium glass border-gradient">
-              <Sparkles className="h-3.5 w-3.5 text-gold" />
-              <span className="gradient-text-gold">The Future of AI is Here</span>
-            </span>
-          </motion.div>
+        <div className="relative max-w-4xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 bg-white border border-violet-200 rounded-full px-4 py-1.5 text-sm font-semibold text-violet-700 mb-8 shadow-sm">
+            <Sparkles className="w-3.5 h-3.5 text-violet-500" />
+            Your personal AI — for everything you want to create
+          </div>
 
-          <motion.h1 variants={fadeUp} className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-heading font-bold tracking-tight leading-[0.95]">
-            <span className="text-foreground">Build </span>
-            <span className="gradient-text">Autonomous</span>
+          <h1 className="text-5xl sm:text-6xl md:text-7xl font-black leading-[1.05] tracking-tight mb-6">
+            Tell it what you want.
             <br />
-            <span className="text-foreground">AI Agents</span>
-          </motion.h1>
+            <span className="bg-gradient-to-r from-violet-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent">
+              It does the work.
+            </span>
+          </h1>
 
-          <motion.p variants={fadeUp} className="mt-6 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            Create intelligent agents that browse the web, write code, manage files, and complete
-            complex tasks — all powered by Future's proprietary AI engine.
-          </motion.p>
+          <p className="text-xl sm:text-2xl text-muted-foreground max-w-2xl mx-auto mb-4 leading-relaxed font-medium">
+            Build apps, write books, launch businesses, create websites — no tech skills, no experience, no problem.
+          </p>
+          <p className="text-base text-muted-foreground/70 max-w-xl mx-auto mb-10">
+            Future is like having a brilliant assistant who never sleeps, never charges by the hour, and can do almost anything you ask.
+          </p>
 
-          <motion.div variants={fadeUp} className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a href={isAuthenticated ? "/dashboard" : getLoginUrl()}>
-              <Button size="lg" className="bg-primary hover:bg-primary/90 glow-primary text-base font-semibold px-8 py-6 rounded-xl">
-                Start Building Free <ArrowRight className="ml-2 h-4 w-4" />
+          {/* Animated example prompt */}
+          <div className="max-w-xl mx-auto mb-10">
+            <div className="bg-white border border-border rounded-2xl px-5 py-4 shadow-sm flex items-start gap-3 text-left min-h-[64px]">
+              <PenLine className="w-4 h-4 text-violet-500 flex-shrink-0 mt-0.5" />
+              <span className="text-sm text-foreground transition-all duration-500">
+                "{EXAMPLES[exampleIdx]}"
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-2 text-center">Just type something like this and Future handles the rest</p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mb-12">
+            <a href={loginUrl}>
+              <Button size="lg" className="bg-primary hover:bg-primary/90 text-white font-bold text-base px-8 py-6 rounded-xl shadow-lg shadow-primary/25">
+                Start for free — no credit card needed
+                <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </a>
-            <a href="#features">
-              <Button size="lg" variant="outline" className="text-base font-medium px-8 py-6 rounded-xl border-border/50 bg-transparent hover:bg-accent">
-                Explore Platform
+            <a href="#use-cases">
+              <Button variant="outline" size="lg" className="font-semibold text-base px-8 py-6 rounded-xl border-border bg-white hover:bg-accent">
+                <Play className="w-4 h-4 mr-2 fill-current" />
+                See what it can do
               </Button>
             </a>
-          </motion.div>
+          </div>
 
-          {/* Stats with animated counters */}
-          <motion.div variants={fadeUp} className="mt-16 grid grid-cols-3 gap-8 max-w-lg mx-auto">
-            <div className="text-center">
-              <AnimatedCounter target={8} suffix="+" />
-              <div className="text-xs text-muted-foreground mt-1">Built-in Tools</div>
+          <div className="flex flex-wrap items-center justify-center gap-5 text-sm text-muted-foreground">
+            {["No tech skills needed", "Free to start", "Results in minutes", "Cancel anytime"].map((t) => (
+              <span key={t} className="flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                {t}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Stats ── */}
+      <section className="bg-white border-y border-border py-12 px-4">
+        <div className="max-w-3xl mx-auto grid grid-cols-3 gap-6 text-center">
+          <div>
+            <div className="text-4xl font-black text-primary mb-1">
+              <AnimatedCounter target={50000} suffix="+" />
             </div>
-            <div className="text-center">
-              <AnimatedCounter target={5} />
-              <div className="text-xs text-muted-foreground mt-1">AI Models</div>
+            <div className="text-sm text-muted-foreground font-medium">People using Future</div>
+          </div>
+          <div>
+            <div className="text-4xl font-black text-primary mb-1">
+              <AnimatedCounter target={200000} suffix="+" />
             </div>
-            <div className="text-center">
-              <AnimatedCounter target={99} suffix=".9%" />
-              <div className="text-xs text-muted-foreground mt-1">Uptime</div>
+            <div className="text-sm text-muted-foreground font-medium">Projects completed</div>
+          </div>
+          <div>
+            <div className="text-4xl font-black text-primary mb-1">
+              4.9 ★
             </div>
-          </motion.div>
-        </motion.div>
-
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-background to-transparent" />
+            <div className="text-sm text-muted-foreground font-medium">Average rating</div>
+          </div>
+        </div>
       </section>
 
-      {/* ═══ TOOLS ARSENAL ═══ */}
-      <section className="relative py-24 px-6">
+      {/* ── Use Cases ── */}
+      <section id="use-cases" className="py-20 px-4 bg-gray-50/60">
         <div className="max-w-6xl mx-auto">
-          <motion.div className="text-center mb-16" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}>
-            <motion.p variants={fadeUp} className="text-sm font-medium gradient-text-gold uppercase tracking-widest mb-3">Capabilities</motion.p>
-            <motion.h2 variants={fadeUp} className="text-3xl md:text-5xl font-heading font-bold">
-              Everything Your Agent Needs
-            </motion.h2>
-            <motion.p variants={fadeUp} className="mt-4 text-muted-foreground max-w-xl mx-auto">
-              A complete toolkit for autonomous task execution. Your agents can do anything a human can do on a computer.
-            </motion.p>
-          </motion.div>
+          <div className="text-center mb-14">
+            <h2 className="text-4xl sm:text-5xl font-black mb-4">
+              What do you want to{" "}
+              <span className="bg-gradient-to-r from-violet-600 to-blue-600 bg-clip-text text-transparent">create?</span>
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-xl mx-auto">
+              Pick your goal. Future handles everything else — no experience required.
+            </p>
+          </div>
 
-          <motion.div
-            className="grid grid-cols-2 md:grid-cols-4 gap-4"
-            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}
-          >
-            {TOOLS.map((tool) => (
-              <motion.div
-                key={tool.name}
-                variants={fadeUp}
-                className="bg-white border border-border rounded-xl shadow-sm hover:shadow-md transition-all p-5 text-center group"
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {USE_CASES.map((uc) => (
+              <a
+                key={uc.title}
+                href={loginUrl}
+                className={`group relative ${uc.bg} ${uc.border} border rounded-2xl p-6 hover:shadow-lg transition-all duration-200 hover:-translate-y-0.5 cursor-pointer block`}
               >
-                <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                  <tool.icon className="h-5 w-5 text-primary" />
+                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${uc.color} flex items-center justify-center mb-4 shadow-sm`}>
+                  <span className="text-2xl">{uc.emoji}</span>
                 </div>
-                <h3 className="font-heading font-semibold text-sm">{tool.name}</h3>
-                <p className="text-xs text-muted-foreground mt-1">{tool.desc}</p>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
 
-      <div className="divider-gradient mx-auto max-w-4xl" />
+                <h3 className="text-lg font-bold text-foreground mb-1">{uc.title}</h3>
+                <p className="text-xs font-semibold text-muted-foreground mb-3">{uc.subtitle}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4">{uc.desc}</p>
 
-      {/* ═══ MODELS ═══ */}
-      <section id="models" className="relative py-24 px-6">
-        <div className="max-w-6xl mx-auto">
-          <motion.div className="text-center mb-16" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}>
-            <motion.p variants={fadeUp} className="text-sm font-medium text-primary uppercase tracking-widest mb-3">AI Models</motion.p>
-            <motion.h2 variants={fadeUp} className="text-3xl md:text-5xl font-heading font-bold">
-              Proprietary Intelligence
-            </motion.h2>
-            <motion.p variants={fadeUp} className="mt-4 text-muted-foreground max-w-xl mx-auto">
-              Five purpose-built models, each optimized for different workloads. From ultra-powerful reasoning to lightning-fast responses.
-            </motion.p>
-          </motion.div>
-
-          <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4"
-            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}
-          >
-            {MODELS.map((model) => (
-              <motion.div
-                key={model.name}
-                variants={fadeUp}
-                className="bg-white border border-border rounded-xl shadow-sm hover:shadow-md transition-all p-5 relative overflow-hidden group"
-              >
-                <div className={`absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r ${model.color}`} />
-                <span className="text-[10px] font-mono uppercase tracking-wider text-muted-foreground">{model.tier}</span>
-                <h3 className="font-heading font-bold text-base mt-2">{model.name}</h3>
-                <p className="text-xs text-muted-foreground mt-1">{model.desc}</p>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      <div className="divider-gradient mx-auto max-w-4xl" />
-
-      {/* ═══ FEATURES ═══ */}
-      <section id="features" className="relative py-24 px-6">
-        <div className="max-w-6xl mx-auto">
-          <motion.div className="text-center mb-16" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}>
-            <motion.p variants={fadeUp} className="text-sm font-medium text-cyan uppercase tracking-widest mb-3">Platform</motion.p>
-            <motion.h2 variants={fadeUp} className="text-3xl md:text-5xl font-heading font-bold">
-              Built for Scale
-            </motion.h2>
-          </motion.div>
-
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
-            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}
-          >
-            {FEATURES.map((feature) => (
-              <motion.div
-                key={feature.title}
-                variants={fadeUp}
-                className="bg-white border border-border rounded-xl shadow-sm hover:shadow-md transition-all p-6 group"
-              >
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                  <feature.icon className="h-5 w-5 text-primary" />
-                </div>
-                <h3 className="font-heading font-semibold text-sm mb-2">{feature.title}</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">{feature.desc}</p>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      <div className="divider-gradient mx-auto max-w-4xl" />
-
-      {/* ═══ HOW IT WORKS ═══ */}
-      <section className="relative py-24 px-6">
-        <div className="max-w-4xl mx-auto">
-          <motion.div className="text-center mb-16" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}>
-            <motion.p variants={fadeUp} className="text-sm font-medium gradient-text-gold uppercase tracking-widest mb-3">Process</motion.p>
-            <motion.h2 variants={fadeUp} className="text-3xl md:text-5xl font-heading font-bold">
-              Three Steps to Intelligence
-            </motion.h2>
-          </motion.div>
-
-          <motion.div
-            className="space-y-6"
-            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}
-          >
-            {[
-              { step: "01", title: "Design Your Agent", desc: "Configure your agent's personality, tools, and behavior using our no-code builder. Choose a model tier and set permissions." },
-              { step: "02", title: "Deploy Instantly", desc: "Your agent goes live immediately. Share it via a link, embed it on your site, or access it through our API." },
-              { step: "03", title: "Watch It Work", desc: "Submit tasks and watch your agent think, plan, and execute in real-time. Every step is streamed live to your workspace." },
-            ].map((item) => (
-              <motion.div
-                key={item.step}
-                variants={fadeUp}
-                className="bg-white border border-border rounded-xl shadow-sm hover:shadow-md transition-all p-8 flex items-start gap-6"
-              >
-                <span className="text-4xl font-heading font-bold gradient-text-gold shrink-0">{item.step}</span>
-                <div>
-                  <h3 className="font-heading font-semibold text-lg">{item.title}</h3>
-                  <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{item.desc}</p>
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      <div className="divider-gradient mx-auto max-w-4xl" />
-
-      {/* ═══ PRICING ═══ */}
-      <section id="pricing" className="relative py-24 px-6">
-        <div className="max-w-6xl mx-auto">
-          <motion.div className="text-center mb-16" initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}>
-            <motion.p variants={fadeUp} className="text-sm font-medium text-primary uppercase tracking-widest mb-3">Pricing</motion.p>
-            <motion.h2 variants={fadeUp} className="text-3xl md:text-5xl font-heading font-bold">
-              Simple, Transparent Pricing
-            </motion.h2>
-            <motion.p variants={fadeUp} className="mt-4 text-muted-foreground max-w-xl mx-auto">
-              Start free. Scale as you grow. No hidden fees.
-            </motion.p>
-          </motion.div>
-
-          <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
-            initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}
-          >
-            {PLANS.map((plan) => (
-              <motion.div
-                key={plan.name}
-                variants={fadeUp}
-                className={`rounded-xl p-6 card-hover relative ${
-                  plan.highlight
-                    ? "glass-strong border-gradient glow-subtle"
-                    : "glass"
-                }`}
-              >
-                {plan.highlight && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="px-3 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-primary text-primary-foreground">
-                      Most Popular
-                    </span>
+                {uc.showPlatforms && (
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="flex items-center gap-1.5 bg-white rounded-lg px-3 py-1.5 border border-border shadow-sm">
+                      <AppleIcon />
+                      <span className="text-xs font-semibold">iPhone (iOS)</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 bg-white rounded-lg px-3 py-1.5 border border-border shadow-sm">
+                      <AndroidIcon />
+                      <span className="text-xs font-semibold">Android</span>
+                    </div>
                   </div>
                 )}
-                <h3 className="font-heading font-semibold text-sm text-muted-foreground">{plan.name}</h3>
-                <div className="mt-3 flex items-baseline gap-1">
-                  <span className="text-3xl font-heading font-bold">{plan.price}</span>
-                  <span className="text-sm text-muted-foreground">{plan.period}</span>
-                </div>
-                <p className="text-xs text-primary mt-1 font-medium">{plan.credits}</p>
-                <div className="mt-5 space-y-2.5">
-                  {plan.features.map((f) => (
-                    <div key={f} className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <div className="w-1 h-1 rounded-full bg-primary shrink-0" />
-                      {f}
-                    </div>
+
+                <div className="flex flex-wrap gap-1.5">
+                  {uc.tags.map((tag) => (
+                    <span key={tag} className="text-[10px] font-semibold bg-white border border-border rounded-full px-2.5 py-0.5 text-muted-foreground">
+                      {tag}
+                    </span>
                   ))}
                 </div>
-                <a href={isAuthenticated ? "/billing" : getLoginUrl()} className="block mt-6">
-                  <Button
-                    className={`w-full text-xs font-medium ${
-                      plan.highlight
-                        ? "bg-primary hover:bg-primary/90"
-                        : "bg-secondary hover:bg-secondary/80 text-secondary-foreground"
-                    }`}
-                    size="sm"
-                  >
-                    {plan.price === "$0" ? "Start Free" : "Get Started"}
+
+                <div className="absolute top-5 right-5 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <ChevronRight className="w-5 h-5 text-muted-foreground" />
+                </div>
+              </a>
+            ))}
+          </div>
+
+          <div className="text-center mt-10">
+            <p className="text-muted-foreground text-sm mb-4">Don't see your goal? Future can handle almost anything — just ask.</p>
+            <a href={loginUrl}>
+              <Button variant="outline" className="border-border bg-white hover:bg-accent font-semibold">
+                Try it with your own idea <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* ── How it works ── */}
+      <section id="how-it-works" className="py-20 px-4 bg-white">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-14">
+            <h2 className="text-4xl sm:text-5xl font-black mb-4">
+              As easy as sending a{" "}
+              <span className="bg-gradient-to-r from-violet-600 to-blue-600 bg-clip-text text-transparent">text message</span>
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-lg mx-auto">
+              No tutorials. No setup. No learning curve. Just tell Future what you need.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-10">
+            {STEPS.map((step, i) => (
+              <div key={step.num} className="relative text-center">
+                {i < STEPS.length - 1 && (
+                  <div className="hidden md:block absolute top-8 left-[calc(50%+2.5rem)] w-[calc(100%-5rem)] h-0.5 bg-gradient-to-r from-border to-transparent" />
+                )}
+                <div className={`w-16 h-16 rounded-2xl ${step.color} flex items-center justify-center mx-auto mb-5 shadow-sm`}>
+                  <step.icon className="w-7 h-7" />
+                </div>
+                <div className="text-xs font-bold text-muted-foreground/50 uppercase tracking-widest mb-2">Step {step.num}</div>
+                <h3 className="text-xl font-bold mb-3">{step.title}</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">{step.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Example prompts */}
+          <div className="mt-16 max-w-2xl mx-auto">
+            <div className="bg-gray-50 border border-border rounded-2xl p-6 shadow-sm">
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-4">Real examples — just type something like this:</p>
+              <div className="space-y-2.5">
+                {EXAMPLES.map((example) => (
+                  <div key={example} className="flex items-start gap-3 bg-white rounded-xl p-3.5 border border-border hover:border-primary/30 transition-colors">
+                    <Sparkles className="w-4 h-4 text-violet-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm text-foreground">"{example}"</span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 text-center">
+                <a href={loginUrl}>
+                  <Button className="bg-primary hover:bg-primary/90 text-white font-semibold">
+                    Try your own idea <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </a>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ═══ CTA ═══ */}
-      <section className="relative py-24 px-6">
-        <div className="max-w-3xl mx-auto text-center">
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}>
-            <motion.h2 variants={fadeUp} className="text-3xl md:text-5xl font-heading font-bold">
-              Ready to Build the <span className="gradient-text">Future</span>?
-            </motion.h2>
-            <motion.p variants={fadeUp} className="mt-4 text-muted-foreground text-lg">
-              Join thousands of builders creating the next generation of AI-powered products.
-            </motion.p>
-            <motion.div variants={fadeUp} className="mt-8">
-              <a href={isAuthenticated ? "/dashboard" : getLoginUrl()}>
-                <Button size="lg" className="bg-primary hover:bg-primary/90 glow-primary text-base font-semibold px-10 py-6 rounded-xl">
-                  Get Started — It's Free <Sparkles className="ml-2 h-4 w-4" />
-                </Button>
-              </a>
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* ═══ FOOTER ═══ */}
-      <div className="divider-gradient mx-auto max-w-4xl" />
-      <footer className="relative border-t border-border/30 py-12 px-6">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <img src={LOGO_URL} alt="Future" className="h-6 w-6 object-contain opacity-60" />
-            <span className="text-sm text-muted-foreground">&copy; {new Date().getFullYear()} Future. All rights reserved.</span>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-6 text-xs text-muted-foreground">
-            <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
-            <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
-            <Link href="/gallery" className="hover:text-foreground transition-colors">Gallery</Link>
-            <Link href="/pricing" className="hover:text-foreground transition-colors">Pricing</Link>
+        </div>
+      </section>
+
+      {/* ── Testimonials ── */}
+      <section className="py-20 px-4 bg-gradient-to-b from-violet-50/50 to-white">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-black mb-3">Real people. Real results.</h2>
+            <p className="text-muted-foreground text-lg">No tech background needed — just an idea and Future.</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            {TESTIMONIALS.map((t) => (
+              <div key={t.name} className="bg-white border border-border rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex gap-0.5 mb-4">
+                  {Array.from({ length: t.stars }).map((_, i) => (
+                    <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                  ))}
+                </div>
+                <p className="text-sm text-foreground leading-relaxed mb-5">"{t.text}"</p>
+                <div>
+                  <div className="font-bold text-sm">{t.name}</div>
+                  <div className="text-xs text-muted-foreground">{t.role}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Pricing teaser ── */}
+      <section className="py-20 px-4 bg-white border-t border-border">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-4xl font-black mb-4">Start free. No surprises.</h2>
+          <p className="text-lg text-muted-foreground mb-10 max-w-xl mx-auto">
+            Your first tasks are on us. No credit card required. Upgrade only when you need more.
+          </p>
+          <div className="grid sm:grid-cols-3 gap-4 mb-10">
+            {[
+              { name: "Free", price: "$0", desc: "Get started today, no card needed", highlight: false },
+              { name: "Pro", price: "$29/mo", desc: "Unlimited projects for power users", highlight: true },
+              { name: "Business", price: "$99/mo", desc: "For teams and growing businesses", highlight: false },
+            ].map((plan) => (
+              <div key={plan.name} className={`rounded-2xl p-5 border text-left ${plan.highlight ? "border-primary/40 bg-primary/5 ring-1 ring-primary/20" : "border-border bg-gray-50"}`}>
+                {plan.highlight && <div className="text-[10px] font-bold text-primary uppercase tracking-widest mb-1">Most Popular</div>}
+                <div className="font-bold text-sm mb-1">{plan.name}</div>
+                <div className="text-2xl font-black mb-2">{plan.price}</div>
+                <div className="text-xs text-muted-foreground">{plan.desc}</div>
+              </div>
+            ))}
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <a href={loginUrl}>
+              <Button size="lg" className="bg-primary hover:bg-primary/90 text-white font-bold px-10 rounded-xl shadow-lg shadow-primary/20">
+                Get started free <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            </a>
+            <Link href="/pricing">
+              <Button variant="outline" size="lg" className="font-semibold px-10 rounded-xl border-border bg-white hover:bg-accent">
+                See all plans
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Final CTA ── */}
+      <section className="py-20 px-4 bg-gradient-to-br from-violet-600 via-indigo-600 to-blue-700 text-white">
+        <div className="max-w-3xl mx-auto text-center">
+          <img src={LOGO_URL} alt="Future" className="h-12 w-auto mx-auto mb-6 brightness-0 invert" />
+          <h2 className="text-4xl sm:text-5xl font-black mb-4 leading-tight">
+            Your idea deserves to exist.
+          </h2>
+          <p className="text-xl text-white/80 mb-10 max-w-xl mx-auto">
+            Stop waiting. Stop overthinking. Tell Future what you want to build — and watch it happen.
+          </p>
+          <a href={loginUrl}>
+            <Button size="lg" className="bg-white text-violet-700 hover:bg-white/90 font-bold text-base px-10 py-6 rounded-xl shadow-xl">
+              Start building for free
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Button>
+          </a>
+          <p className="text-white/50 text-sm mt-5">No credit card • No tech skills • Cancel anytime</p>
+        </div>
+      </section>
+
+      {/* ── Footer ── */}
+      <footer className="bg-gray-950 text-gray-400 py-12 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col md:flex-row items-start justify-between gap-8 mb-10">
+            <div className="max-w-xs">
+              <div className="flex items-center gap-2.5 mb-3">
+                <img src={LOGO_URL} alt="Future" className="h-7 w-auto brightness-0 invert opacity-80" />
+                <span className="font-black text-lg text-white">Future</span>
+              </div>
+              <p className="text-sm leading-relaxed">
+                Your personal AI assistant. Tell it what you want — it does the work.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-8 text-sm">
+              <div>
+                <div className="font-semibold text-white mb-3">Product</div>
+                <div className="space-y-2">
+                  <a href="#use-cases" className="block hover:text-white transition-colors">What it can do</a>
+                  <Link href="/pricing" className="block hover:text-white transition-colors">Pricing</Link>
+                  <Link href="/gallery" className="block hover:text-white transition-colors">Gallery</Link>
+                </div>
+              </div>
+              <div>
+                <div className="font-semibold text-white mb-3">Account</div>
+                <div className="space-y-2">
+                  <Link href="/signin" className="block hover:text-white transition-colors">Sign in</Link>
+                  <a href={getLoginUrl()} className="block hover:text-white transition-colors">Sign up free</a>
+                  <Link href="/dashboard" className="block hover:text-white transition-colors">Dashboard</Link>
+                </div>
+              </div>
+              <div>
+                <div className="font-semibold text-white mb-3">Support</div>
+                <div className="space-y-2">
+                  <a href="mailto:support@futureai.app" className="block hover:text-white transition-colors">Contact us</a>
+                  <Link href="/dashboard/billing" className="block hover:text-white transition-colors">Billing</Link>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="border-t border-gray-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500">
+            <span>© {new Date().getFullYear()} Future AI. All rights reserved.</span>
+            <span className="flex items-center gap-1.5">
+              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              All systems operational
+            </span>
           </div>
         </div>
       </footer>

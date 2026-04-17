@@ -19,16 +19,16 @@ const STEPS = [
 ];
 
 const SUGGESTIONS = [
-  { icon: Globe,        label: "Build a website",          prompt: "Build a modern, professional website for my business. I'll describe what I need." },
-  { icon: Smartphone,   label: "Build an iOS app",         prompt: "Help me build an iOS app. I'll describe the idea and you'll guide me through the full process." },
-  { icon: Smartphone,   label: "Build an Android app",     prompt: "Help me build an Android app. I'll describe the idea and you'll guide me through the full process." },
-  { icon: Briefcase,    label: "Launch a business",        prompt: "Help me launch a business. I'll describe my idea and you'll help with the plan, branding, and first steps." },
-  { icon: ShoppingBag,  label: "Build an online store",    prompt: "Help me set up an online store with product listings, payments, and a great shopping experience." },
-  { icon: TrendingUp,   label: "Grow my social media",     prompt: "Help me grow my social media presence. I'll tell you about my brand and goals." },
-  { icon: Megaphone,    label: "Create a marketing plan",  prompt: "Create a comprehensive marketing plan for my business or product." },
-  { icon: FileText,     label: "Write a business plan",    prompt: "Write a detailed business plan for my idea, including market analysis, financials, and strategy." },
-  { icon: Rocket,       label: "Launch a SaaS product",    prompt: "Help me launch a SaaS product — from idea validation to landing page to first users." },
-  { icon: Code2,        label: "Write & run code",          prompt: "Write and run code to solve a problem for me. I'll describe what I need." },
+  { icon: Globe,        label: "Build a website",          prompt: "Build a professional website for my business. I'll describe what I need and you'll handle the rest." },
+  { icon: Smartphone,   label: "Build an iPhone app",      prompt: "Help me build an iPhone app. I'll describe my idea and you'll guide me through the entire process — design, code, and launch." },
+  { icon: Smartphone,   label: "Build an Android app",     prompt: "Help me build an Android app. I'll describe my idea and you'll handle everything from design to launch." },
+  { icon: Briefcase,    label: "Launch a business",        prompt: "Help me launch a business. I have an idea and I need a business plan, brand name, website, and first steps." },
+  { icon: ShoppingBag,  label: "Start an online store",    prompt: "Help me start an online store. I'll describe what I'm selling and you'll set up everything — products, payments, and design." },
+  { icon: TrendingUp,   label: "Write a book",             prompt: "Help me write a book. I'll describe the topic or story idea and you'll write the full manuscript." },
+  { icon: Megaphone,    label: "Create a marketing plan",  prompt: "Create a marketing plan for my business. I'll describe my product and target customers." },
+  { icon: FileText,     label: "Write a business plan",    prompt: "Write a complete business plan for my idea, including market research, financials, and growth strategy." },
+  { icon: Rocket,       label: "Grow my social media",     prompt: "Help me grow my social media. I'll describe my brand and you'll create a content strategy and posts." },
+  { icon: Code2,        label: "Write & run code",          prompt: "Write and run code to solve a problem for me. I'll describe exactly what I need." },
 ];
 
 function buildAgent(task: string) {
@@ -159,7 +159,7 @@ export default function Onboarding() {
                   Welcome to <span className="gradient-text">Future</span>
                 </h1>
                 <p className="text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
-                  Your autonomous AI that browses the web, writes code, manages files, and completes complex tasks — all on your behalf.
+                  Your personal AI assistant. Tell it what you want to create — a website, app, book, business, or anything else — and it handles everything for you.
                 </p>
               </div>
 
@@ -188,8 +188,8 @@ export default function Onboarding() {
           {step === 2 && (
             <div className="space-y-6">
               <div className="text-center space-y-2">
-                <h2 className="text-2xl font-heading font-bold text-foreground">What can I help you with?</h2>
-                <p className="text-xs text-muted-foreground">Describe your task and Future will get to work</p>
+                <h2 className="text-2xl font-heading font-bold text-foreground">What do you want to create?</h2>
+                <p className="text-xs text-muted-foreground">Just describe it in plain English — no tech skills needed</p>
               </div>
 
               {/* Main prompt box */}
@@ -199,7 +199,7 @@ export default function Onboarding() {
                   value={task}
                   onChange={(e) => setTask(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="e.g. Build me a landing page for my SaaS product, or research the latest AI trends and write a report…"
+                  placeholder="e.g. Build me an iPhone app for my restaurant, or write a business plan for my bakery…"
                   rows={4}
                   className="w-full bg-transparent text-foreground placeholder:text-muted-foreground text-sm px-5 pt-5 pb-3 resize-none outline-none font-sans leading-relaxed"
                 />
