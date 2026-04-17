@@ -350,3 +350,14 @@
 - [x] Update Dashboard suggestion chips to match new use cases
 - [x] Update Onboarding suggestion chips to match new use cases
 - [x] Remove all technical jargon from visible UI text
+
+## Manus-Style Split Workspace Redesign
+
+- [x] Rewrite AgentWorkspace with split-pane layout: left = conversation chat, right = execution log
+- [x] Left panel: full chat history (user messages + AI responses), input box at bottom with send button
+- [x] Left panel: show agent name + model in header, credits used, back button
+- [x] Right panel: live execution log with step cards (thinking, tool calls, results, complete)
+- [x] Right panel: collapsible step cards, status badges (running/complete/failed)
+- [x] Chat messages persist in-session (conversation history passed to agent for context)
+- [x] Sending a new message triggers a new task run and streams steps in real-time
+- [x] Mobile responsive: fixed-width left panel, flex-1 right panel; works on all screen sizes
