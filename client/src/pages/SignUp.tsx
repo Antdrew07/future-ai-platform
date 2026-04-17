@@ -57,13 +57,13 @@ export default function SignUp() {
         {/* Headline */}
         <div className="relative z-10 space-y-5">
           <h1 className="text-4xl font-heading font-bold text-white leading-tight">
-            Build anything.<br />
+            Your AI companion<br />
             <span style={{ background: "linear-gradient(90deg, #C9A84C, #f0d080, #C9A84C)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              Start for free.
+              is ready for you.
             </span>
           </h1>
           <p className="text-white/60 text-base leading-relaxed max-w-sm">
-            100 free credits on signup. Build iOS apps, Android apps, websites, and businesses — no credit card needed.
+            Start free — no credit card needed. I'll help you build apps, write books, launch businesses, and so much more.
           </p>
           <div className="flex items-center gap-3 pt-2">
             <div className="flex -space-x-2">
@@ -73,7 +73,7 @@ export default function SignUp() {
                 </div>
               ))}
             </div>
-            <p className="text-white/60 text-sm">Join thousands of builders</p>
+            <p className="text-white/60 text-sm">Join thousands of people achieving their goals</p>
           </div>
         </div>
 
@@ -93,7 +93,7 @@ export default function SignUp() {
 
           <div>
             <h2 className="text-2xl font-heading font-bold text-foreground">Create your account</h2>
-            <p className="text-sm text-muted-foreground mt-1">Start building AI agents — 100 free credits included</p>
+            <p className="text-sm text-muted-foreground mt-1">Get started free — your first 100 tasks are on us</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">

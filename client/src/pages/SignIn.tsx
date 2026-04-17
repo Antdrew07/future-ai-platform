@@ -46,13 +46,13 @@ export default function SignIn() {
         {/* Headline */}
         <div className="relative z-10 space-y-5">
           <h1 className="text-4xl font-heading font-bold text-white leading-tight">
-            Build anything.<br />
+            Your personal AI<br />
             <span style={{ background: "linear-gradient(90deg, #C9A84C, #f0d080, #C9A84C)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              Launch faster.
+              is waiting for you.
             </span>
           </h1>
           <p className="text-white/60 text-base leading-relaxed max-w-sm">
-            Build iOS apps, Android apps, websites, and businesses — powered by Future AI.
+            Tell me what you want. I'll do the work for you — apps, books, websites, businesses, and more.
           </p>
           <div className="flex flex-wrap gap-2 pt-1">
             {[
@@ -84,7 +84,7 @@ export default function SignIn() {
 
           <div>
             <h2 className="text-2xl font-heading font-bold text-foreground">Welcome back</h2>
-            <p className="text-sm text-muted-foreground mt-1">Sign in to your Future account</p>
+            <p className="text-sm text-muted-foreground mt-1">Welcome back — I missed you.</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">

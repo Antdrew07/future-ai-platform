@@ -156,18 +156,18 @@ export default function Onboarding() {
                   <img src={LOGO_URL} alt="Future" className="w-14 h-14 object-contain" />
                 </div>
                 <h1 className="text-3xl md:text-4xl font-heading font-bold text-foreground">
-                  Welcome to <span className="gradient-text">Future</span>
+                  Meet <span className="gradient-text">Future</span> — I'm yours.
                 </h1>
                 <p className="text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
-                  Your personal AI assistant. Tell it what you want to create — a website, app, book, business, or anything else — and it handles everything for you.
+                  I'm your personal AI companion. Tell me what you want — a website, app, book, business, or anything else — and I'll handle everything for you. No tech skills needed.
                 </p>
               </div>
 
               <div className="grid grid-cols-3 gap-3">
                 {[
-                  { icon: Globe, label: "Web Search", bg: "bg-blue-50", iconColor: "text-blue-600" },
-                  { icon: Code2, label: "Code Execution", bg: "bg-emerald-50", iconColor: "text-emerald-600" },
-                  { icon: Bot, label: "Multi-Model AI", bg: "bg-violet-50", iconColor: "text-violet-600" },
+                  { icon: Globe, label: "Builds websites", bg: "bg-blue-50", iconColor: "text-blue-600" },
+                  { icon: Code2, label: "Builds apps", bg: "bg-emerald-50", iconColor: "text-emerald-600" },
+                  { icon: Bot, label: "Writes books", bg: "bg-violet-50", iconColor: "text-violet-600" },
                 ].map((item) => (
                   <div key={item.label} className="bg-white border border-border rounded-xl p-4 text-center shadow-sm">
                     <div className={`w-10 h-10 rounded-lg ${item.bg} flex items-center justify-center mx-auto mb-2`}>
@@ -179,7 +179,7 @@ export default function Onboarding() {
               </div>
 
               <Button size="lg" className="h-11 px-10 bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-semibold" onClick={() => setStep(2)}>
-                Get Started <ArrowRight className="w-4 h-4 ml-2" />
+                Let's get started <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </div>
           )}
@@ -188,8 +188,8 @@ export default function Onboarding() {
           {step === 2 && (
             <div className="space-y-6">
               <div className="text-center space-y-2">
-                <h2 className="text-2xl font-heading font-bold text-foreground">What do you want to create?</h2>
-                <p className="text-xs text-muted-foreground">Just describe it in plain English — no tech skills needed</p>
+                <h2 className="text-2xl font-heading font-bold text-foreground">What would you like me to do for you?</h2>
+                <p className="text-xs text-muted-foreground">Just tell me in plain English — I'll take it from there</p>
               </div>
 
               {/* Main prompt box */}
@@ -199,7 +199,7 @@ export default function Onboarding() {
                   value={task}
                   onChange={(e) => setTask(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="e.g. Build me an iPhone app for my restaurant, or write a business plan for my bakery…"
+                  placeholder="e.g. Build me an iPhone app for my restaurant, write a business plan for my bakery, or create a website for my brand…"
                   rows={4}
                   className="w-full bg-transparent text-foreground placeholder:text-muted-foreground text-sm px-5 pt-5 pb-3 resize-none outline-none font-sans leading-relaxed"
                 />
@@ -227,7 +227,7 @@ export default function Onboarding() {
 
               {/* Suggestion chips */}
               <div>
-                <p className="text-[11px] text-muted-foreground mb-3 text-center uppercase tracking-widest">Or choose a task</p>
+                <p className="text-[11px] text-muted-foreground mb-3 text-center uppercase tracking-widest">Or pick something to get started</p>
                 <div className="flex flex-wrap gap-2 justify-center">
                   {SUGGESTIONS.map((s) => (
                     <button
@@ -262,10 +262,10 @@ export default function Onboarding() {
                   <CheckCircle2 className="w-10 h-10 text-emerald-600" />
                 </div>
                 <h1 className="text-3xl font-heading font-bold text-foreground">
-                  Your agent is ready!
+                  I'm ready to get to work!
                 </h1>
                 <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                  Launch the workspace and Future will start working on your task right away.
+                  I've got everything I need. Let's go make this happen — I'll start right away.
                 </p>
               </div>
 
@@ -288,7 +288,7 @@ export default function Onboarding() {
                 {createdAgentId && (
                   <Button size="lg" className="h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-heading font-semibold" onClick={() => navigate(`/workspace/${createdAgentId}?task=${encodeURIComponent(task)}`)}>
                     <Play className="w-4 h-4 mr-2" />
-                    Launch Workspace
+                    Let's go! Start working
                   </Button>
                 )}
                 <Button variant="outline" className="h-11 border-border bg-white text-foreground hover:bg-accent" onClick={() => navigate("/dashboard")}>

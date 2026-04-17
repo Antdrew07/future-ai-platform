@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/_core/hooks/useAuth";
@@ -6,7 +6,7 @@ import { getLoginUrl } from "@/const";
 import {
   ArrowRight, CheckCircle2, Star, Smartphone, Globe, BookOpen,
   TrendingUp, ShoppingBag, Megaphone, ChevronRight, Menu, X,
-  Sparkles, Zap, MessageSquare, Play, PenLine
+  Sparkles, Zap, MessageSquare, Heart, Shield, Clock
 } from "lucide-react";
 
 const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310419663029617589/m5GbkNTBEjcM6aS7UZa8ie/future-logo_dd9d650b.png";
@@ -28,9 +28,9 @@ const AndroidIcon = () => (
 const USE_CASES = [
   {
     emoji: "📱",
-    title: "Build a Mobile App",
+    title: "I'll build your app",
     subtitle: "iPhone & Android",
-    desc: "Turn your app idea into a real, working app. Future designs it, codes it, and gets it ready to launch — no programming needed.",
+    desc: "Tell me your app idea and I'll design it, code it, and get it ready to launch — just like that. No programming needed from you.",
     tags: ["iOS", "Android"],
     color: "from-blue-500 to-indigo-600",
     bg: "bg-blue-50",
@@ -39,9 +39,9 @@ const USE_CASES = [
   },
   {
     emoji: "🌐",
-    title: "Build a Website",
-    subtitle: "Professional & ready to go live",
-    desc: "Get a beautiful website for your business, portfolio, or store. Built, designed, and live in minutes.",
+    title: "I'll build your website",
+    subtitle: "Beautiful & ready to go live",
+    desc: "Need a website for your business, portfolio, or store? I'll design it, write the copy, and have it live — all in one conversation.",
     tags: ["Business", "Portfolio", "Store"],
     color: "from-violet-500 to-purple-600",
     bg: "bg-violet-50",
@@ -50,9 +50,9 @@ const USE_CASES = [
   },
   {
     emoji: "📖",
-    title: "Write a Book",
+    title: "I'll write your book",
     subtitle: "Fiction, guides, or memoirs",
-    desc: "From your idea to a finished, formatted manuscript. Future writes, edits, and structures your entire book.",
+    desc: "That book you've been meaning to write? Tell me the idea and I'll write it, chapter by chapter, until it's finished and ready to publish.",
     tags: ["Fiction", "Non-Fiction", "Self-Help"],
     color: "from-amber-500 to-orange-500",
     bg: "bg-amber-50",
@@ -61,9 +61,9 @@ const USE_CASES = [
   },
   {
     emoji: "🚀",
-    title: "Launch a Business",
+    title: "I'll launch your business",
     subtitle: "From idea to open for business",
-    desc: "Business plan, brand name, marketing strategy, and website — Future puts it all together for you.",
+    desc: "Business plan, brand name, marketing strategy, website — I'll put it all together so you can focus on what you love.",
     tags: ["Startups", "Small Business", "Side Hustles"],
     color: "from-emerald-500 to-teal-600",
     bg: "bg-emerald-50",
@@ -72,9 +72,9 @@ const USE_CASES = [
   },
   {
     emoji: "🛒",
-    title: "Start an Online Store",
+    title: "I'll set up your online store",
     subtitle: "Sell anything, anywhere",
-    desc: "Product descriptions, store design, pricing strategy, and checkout setup — all done for you automatically.",
+    desc: "Product descriptions, store design, pricing strategy — I'll handle every detail so your store is ready to take orders today.",
     tags: ["E-commerce", "Products", "Dropshipping"],
     color: "from-pink-500 to-rose-600",
     bg: "bg-pink-50",
@@ -83,9 +83,9 @@ const USE_CASES = [
   },
   {
     emoji: "📣",
-    title: "Create a Marketing Plan",
-    subtitle: "Grow your audience fast",
-    desc: "Social media posts, ad copy, email campaigns, and SEO content — created and ready to publish instantly.",
+    title: "I'll grow your audience",
+    subtitle: "Marketing that actually works",
+    desc: "Social posts, ad copy, email campaigns, SEO content — I'll create everything you need to reach more people and grow your brand.",
     tags: ["Social Media", "Ads", "Email"],
     color: "from-cyan-500 to-blue-500",
     bg: "bg-cyan-50",
@@ -94,27 +94,30 @@ const USE_CASES = [
   },
 ];
 
-const STEPS = [
+const COMPANION_TRAITS = [
   {
-    num: "1",
-    title: "Tell Future what you want",
-    desc: "Just type it in plain English. \"Build me an app for my restaurant\" or \"Write a business plan for my bakery.\" No tech skills needed — ever.",
-    icon: MessageSquare,
-    color: "text-violet-600 bg-violet-100",
+    icon: Heart,
+    title: "I'm always in your corner",
+    desc: "I genuinely care about your success. Whatever you're working toward — I'm here to help you get there, every single step of the way.",
+    color: "text-rose-500 bg-rose-50",
   },
   {
-    num: "2",
-    title: "Future gets to work",
-    desc: "Your personal AI assistant thinks, plans, writes, codes, and creates — handling every single step of the job, automatically.",
+    icon: Clock,
+    title: "I never sleep, never stop",
+    desc: "Day or night, weekday or weekend — I'm always ready when you are. Your goals don't wait, and neither do I.",
+    color: "text-violet-500 bg-violet-50",
+  },
+  {
+    icon: Shield,
+    title: "I keep your ideas safe",
+    desc: "Your ideas, your work, your future. Everything you share with me stays private and secure — always.",
+    color: "text-emerald-500 bg-emerald-50",
+  },
+  {
     icon: Zap,
-    color: "text-amber-600 bg-amber-100",
-  },
-  {
-    num: "3",
-    title: "You get real results",
-    desc: "A finished app, a complete book, a live website, a full business plan — delivered to you, ready to use right away.",
-    icon: CheckCircle2,
-    color: "text-emerald-600 bg-emerald-100",
+    title: "I work fast",
+    desc: "What would take you weeks, I can do in minutes. I move at the speed of your ambition — no waiting, no delays.",
+    color: "text-amber-500 bg-amber-50",
   },
 ];
 
@@ -122,19 +125,19 @@ const TESTIMONIALS = [
   {
     name: "Sarah M.",
     role: "Small Business Owner",
-    text: "I had my online store up and running in one afternoon. I didn't write a single line of code and I have zero tech background.",
+    text: "I finally feel like I have someone in my corner. I told Future what I needed and it just... did it. My store is up, my customers are happy, and I didn't have to figure anything out alone.",
     stars: 5,
   },
   {
     name: "James T.",
     role: "First-Time Author",
-    text: "Future helped me finish the book I'd been putting off for 3 years. It's now published on Amazon and selling every week.",
+    text: "I'd been carrying this book idea for 3 years, too scared to start. Future helped me write it, chapter by chapter. It's now published on Amazon. I couldn't have done it without this.",
     stars: 5,
   },
   {
     name: "Priya K.",
     role: "Entrepreneur",
-    text: "My app idea became a real iPhone and Android app. My customers love it. I still can't believe how easy it was.",
+    text: "Having Future feels like having a brilliant business partner who's available 24/7 and never judges your ideas. My app is live, my business is growing, and I feel unstoppable.",
     stars: 5,
   },
 ];
@@ -182,9 +185,8 @@ export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [exampleIdx, setExampleIdx] = useState(0);
 
-  // Rotate example prompts
   useEffect(() => {
-    const t = setInterval(() => setExampleIdx((i) => (i + 1) % EXAMPLES.length), 3000);
+    const t = setInterval(() => setExampleIdx((i) => (i + 1) % EXAMPLES.length), 3500);
     return () => clearInterval(t);
   }, []);
 
@@ -202,7 +204,7 @@ export default function Home() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-muted-foreground">
-            <a href="#use-cases" className="hover:text-foreground transition-colors">What it can do</a>
+            <a href="#what-i-can-do" className="hover:text-foreground transition-colors">What I can do</a>
             <a href="#how-it-works" className="hover:text-foreground transition-colors">How it works</a>
             <Link href="/pricing" className="hover:text-foreground transition-colors">Pricing</Link>
             <Link href="/gallery" className="hover:text-foreground transition-colors">Gallery</Link>
@@ -222,7 +224,7 @@ export default function Home() {
                 </Link>
                 <a href={getLoginUrl()}>
                   <Button size="sm" className="bg-primary hover:bg-primary/90 text-white font-semibold px-5">
-                    Try for free <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+                    Meet your Future <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
                   </Button>
                 </a>
               </>
@@ -236,12 +238,12 @@ export default function Home() {
 
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-border bg-white px-4 py-4 space-y-1">
-            <a href="#use-cases" className="block text-sm font-medium py-2.5 px-3 rounded-lg hover:bg-accent" onClick={() => setMobileMenuOpen(false)}>What it can do</a>
+            <a href="#what-i-can-do" className="block text-sm font-medium py-2.5 px-3 rounded-lg hover:bg-accent" onClick={() => setMobileMenuOpen(false)}>What I can do</a>
             <a href="#how-it-works" className="block text-sm font-medium py-2.5 px-3 rounded-lg hover:bg-accent" onClick={() => setMobileMenuOpen(false)}>How it works</a>
             <Link href="/pricing" className="block text-sm font-medium py-2.5 px-3 rounded-lg hover:bg-accent" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
             <div className="pt-3 flex flex-col gap-2">
               <Link href="/signin"><Button variant="outline" className="w-full">Sign in</Button></Link>
-              <a href={getLoginUrl()}><Button className="w-full bg-primary text-white font-semibold">Try for free</Button></a>
+              <a href={getLoginUrl()}><Button className="w-full bg-primary text-white font-semibold">Meet your Future</Button></a>
             </div>
           </div>
         )}
@@ -256,46 +258,45 @@ export default function Home() {
         <div className="relative max-w-4xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 bg-white border border-violet-200 rounded-full px-4 py-1.5 text-sm font-semibold text-violet-700 mb-8 shadow-sm">
             <Sparkles className="w-3.5 h-3.5 text-violet-500" />
-            Your personal AI — for everything you want to create
+            Your personal AI companion — always in your corner
           </div>
 
           <h1 className="text-5xl sm:text-6xl md:text-7xl font-black leading-[1.05] tracking-tight mb-6">
-            Tell it what you want.
+            Tell me what you want.
             <br />
             <span className="bg-gradient-to-r from-violet-600 via-blue-600 to-indigo-600 bg-clip-text text-transparent">
-              It does the work.
+              I'll do the work for you.
             </span>
           </h1>
 
           <p className="text-xl sm:text-2xl text-muted-foreground max-w-2xl mx-auto mb-4 leading-relaxed font-medium">
-            Build apps, write books, launch businesses, create websites — no tech skills, no experience, no problem.
+            I'm Future — your personal AI. I build apps, write books, launch businesses, and create websites. You just tell me what you want.
           </p>
           <p className="text-base text-muted-foreground/70 max-w-xl mx-auto mb-10">
-            Future is like having a brilliant assistant who never sleeps, never charges by the hour, and can do almost anything you ask.
+            Think of me as the brilliant, tireless friend you've always wished you had — one who can do almost anything, is available 24/7, and genuinely wants to see you succeed.
           </p>
 
           {/* Animated example prompt */}
           <div className="max-w-xl mx-auto mb-10">
             <div className="bg-white border border-border rounded-2xl px-5 py-4 shadow-sm flex items-start gap-3 text-left min-h-[64px]">
-              <PenLine className="w-4 h-4 text-violet-500 flex-shrink-0 mt-0.5" />
+              <MessageSquare className="w-4 h-4 text-violet-500 flex-shrink-0 mt-0.5" />
               <span className="text-sm text-foreground transition-all duration-500">
                 "{EXAMPLES[exampleIdx]}"
               </span>
             </div>
-            <p className="text-xs text-muted-foreground mt-2 text-center">Just type something like this and Future handles the rest</p>
+            <p className="text-xs text-muted-foreground mt-2 text-center">Just tell me something like this — I'll take it from there</p>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center items-center mb-12">
             <a href={loginUrl}>
               <Button size="lg" className="bg-primary hover:bg-primary/90 text-white font-bold text-base px-8 py-6 rounded-xl shadow-lg shadow-primary/25">
-                Start for free — no credit card needed
+                Meet your Future — it's free
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </a>
-            <a href="#use-cases">
+            <a href="#what-i-can-do">
               <Button variant="outline" size="lg" className="font-semibold text-base px-8 py-6 rounded-xl border-border bg-white hover:bg-accent">
-                <Play className="w-4 h-4 mr-2 fill-current" />
-                See what it can do
+                See what I can do
               </Button>
             </a>
           </div>
@@ -318,13 +319,13 @@ export default function Home() {
             <div className="text-4xl font-black text-primary mb-1">
               <AnimatedCounter target={50000} suffix="+" />
             </div>
-            <div className="text-sm text-muted-foreground font-medium">People using Future</div>
+            <div className="text-sm text-muted-foreground font-medium">People I'm helping</div>
           </div>
           <div>
             <div className="text-4xl font-black text-primary mb-1">
               <AnimatedCounter target={200000} suffix="+" />
             </div>
-            <div className="text-sm text-muted-foreground font-medium">Projects completed</div>
+            <div className="text-sm text-muted-foreground font-medium">Dreams brought to life</div>
           </div>
           <div>
             <div className="text-4xl font-black text-primary mb-1">
@@ -335,16 +336,50 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Use Cases ── */}
-      <section id="use-cases" className="py-20 px-4 bg-gray-50/60">
+      {/* ── Meet Future ── */}
+      <section className="py-20 px-4 bg-gradient-to-b from-white to-violet-50/40">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-14">
+            <div className="inline-flex items-center gap-2 bg-violet-100 rounded-full px-4 py-1.5 text-sm font-semibold text-violet-700 mb-5">
+              <Heart className="w-3.5 h-3.5" />
+              Meet Future
+            </div>
+            <h2 className="text-4xl sm:text-5xl font-black mb-5 leading-tight">
+              I'm not just a tool.<br />
+              <span className="bg-gradient-to-r from-violet-600 to-blue-600 bg-clip-text text-transparent">
+                I'm your partner in success.
+              </span>
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              Most people have incredible ideas but not enough time, money, or skills to make them real. I exist to change that. 
+              Whatever you want to build, create, or launch — I'm here to make it happen for you.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {COMPANION_TRAITS.map((trait) => (
+              <div key={trait.title} className="bg-white border border-border rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow text-center">
+                <div className={`w-12 h-12 rounded-xl ${trait.color} flex items-center justify-center mx-auto mb-4`}>
+                  <trait.icon className="w-6 h-6" />
+                </div>
+                <h3 className="font-bold text-sm mb-2">{trait.title}</h3>
+                <p className="text-xs text-muted-foreground leading-relaxed">{trait.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── What I Can Do ── */}
+      <section id="what-i-can-do" className="py-20 px-4 bg-gray-50/60">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14">
             <h2 className="text-4xl sm:text-5xl font-black mb-4">
-              What do you want to{" "}
-              <span className="bg-gradient-to-r from-violet-600 to-blue-600 bg-clip-text text-transparent">create?</span>
+              What do you want me to{" "}
+              <span className="bg-gradient-to-r from-violet-600 to-blue-600 bg-clip-text text-transparent">do for you?</span>
             </h2>
             <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-              Pick your goal. Future handles everything else — no experience required.
+              Pick your goal. I'll handle everything — no experience, no tech skills, no problem.
             </p>
           </div>
 
@@ -392,10 +427,10 @@ export default function Home() {
           </div>
 
           <div className="text-center mt-10">
-            <p className="text-muted-foreground text-sm mb-4">Don't see your goal? Future can handle almost anything — just ask.</p>
+            <p className="text-muted-foreground text-sm mb-4">Don't see your goal? I can handle almost anything — just ask me.</p>
             <a href={loginUrl}>
               <Button variant="outline" className="border-border bg-white hover:bg-accent font-semibold">
-                Try it with your own idea <ArrowRight className="w-4 h-4 ml-2" />
+                Tell me your idea <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </a>
           </div>
@@ -407,18 +442,40 @@ export default function Home() {
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-14">
             <h2 className="text-4xl sm:text-5xl font-black mb-4">
-              As easy as sending a{" "}
-              <span className="bg-gradient-to-r from-violet-600 to-blue-600 bg-clip-text text-transparent">text message</span>
+              Working with me is as easy as{" "}
+              <span className="bg-gradient-to-r from-violet-600 to-blue-600 bg-clip-text text-transparent">texting a friend</span>
             </h2>
             <p className="text-lg text-muted-foreground max-w-lg mx-auto">
-              No tutorials. No setup. No learning curve. Just tell Future what you need.
+              No tutorials. No setup. No learning curve. Just tell me what you need.
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-10">
-            {STEPS.map((step, i) => (
+            {[
+              {
+                num: "1",
+                icon: MessageSquare,
+                color: "text-violet-600 bg-violet-100",
+                title: "You tell me what you want",
+                desc: "Just type it in plain English. \"Build me an app for my restaurant\" or \"Write a business plan for my bakery.\" No tech skills needed — ever.",
+              },
+              {
+                num: "2",
+                icon: Zap,
+                color: "text-amber-600 bg-amber-100",
+                title: "I get to work immediately",
+                desc: "I think, plan, write, code, and create — handling every single step automatically. You can watch me work in real time.",
+              },
+              {
+                num: "3",
+                icon: CheckCircle2,
+                color: "text-emerald-600 bg-emerald-100",
+                title: "You get real results",
+                desc: "A finished app, a complete book, a live website, a full business plan — delivered to you, ready to use right away.",
+              },
+            ].map((step, i, arr) => (
               <div key={step.num} className="relative text-center">
-                {i < STEPS.length - 1 && (
+                {i < arr.length - 1 && (
                   <div className="hidden md:block absolute top-8 left-[calc(50%+2.5rem)] w-[calc(100%-5rem)] h-0.5 bg-gradient-to-r from-border to-transparent" />
                 )}
                 <div className={`w-16 h-16 rounded-2xl ${step.color} flex items-center justify-center mx-auto mb-5 shadow-sm`}>
@@ -434,7 +491,7 @@ export default function Home() {
           {/* Example prompts */}
           <div className="mt-16 max-w-2xl mx-auto">
             <div className="bg-gray-50 border border-border rounded-2xl p-6 shadow-sm">
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-4">Real examples — just type something like this:</p>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-4">Things people ask me every day:</p>
               <div className="space-y-2.5">
                 {EXAMPLES.map((example) => (
                   <div key={example} className="flex items-start gap-3 bg-white rounded-xl p-3.5 border border-border hover:border-primary/30 transition-colors">
@@ -446,7 +503,7 @@ export default function Home() {
               <div className="mt-4 text-center">
                 <a href={loginUrl}>
                   <Button className="bg-primary hover:bg-primary/90 text-white font-semibold">
-                    Try your own idea <ArrowRight className="w-4 h-4 ml-2" />
+                    Tell me your idea <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </a>
               </div>
@@ -459,8 +516,8 @@ export default function Home() {
       <section className="py-20 px-4 bg-gradient-to-b from-violet-50/50 to-white">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-black mb-3">Real people. Real results.</h2>
-            <p className="text-muted-foreground text-lg">No tech background needed — just an idea and Future.</p>
+            <h2 className="text-4xl font-black mb-3">Real people. Real transformations.</h2>
+            <p className="text-muted-foreground text-lg">People just like you — with big ideas and no tech background.</p>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             {TESTIMONIALS.map((t) => (
@@ -482,11 +539,11 @@ export default function Home() {
       </section>
 
       {/* ── Pricing teaser ── */}
-      <section className="py-20 px-4 bg-white border-t border-border">
+      <section className="py-20 px-4 bg-white">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-4xl font-black mb-4">Start free. No surprises.</h2>
           <p className="text-lg text-muted-foreground mb-10 max-w-xl mx-auto">
-            Your first tasks are on us. No credit card required. Upgrade only when you need more.
+            Your first tasks are on me. No credit card required. Upgrade only when you're ready for more.
           </p>
           <div className="grid sm:grid-cols-3 gap-4 mb-10">
             {[
@@ -505,7 +562,7 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <a href={loginUrl}>
               <Button size="lg" className="bg-primary hover:bg-primary/90 text-white font-bold px-10 rounded-xl shadow-lg shadow-primary/20">
-                Get started free <ArrowRight className="w-4 h-4 ml-2" />
+                Start for free <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </a>
             <Link href="/pricing">
@@ -518,22 +575,25 @@ export default function Home() {
       </section>
 
       {/* ── Final CTA ── */}
-      <section className="py-20 px-4 bg-gradient-to-br from-violet-600 via-indigo-600 to-blue-700 text-white">
+      <section className="py-24 px-4 bg-gradient-to-br from-violet-600 via-indigo-600 to-blue-700 text-white">
         <div className="max-w-3xl mx-auto text-center">
           <img src={LOGO_URL} alt="Future" className="h-12 w-auto mx-auto mb-6 brightness-0 invert" />
-          <h2 className="text-4xl sm:text-5xl font-black mb-4 leading-tight">
-            Your idea deserves to exist.
+          <h2 className="text-4xl sm:text-5xl font-black mb-5 leading-tight">
+            You deserve a Future<br />that works for you.
           </h2>
-          <p className="text-xl text-white/80 mb-10 max-w-xl mx-auto">
-            Stop waiting. Stop overthinking. Tell Future what you want to build — and watch it happen.
+          <p className="text-xl text-white/80 mb-4 max-w-xl mx-auto leading-relaxed">
+            I'm ready when you are. Tell me your dream — your app, your book, your business — and I'll help you make it real.
+          </p>
+          <p className="text-white/60 text-base mb-10 max-w-lg mx-auto">
+            No experience needed. No tech skills required. Just you, your idea, and me.
           </p>
           <a href={loginUrl}>
             <Button size="lg" className="bg-white text-violet-700 hover:bg-white/90 font-bold text-base px-10 py-6 rounded-xl shadow-xl">
-              Start building for free
+              Meet your Future — it's free
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </a>
-          <p className="text-white/50 text-sm mt-5">No credit card • No tech skills • Cancel anytime</p>
+          <p className="text-white/40 text-sm mt-5">No credit card • No tech skills • Cancel anytime</p>
         </div>
       </section>
 
@@ -547,16 +607,17 @@ export default function Home() {
                 <span className="font-black text-lg text-white">Future</span>
               </div>
               <p className="text-sm leading-relaxed">
-                Your personal AI assistant. Tell it what you want — it does the work.
+                Your personal AI companion. Tell me what you want — I'll do the work for you.
               </p>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-8 text-sm">
               <div>
-                <div className="font-semibold text-white mb-3">Product</div>
+                <div className="font-semibold text-white mb-3">What I can do</div>
                 <div className="space-y-2">
-                  <a href="#use-cases" className="block hover:text-white transition-colors">What it can do</a>
-                  <Link href="/pricing" className="block hover:text-white transition-colors">Pricing</Link>
-                  <Link href="/gallery" className="block hover:text-white transition-colors">Gallery</Link>
+                  <a href="#what-i-can-do" className="block hover:text-white transition-colors">Build apps</a>
+                  <a href="#what-i-can-do" className="block hover:text-white transition-colors">Write books</a>
+                  <a href="#what-i-can-do" className="block hover:text-white transition-colors">Launch businesses</a>
+                  <Link href="/gallery" className="block hover:text-white transition-colors">See gallery</Link>
                 </div>
               </div>
               <div>
@@ -565,12 +626,13 @@ export default function Home() {
                   <Link href="/signin" className="block hover:text-white transition-colors">Sign in</Link>
                   <a href={getLoginUrl()} className="block hover:text-white transition-colors">Sign up free</a>
                   <Link href="/dashboard" className="block hover:text-white transition-colors">Dashboard</Link>
+                  <Link href="/pricing" className="block hover:text-white transition-colors">Pricing</Link>
                 </div>
               </div>
               <div>
                 <div className="font-semibold text-white mb-3">Support</div>
                 <div className="space-y-2">
-                  <a href="mailto:support@futureai.app" className="block hover:text-white transition-colors">Contact us</a>
+                  <a href="mailto:support@futureos.io" className="block hover:text-white transition-colors">Contact me</a>
                   <Link href="/dashboard/billing" className="block hover:text-white transition-colors">Billing</Link>
                 </div>
               </div>

@@ -89,7 +89,7 @@ export default function Dashboard() {
             {greeting()}, {firstName}
           </h1>
           <p className="text-sm text-muted-foreground mb-8 text-center">
-            What would you like Future to help you with today?
+            I'm ready when you are. What shall we work on today?
           </p>
 
           {/* Prompt Box */}
@@ -100,7 +100,7 @@ export default function Dashboard() {
                 value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Tell Future what you want to create — a website, app, book, business plan..."
+                placeholder="Tell me what you want — I'll handle everything for you..."
                 rows={1}
                 className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground/50 resize-none px-5 pt-4 pb-3 pr-14 focus:outline-none leading-relaxed"
                 style={{ minHeight: "56px" }}
@@ -191,7 +191,7 @@ export default function Dashboard() {
               <div className="w-12 h-12 rounded-2xl bg-muted border border-border flex items-center justify-center mx-auto mb-3">
                 <Bot className="w-5 h-5 text-muted-foreground/30" />
               </div>
-              <p className="text-sm text-muted-foreground/50">Your recent tasks will appear here</p>
+              <p className="text-sm text-muted-foreground/50">Your work with me will appear here</p>
             </div>
           )}
         </div>

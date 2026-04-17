@@ -364,11 +364,24 @@
 
 ## Billing Page Redesign — Tiered Subscriptions
 
-- [ ] Clean duplicate credit_packs and subscription_plans rows from DB (deduplicate)
-- [ ] Fix seed script to use INSERT IGNORE / upsert so re-running never duplicates
-- [ ] Redesign Billing page: show current plan, tiered plan cards (Free/Starter/Pro/Enterprise), top-up credits section
-- [ ] Each plan card shows: monthly price, monthly credits included, key features, upgrade/downgrade CTA
-- [ ] Top-up section: 3 simple credit pack options (small/medium/large) below the plan cards
-- [ ] Update Pricing page to match the new tier structure
-- [ ] Wire plan upgrade CTAs to Stripe checkout (subscription mode)
-- [ ] Wire top-up CTAs to Stripe checkout (one-time payment mode)
+- [x] Clean duplicate credit_packs and subscription_plans rows from DB (deduplicate)
+- [x] Fix seed script to use INSERT IGNORE / upsert so re-running never duplicates
+- [x] Redesign Billing page: show current plan, tiered plan cards (Free/Starter/Pro/Business), top-up credits section
+- [x] Each plan card shows: monthly price, monthly credits included, key features, upgrade CTA
+- [x] Top-up section: 3 simple credit pack options (small/medium/large) below the plan cards
+- [x] Update Pricing page to match the new tier structure (Free $0 / Starter $9 / Pro $29 / Business $99)
+- [x] Wire plan upgrade CTAs to Stripe checkout (credits.checkout procedure)
+- [x] Wire top-up CTAs to Stripe checkout (credits.checkout procedure)
+
+## Personal AI Companion Rebrand
+
+- [x] Rewrite hero headline: "Tell me what you want. I'll do the work for you." (first-person AI voice)
+- [x] Rewrite subheadline: warm, personal, life-success framing — not tech product pitch
+- [x] Add "Meet Future" section — introduce Future as a companion, not a tool
+- [x] Rewrite use-case cards with personal framing ("I'll build your app", "I'll write your book")
+- [x] Add "Your AI. Always in your corner." section with emotional connection copy
+- [x] Rewrite How It Works: conversational, first-person AI voice
+- [x] Rewrite testimonials: real life transformation stories
+- [x] Update CTA: "Meet your Future" or "Start your journey"
+- [x] Update Dashboard greeting to match companion tone
+- [x] Update Onboarding welcome to companion tone
