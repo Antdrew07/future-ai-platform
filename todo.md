@@ -514,3 +514,8 @@
 - [x] Replace blocking domain upsell modal/overlay with a dismissible suggestion card
 - [x] User can close/skip the suggestion and continue working without purchasing a domain
 - [x] Suggestion card should be subtle — small banner or inline card, not a full modal
+
+## Agent Execution Behavior Fix (Apr 17, 2026)
+
+- [x] Fix agent system prompt so it executes tasks directly (builds apps, writes code) instead of giving advice/planning text
+- [x] Agent should never say "you will need to coordinate with..." or "feel free to ask" — it should just do the work
