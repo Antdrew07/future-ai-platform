@@ -22,8 +22,9 @@ import {
   Download, ArrowLeft, Sparkles, Terminal, Image, Database,
   AlertCircle, Cpu, Clock, Coins, Plus, MessageSquare, Activity,
   Eye, ExternalLink, Monitor, ShoppingCart, MonitorPlay, X,
-  Maximize2, Minimize2, RefreshCw
+  Maximize2, Minimize2, RefreshCw, ZoomIn
 } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useLocation as useWouterLocation } from "wouter";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -812,7 +813,140 @@ function ChatPanelContent({
   );
 }
 
-// ─── Execution Log Panel Content ──────────────────────────────────────────────
+// ─── Preview Panel ────────────────────────────────────────────────────────────
+
+/**
+ * Renders the latest artifact visually:
+ * - image/png → full <img> preview
+ * - text/html or .html filename → iframe preview
+ * - text/plain with HTML content → iframe preview
+ * - everything else → code block
+ */
+function ArtifactPreview({ artifact }: { artifact: { name: string; content: string; type: string } }) {
+  const [lightbox, setLightbox] = useState(false);
+
+  // Image: content is a URL
+  if (artifact.type === "image/png" || artifact.type === "image/jpeg" || artifact.type.startsWith("image/")) {
+    return (
+      <div className="flex flex-col items-center gap-3 p-4">
+        <div className="relative group cursor-zoom-in" onClick={() => setLightbox(true)}>
+          <img
+            src={artifact.content}
+            alt={artifact.name}
+            className="max-w-full rounded-xl border border-border shadow-md object-contain"
+            style={{ maxHeight: "calc(100vh - 280px)" }}
+          />
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 rounded-xl">
+            <div className="bg-white/90 rounded-full p-2">
+              <ZoomIn className="w-5 h-5 text-gray-700" />
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <a
+            href={artifact.content}
+            download={artifact.name}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors"
+          >
+            <Download className="w-3 h-3" />
+            Download
+          </a>
+          <a
+            href={artifact.content}
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 text-xs font-medium hover:bg-gray-200 transition-colors"
+          >
+            <ExternalLink className="w-3 h-3" />
+            Open full size
+          </a>
+        </div>
+        {/* Lightbox */}
+        {lightbox && (
+          <div
+            className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
+            onClick={() => setLightbox(false)}
+          >
+            <img
+              src={artifact.content}
+              alt={artifact.name}
+              className="max-w-full max-h-full rounded-xl shadow-2xl object-contain"
+              onClick={e => e.stopPropagation()}
+            />
+            <button
+              className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+              onClick={() => setLightbox(false)}
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // HTML: render in iframe
+  const isHtml = artifact.type === "text/html" ||
+    artifact.name.endsWith(".html") ||
+    (artifact.type === "text/plain" && /<html[\s>]/i.test(artifact.content));
+
+  if (isHtml) {
+    const openInTab = () => {
+      const blob = new Blob([artifact.content], { type: "text/html" });
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+    };
+    return (
+      <div className="flex flex-col h-full">
+        <div className="flex items-center justify-between px-3 py-2 bg-gray-50 border-b border-border shrink-0">
+          <div className="flex items-center gap-1.5">
+            <Monitor className="w-3.5 h-3.5 text-primary" />
+            <span className="text-xs font-semibold text-foreground">{artifact.name}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <button onClick={openInTab} className="flex items-center gap-1 px-2 py-1 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors">
+              <ExternalLink className="w-3 h-3" />
+              Open full screen
+            </button>
+          </div>
+        </div>
+        <div className="flex-1 bg-white">
+          <iframe
+            srcDoc={artifact.content}
+            sandbox="allow-scripts allow-same-origin"
+            className="w-full h-full border-0"
+            title={artifact.name}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Code / text fallback
+  return (
+    <div className="p-4">
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+          <FileText className="w-3.5 h-3.5" />{artifact.name}
+        </span>
+        <button
+          className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
+          onClick={() => navigator.clipboard.writeText(artifact.content)}
+        >
+          <Copy className="w-3 h-3" /> Copy
+        </button>
+      </div>
+      <pre className="text-xs bg-gray-950 text-green-300 rounded-xl p-4 overflow-auto max-h-[calc(100vh-280px)] font-mono whitespace-pre-wrap">
+        {artifact.content.slice(0, 8000)}{artifact.content.length > 8000 ? "\n... (truncated)" : ""}
+      </pre>
+    </div>
+  );
+}
+
+// ─── Right Panel (Tabs: Log | Preview | Live Browser) ─────────────────────────
 
 function LogPanelContent({
   liveSteps,
@@ -833,106 +967,243 @@ function LogPanelContent({
   onShowBrowser: (sessionId: string, liveViewUrl: string) => void;
   onCloseBrowser: () => void;
 }) {
+  // Track which tab is active — auto-switch to Preview when new artifacts arrive
+  const [activeTab, setActiveTab] = useState<"log" | "preview" | "browser">("log");
+  const prevArtifactCount = useRef(0);
+
+  useEffect(() => {
+    const imageArtifacts = allArtifacts.filter(a => a.type.startsWith("image/"));
+    const htmlArtifacts = allArtifacts.filter(a =>
+      a.type === "text/html" || a.name.endsWith(".html") ||
+      (a.type === "text/plain" && /<html[\s>]/i.test(a.content))
+    );
+    const previewable = imageArtifacts.length + htmlArtifacts.length;
+    if (previewable > prevArtifactCount.current) {
+      setActiveTab("preview");
+    }
+    prevArtifactCount.current = previewable;
+  }, [allArtifacts]);
+
+  // Auto-switch to browser tab when session starts
+  useEffect(() => {
+    if (activeBrowserSession) setActiveTab("browser");
+  }, [activeBrowserSession]);
+
+  // Determine the best artifact to preview (latest image or HTML)
+  const previewArtifact = [...allArtifacts].reverse().find(a =>
+    a.type.startsWith("image/") ||
+    a.type === "text/html" ||
+    a.name.endsWith(".html") ||
+    (a.type === "text/plain" && /<html[\s>]/i.test(a.content))
+  ) ?? (allArtifacts.length > 0 ? allArtifacts[allArtifacts.length - 1] : null);
+
+  const imageArtifacts = allArtifacts.filter(a => a.type.startsWith("image/"));
+  const hasPreview = !!previewArtifact;
+  const hasBrowser = !!activeBrowserSession;
+
   return (
     <div className="flex flex-col h-full">
-      {/* Log header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-white shrink-0">
-        <div className="flex items-center gap-2">
-          <Terminal className="w-4 h-4 text-muted-foreground" />
-          <span className="text-sm font-medium text-foreground">Execution Log</span>
-          {runStatus !== "idle" && (
-            <Badge variant="outline" className={`text-xs ml-1 ${
-              runStatus === "running" ? "border-emerald-300 text-emerald-600 bg-emerald-50" :
-              runStatus === "complete" ? "border-emerald-300 text-emerald-600 bg-emerald-50" :
-              runStatus === "error" ? "border-red-300 text-red-600 bg-red-50" : ""
-            }`}>
-              {runStatus === "running" ? "Running" : runStatus === "complete" ? "Complete" : "Error"}
-            </Badge>
-          )}
-          {/* Live browser indicator in header */}
-          {activeBrowserSession && (
-            <button
-              onClick={() => onShowBrowser(activeBrowserSession.sessionId, activeBrowserSession.liveViewUrl)}
-              className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-100 border border-indigo-300 text-indigo-700 text-[10px] font-medium hover:bg-indigo-200 transition-colors ml-1"
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
-              Live Browser
-            </button>
+      <Tabs
+        value={activeTab}
+        onValueChange={v => setActiveTab(v as "log" | "preview" | "browser")}
+        className="flex flex-col h-full"
+      >
+        {/* Tab bar */}
+        <div className="flex items-center justify-between px-3 py-2 border-b border-border bg-white shrink-0">
+          <TabsList className="h-8 p-0.5 gap-0.5">
+            <TabsTrigger value="log" className="h-7 px-3 text-xs gap-1.5">
+              <Terminal className="w-3.5 h-3.5" />
+              Log
+              {runStatus !== "idle" && (
+                <span className={`w-1.5 h-1.5 rounded-full ml-0.5 ${
+                  runStatus === "running" ? "bg-emerald-500 animate-pulse" :
+                  runStatus === "complete" ? "bg-emerald-500" :
+                  runStatus === "error" ? "bg-red-500" : ""
+                }`} />
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="preview" className="h-7 px-3 text-xs gap-1.5" disabled={!hasPreview}>
+              <Eye className="w-3.5 h-3.5" />
+              Preview
+              {imageArtifacts.length > 0 && (
+                <span className="ml-0.5 px-1.5 py-0.5 rounded-full bg-pink-100 text-pink-700 text-[9px] font-bold">
+                  {imageArtifacts.length}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="browser" className="h-7 px-3 text-xs gap-1.5" disabled={!hasBrowser}>
+              <MonitorPlay className="w-3.5 h-3.5" />
+              Browser
+              {hasBrowser && (
+                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse ml-0.5" />
+              )}
+            </TabsTrigger>
+          </TabsList>
+          {liveSteps.length > 0 && (
+            <span className="text-xs text-muted-foreground">{liveSteps.length} steps</span>
           )}
         </div>
-        {liveSteps.length > 0 && (
-          <span className="text-xs text-muted-foreground">{liveSteps.length} steps</span>
-        )}
-      </div>
 
-      {/* Live browser view — shown when a session is active */}
-      {activeBrowserSession && (
-        <div className="px-3 pt-3 shrink-0">
-          <LiveBrowserPanel
-            sessionId={activeBrowserSession.sessionId}
-            liveViewUrl={activeBrowserSession.liveViewUrl}
-            onClose={onCloseBrowser}
-          />
-        </div>
-      )}
-
-      {/* Steps */}
-      <div className="flex-1 overflow-y-auto p-4">
-        {liveSteps.length === 0 && !isRunning && (
-          <div className="flex flex-col items-center justify-center h-full text-center py-16">
-            <div className="w-12 h-12 rounded-xl bg-white border border-border flex items-center justify-center mb-4 shadow-sm">
-              <Terminal className="w-6 h-6 text-muted-foreground" />
+        {/* ── Execution Log Tab ── */}
+        <TabsContent value="log" className="flex-1 overflow-hidden m-0">
+          <div className="flex flex-col h-full">
+            <div className="flex-1 overflow-y-auto p-4">
+              {liveSteps.length === 0 && !isRunning && (
+                <div className="flex flex-col items-center justify-center h-full text-center py-16">
+                  <div className="w-12 h-12 rounded-xl bg-white border border-border flex items-center justify-center mb-4 shadow-sm">
+                    <Terminal className="w-6 h-6 text-muted-foreground" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">Execution steps will appear here</p>
+                  <p className="text-xs text-muted-foreground/60 mt-1">Send a message to see your agent work in real-time</p>
+                </div>
+              )}
+              {(liveSteps.length > 0 || isRunning) && (
+                <div className="space-y-2">
+                  {liveSteps.map((step, idx) => (
+                    <StepCard
+                      key={step.id}
+                      step={step}
+                      isLast={idx === liveSteps.length - 1}
+                      onShowBrowser={(sid, url) => {
+                        onShowBrowser(sid, url);
+                        setActiveTab("browser");
+                      }}
+                    />
+                  ))}
+                  {isRunning && (
+                    <div className="flex items-center gap-3 p-3 rounded-xl border border-indigo-200 bg-indigo-50/60">
+                      <Loader2 className="w-4 h-4 text-indigo-500 animate-spin shrink-0" />
+                      <span className="text-sm text-indigo-700">Agent is working...</span>
+                    </div>
+                  )}
+                  <div ref={stepsEndRef} />
+                </div>
+              )}
             </div>
-            <p className="text-sm text-muted-foreground">Execution steps will appear here</p>
-            <p className="text-xs text-muted-foreground/60 mt-1">Send a message to see your agent work in real-time</p>
-          </div>
-        )}
-
-        {(liveSteps.length > 0 || isRunning) && (
-          <div className="space-y-2">
-            {liveSteps.map((step, idx) => (
-              <StepCard
-                key={step.id}
-                step={step}
-                isLast={idx === liveSteps.length - 1}
-                onShowBrowser={onShowBrowser}
-              />
-            ))}
-            {isRunning && (
-              <div className="flex items-center gap-3 p-3 rounded-xl border border-indigo-200 bg-indigo-50/60">
-                <Loader2 className="w-4 h-4 text-indigo-500 animate-spin shrink-0" />
-                <span className="text-sm text-indigo-700">Agent is working...</span>
+            {/* Output files strip */}
+            {allArtifacts.length > 0 && (
+              <div className="border-t border-border bg-white px-4 py-2.5 shrink-0">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <Download className="w-3.5 h-3.5 text-emerald-600" />
+                  <span className="text-xs font-semibold text-foreground">Output Files ({allArtifacts.length})</span>
+                  <button
+                    onClick={() => setActiveTab("preview")}
+                    className="ml-auto text-xs text-primary hover:underline"
+                  >
+                    View Preview →
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {allArtifacts.map((artifact, i) => (
+                    <button key={i}
+                      className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-700 hover:bg-emerald-100 transition-all"
+                      onClick={() => {
+                        if (artifact.type.startsWith("image/")) {
+                          setActiveTab("preview");
+                          return;
+                        }
+                        const isHtml = artifact.name.endsWith(".html") || artifact.type === "text/html";
+                        if (isHtml) {
+                          setActiveTab("preview");
+                          return;
+                        }
+                        const blob = new Blob([artifact.content], { type: artifact.type });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement("a");
+                        a.href = url; a.download = artifact.name; a.click();
+                        URL.revokeObjectURL(url);
+                      }}>
+                      {artifact.type.startsWith("image/") ? <Image className="w-3 h-3" /> : <FileText className="w-3 h-3" />}
+                      {artifact.name}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
-            <div ref={stepsEndRef} />
           </div>
-        )}
-      </div>
+        </TabsContent>
 
-      {/* Artifacts panel */}
-      {allArtifacts.length > 0 && (
-        <div className="border-t border-border bg-white px-4 py-3 shrink-0">
-          <div className="flex items-center gap-2 mb-2">
-            <Download className="w-3.5 h-3.5 text-emerald-600" />
-            <span className="text-xs font-semibold text-foreground">Output Files ({allArtifacts.length})</span>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {allArtifacts.map((artifact, i) => (
-              <button key={i}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-700 hover:bg-emerald-100 transition-all"
-                onClick={() => {
-                  const blob = new Blob([artifact.content], { type: artifact.type });
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement("a");
-                  a.href = url; a.download = artifact.name; a.click();
-                  URL.revokeObjectURL(url);
-                }}>
-                <FileText className="w-3 h-3" />{artifact.name}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+        {/* ── Preview Tab ── */}
+        <TabsContent value="preview" className="flex-1 overflow-hidden m-0">
+          {!hasPreview ? (
+            <div className="flex flex-col items-center justify-center h-full text-center py-16">
+              <div className="w-12 h-12 rounded-xl bg-white border border-border flex items-center justify-center mb-4 shadow-sm">
+                <Eye className="w-6 h-6 text-muted-foreground" />
+              </div>
+              <p className="text-sm text-muted-foreground">No preview yet</p>
+              <p className="text-xs text-muted-foreground/60 mt-1">Generated images and websites will appear here</p>
+            </div>
+          ) : (
+            <div className="flex flex-col h-full overflow-hidden">
+              {/* If multiple images, show a filmstrip at top */}
+              {imageArtifacts.length > 1 && (
+                <div className="flex gap-2 px-4 py-2 border-b border-border bg-white shrink-0 overflow-x-auto">
+                  {imageArtifacts.map((a, i) => (
+                    <img
+                      key={i}
+                      src={a.content}
+                      alt={a.name}
+                      className="h-14 w-14 rounded-lg object-cover border-2 border-border hover:border-primary cursor-pointer shrink-0 transition-colors"
+                      onClick={() => {
+                        // Scroll to this image — just show it in the main area
+                        // by making it the "latest" via a local state
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+              <div className="flex-1 overflow-auto">
+                <ArtifactPreview artifact={previewArtifact!} />
+              </div>
+              {/* All files strip */}
+              {allArtifacts.length > 1 && (
+                <div className="border-t border-border bg-white px-4 py-2 shrink-0">
+                  <div className="flex flex-wrap gap-1.5">
+                    {allArtifacts.map((artifact, i) => (
+                      <button key={i}
+                        className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gray-50 border border-border text-xs text-gray-600 hover:bg-gray-100 transition-all"
+                        onClick={() => {
+                          const blob = new Blob([artifact.content], { type: artifact.type });
+                          const url = URL.createObjectURL(blob);
+                          const a = document.createElement("a");
+                          a.href = url; a.download = artifact.name; a.click();
+                          URL.revokeObjectURL(url);
+                        }}>
+                        {artifact.type.startsWith("image/") ? <Image className="w-3 h-3" /> : <FileText className="w-3 h-3" />}
+                        {artifact.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </TabsContent>
+
+        {/* ── Live Browser Tab ── */}
+        <TabsContent value="browser" className="flex-1 overflow-hidden m-0">
+          {!hasBrowser ? (
+            <div className="flex flex-col items-center justify-center h-full text-center py-16">
+              <div className="w-12 h-12 rounded-xl bg-white border border-border flex items-center justify-center mb-4 shadow-sm">
+                <MonitorPlay className="w-6 h-6 text-muted-foreground" />
+              </div>
+              <p className="text-sm text-muted-foreground">No browser session</p>
+              <p className="text-xs text-muted-foreground/60 mt-1">Ask the agent to browse a website to see it live here</p>
+            </div>
+          ) : (
+            <div className="h-full p-3">
+              <LiveBrowserPanel
+                sessionId={activeBrowserSession!.sessionId}
+                liveViewUrl={activeBrowserSession!.liveViewUrl}
+                onClose={() => {
+                  onCloseBrowser();
+                  setActiveTab("log");
+                }}
+              />
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
@@ -960,6 +1231,8 @@ export default function AgentWorkspace() {
   const [elapsed, setElapsed] = useState(0);
   // Mobile: which tab is active
   const [mobileTab, setMobileTab] = useState<"chat" | "log">("chat");
+  // Track if any previewable artifact has been generated (for mobile badge)
+  const hasAnyArtifact = liveSteps.some(s => (s.artifacts ?? []).length > 0);
   // Live browser session state
   const [activeBrowserSession, setActiveBrowserSession] = useState<{
     sessionId: string;
@@ -990,9 +1263,11 @@ export default function AgentWorkspace() {
     if (isRunning) setMobileTab("log");
   }, [isRunning]);
 
-  // Switch back to chat tab when task completes
+  // Switch to log/preview tab when task completes (to show results)
   useEffect(() => {
-    if (runStatus === "complete") setMobileTab("chat");
+    if (runStatus === "complete") {
+      // Stay on log tab so user sees the result; Preview tab auto-switches internally
+    }
   }, [runStatus]);
 
   // Elapsed timer
