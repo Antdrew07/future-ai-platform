@@ -72,12 +72,12 @@ export default function TaskView() {
 
         {isLoading ? (
           <div className="space-y-3">
-            {[1, 2, 3].map(i => <div key={i} className="h-16 rounded-xl bg-card/50 animate-pulse" />)}
+            {[1, 2, 3].map(i => <div key={i} className="h-16 rounded-xl bg-muted animate-pulse" />)}
           </div>
         ) : task ? (
           <>
             {/* Task Header */}
-            <Card className="bg-card/50 border-border/50">
+            <Card className="bg-white border-border shadow-sm">
               <CardContent className="p-5">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
@@ -108,7 +108,7 @@ export default function TaskView() {
             </Card>
 
             {/* Execution Log */}
-            <Card className="bg-card/50 border-border/50">
+            <Card className="bg-white border-border shadow-sm">
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
                   <Terminal className="w-4 h-4 text-cyan-400" />
@@ -171,7 +171,7 @@ export default function TaskView() {
 
             {/* Final Output */}
             {task.output && (
-              <Card className="bg-card/50 border-border/50">
+              <Card className="bg-white border-border shadow-sm">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-emerald-400" />
@@ -179,7 +179,7 @@ export default function TaskView() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="prose prose-sm prose-invert max-w-none">
+                  <div className="prose prose-sm max-w-none">
                     <Streamdown>{task.output}</Streamdown>
                   </div>
                 </CardContent>

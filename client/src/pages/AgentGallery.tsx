@@ -38,7 +38,7 @@ export default function AgentGallery() {
 
   const handleTryAgent = (agentName: string) => {
     if (!isAuthenticated) { window.location.href = getLoginUrl(); return; }
-    navigate("/agents/new");
+    navigate("/dashboard/agents/new");
     toast.success(`Loading ${agentName} template...`);
   };
 
@@ -137,7 +137,7 @@ export default function AgentGallery() {
           </div>
           <div className="ml-auto">
             <Button size="sm" variant="outline" className="text-xs h-8 border-border bg-white text-foreground hover:bg-accent"
-              onClick={() => navigate(isAuthenticated ? "/agents/new" : getLoginUrl())}>
+              onClick={() => navigate(isAuthenticated ? "/dashboard/agents/new" : getLoginUrl())}>
               <Sparkles className="w-3 h-3 mr-1.5" />
               Publish Your Agent
             </Button>
@@ -214,7 +214,7 @@ export default function AgentGallery() {
             <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
               No code required. Define a prompt, pick your tools, and deploy in seconds.
             </p>
-            <a href={isAuthenticated ? "/agents/new" : getLoginUrl()}>
+            <a href={isAuthenticated ? "/dashboard/agents/new" : getLoginUrl()}>
               <Button size="lg" className="h-11 px-8 bg-primary hover:bg-primary/90 text-primary-foreground">
                 <Sparkles className="w-4 h-4 mr-2" />
                 Start Building Free

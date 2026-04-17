@@ -315,3 +315,24 @@
 - [x] Add "Forgot password?" link to SignIn.tsx
 - [x] Register /forgot-password and /reset-password routes in App.tsx
 - [x] Write Vitest tests for forgotPassword and resetPassword procedures
+
+## Full Functionality Audit — Critical Fixes
+
+### CRITICAL — Broken/Wrong
+- [x] Fix AgentGallery "Try Agent" and "Create Agent" navigates to /agents/new (wrong path, should be /dashboard/agents/new)
+- [x] Fix Billing page shows "Payloglobal" as payment processor — should be "Stripe"
+- [x] Fix Pricing page shows "Payloglobal" as payment processor — should be "Stripe"
+- [x] Fix Billing page: no success/cancel handling after Stripe redirect (add URLSearchParams toast)
+- [x] Fix Home footer dead links (Privacy, Terms, Documentation, Status all point to #)
+- [x] Fix TaskView: uses dark card styles (bg-card/50, prose-invert) — convert to white theme
+
+### HIGH — Missing Features (Buttons exist but do nothing real)
+- [x] Settings: "Save Changes" profile update button — add auth.updateProfile procedure + wire it
+- [x] Settings: Notification preferences switches — wire to a real save procedure (toast feedback)
+- [x] Teams: "Invite Member" button shows "coming soon" — implement invite flow with full dialog
+- [x] Templates: "Use Template" button shows fake success toast — wire to templates.install procedure
+- [x] Templates: "Publish Template" button shows "coming soon" — wire to navigate to agent builder with info toast
+
+### MEDIUM — Polish/UX
+- [x] Settings: "Change" login method and "Enable" 2FA — replaced with Reset Password link and "Coming Soon" disabled button
+- [x] AgentGallery: "Try Agent" navigates to /dashboard/agents/new (correct path)

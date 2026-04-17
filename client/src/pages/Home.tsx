@@ -462,10 +462,10 @@ export default function Home() {
             <span className="text-sm text-muted-foreground">&copy; {new Date().getFullYear()} Future. All rights reserved.</span>
           </div>
           <div className="flex items-center gap-6 text-xs text-muted-foreground">
-            <a href="#" className="hover:text-foreground transition-colors">Privacy</a>
-            <a href="#" className="hover:text-foreground transition-colors">Terms</a>
-            <a href="#" className="hover:text-foreground transition-colors">Documentation</a>
-            <a href="#" className="hover:text-foreground transition-colors">Status</a>
+            <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
+            <Link href="/terms" className="hover:text-foreground transition-colors">Terms</Link>
+            <Link href="/gallery" className="hover:text-foreground transition-colors">Gallery</Link>
+            <Link href="/pricing" className="hover:text-foreground transition-colors">Pricing</Link>
           </div>
         </div>
       </footer>

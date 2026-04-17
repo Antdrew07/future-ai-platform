@@ -137,6 +137,13 @@ export const appRouter = router({
 
       return { success: true };
     }),
+
+    updateProfile: protectedProcedure.input(z.object({
+      name: z.string().min(1).max(128),
+    })).mutation(async ({ ctx, input }) => {
+      await upsertUser({ openId: ctx.user.openId, name: input.name });
+      return { success: true };
+    }),
   }),
 
   // ─── Agents ────────────────────────────────────────────────────────────────

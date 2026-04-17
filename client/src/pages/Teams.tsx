@@ -5,9 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useState } from "react";
-import { Users, Plus, UserPlus, Crown, Shield, User, Loader2 } from "lucide-react";
+import { Users, Plus, UserPlus, Crown, Shield, User, Loader2, Mail } from "lucide-react";
 
 const ROLE_ICONS: Record<string, typeof Crown> = { owner: Crown, admin: Shield, member: User, viewer: User };
 const ROLE_COLORS: Record<string, string> = {
@@ -20,19 +21,44 @@ const ROLE_COLORS: Record<string, string> = {
 export default function Teams() {
   const { data: teams, isLoading, refetch } = trpc.teams.list.useQuery();
   const [showCreate, setShowCreate] = useState(false);
+  const [showInvite, setShowInvite] = useState(false);
+  const [inviteTeamId, setInviteTeamId] = useState<number | null>(null);
   const [teamName, setTeamName] = useState("");
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState<"admin" | "member" | "viewer">("member");
 
   const createMutation = trpc.teams.create.useMutation({
     onSuccess: () => { toast.success("Team created!"); refetch(); setShowCreate(false); setTeamName(""); },
     onError: (e) => toast.error(e.message),
   });
 
+  const inviteMutation = trpc.teams.invite.useMutation({
+    onSuccess: () => {
+      toast.success(`Invite sent to ${inviteEmail}!`);
+      setShowInvite(false);
+      setInviteEmail("");
+      setInviteRole("member");
+      setInviteTeamId(null);
+    },
+    onError: (e) => toast.error(e.message),
+  });
+
+  const handleOpenInvite = (teamId: number) => {
+    setInviteTeamId(teamId);
+    setShowInvite(true);
+  };
+
+  const handleSendInvite = () => {
+    if (!inviteTeamId || !inviteEmail.trim()) return;
+    inviteMutation.mutate({ teamId: inviteTeamId, email: inviteEmail.trim(), role: inviteRole });
+  };
+
   return (
     <FutureDashboardLayout title="Teams" subtitle="Collaborate with your team on agents">
       <div className="p-6 space-y-6 max-w-3xl">
         <div className="flex items-center justify-between">
           <p className="text-xs text-muted-foreground">{(teams ?? []).length} team{(teams ?? []).length !== 1 ? "s" : ""}</p>
-          <Button onClick={() => setShowCreate(true)} size="sm" className="glow-primary text-xs">
+          <Button onClick={() => setShowCreate(true)} size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs">
             <Plus className="w-3.5 h-3.5 mr-1.5" />
             Create Team
           </Button>
@@ -68,7 +94,7 @@ export default function Teams() {
                     </div>
                     {(role === "owner" || role === "admin") && (
                       <Button variant="outline" size="sm" className="h-7 text-xs border-border bg-white hover:bg-accent text-foreground"
-                        onClick={() => toast.info("Team management coming soon")}>
+                        onClick={() => handleOpenInvite(team.id)}>
                         <UserPlus className="w-3.5 h-3.5 mr-1.5" />
                         Invite Member
                       </Button>
@@ -87,13 +113,14 @@ export default function Teams() {
             <p className="text-xs text-muted-foreground mb-4 max-w-xs text-center">
               Create a team to collaborate with others on building and managing AI agents.
             </p>
-            <Button onClick={() => setShowCreate(true)} size="sm" className="glow-primary text-xs">
+            <Button onClick={() => setShowCreate(true)} size="sm" className="bg-primary hover:bg-primary/90 text-primary-foreground text-xs">
               <Plus className="w-3.5 h-3.5 mr-1.5" />
               Create Your First Team
             </Button>
           </div>
         )}
 
+        {/* Create Team Dialog */}
         <Dialog open={showCreate} onOpenChange={setShowCreate}>
           <DialogContent className="bg-white border-border">
             <DialogHeader>
@@ -110,9 +137,58 @@ export default function Teams() {
               <Button variant="outline" onClick={() => setShowCreate(false)} className="border-border bg-white text-foreground hover:bg-accent">Cancel</Button>
               <Button onClick={() => createMutation.mutate({ name: teamName })}
                 disabled={!teamName.trim() || createMutation.isPending}
-                className="glow-primary">
+                className="bg-primary hover:bg-primary/90 text-primary-foreground">
                 {createMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                 Create
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Invite Member Dialog */}
+        <Dialog open={showInvite} onOpenChange={(open) => { setShowInvite(open); if (!open) { setInviteEmail(""); setInviteRole("member"); } }}>
+          <DialogContent className="bg-white border-border">
+            <DialogHeader>
+              <DialogTitle className="font-heading flex items-center gap-2">
+                <Mail className="w-4 h-4 text-primary" />
+                Invite Team Member
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-2 space-y-4">
+              <div>
+                <Label className="text-xs text-muted-foreground mb-1.5 block">Email Address</Label>
+                <Input
+                  type="email"
+                  placeholder="colleague@company.com"
+                  value={inviteEmail}
+                  onChange={e => setInviteEmail(e.target.value)}
+                  className="bg-background border-border text-foreground"
+                  onKeyDown={e => e.key === "Enter" && inviteEmail.trim() && handleSendInvite()}
+                />
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground mb-1.5 block">Role</Label>
+                <Select value={inviteRole} onValueChange={(v) => setInviteRole(v as "admin" | "member" | "viewer")}>
+                  <SelectTrigger className="bg-background border-border text-foreground">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="admin">Admin — Can manage team and invite members</SelectItem>
+                    <SelectItem value="member">Member — Can view and use agents</SelectItem>
+                    <SelectItem value="viewer">Viewer — Read-only access</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowInvite(false)} className="border-border bg-white text-foreground hover:bg-accent">Cancel</Button>
+              <Button
+                onClick={handleSendInvite}
+                disabled={!inviteEmail.trim() || inviteMutation.isPending}
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
+              >
+                {inviteMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Mail className="w-4 h-4 mr-2" />}
+                Send Invite
               </Button>
             </DialogFooter>
           </DialogContent>

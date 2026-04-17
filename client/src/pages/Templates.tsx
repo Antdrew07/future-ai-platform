@@ -5,23 +5,57 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useState } from "react";
-import { Search, Store, Star, Download, Bot, Zap, Plus, Sparkles, LayoutGrid, ArrowRight } from "lucide-react";
+import { useLocation } from "wouter";
+import { Search, Store, Star, Download, Bot, Zap, Plus, Sparkles, LayoutGrid, ArrowRight, Loader2 } from "lucide-react";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { getLoginUrl } from "@/const";
 
 const CATEGORIES = ["All", "Research", "Coding", "Writing", "Data", "Productivity", "Support"];
 
 const FEATURED = [
-  { name: "Research Assistant", desc: "Autonomously researches any topic and produces comprehensive reports", category: "research", uses: 1240, rating: 4.9, icon: "🔬" },
-  { name: "Code Reviewer", desc: "Reviews code for bugs, security issues, and best practices", category: "coding", uses: 890, rating: 4.8, icon: "💻" },
-  { name: "Content Writer", desc: "Writes blog posts, social media content, and marketing copy", category: "writing", uses: 2100, rating: 4.7, icon: "✍️" },
-  { name: "Data Analyst", desc: "Analyzes datasets and generates insights with visualizations", category: "data", uses: 650, rating: 4.8, icon: "📊" },
-  { name: "Customer Support", desc: "Handles customer inquiries with context-aware responses", category: "support", uses: 3200, rating: 4.6, icon: "🎧" },
-  { name: "Task Planner", desc: "Breaks down complex projects into actionable task lists", category: "productivity", uses: 780, rating: 4.9, icon: "📋" },
+  { name: "Research Assistant", desc: "Autonomously researches any topic and produces comprehensive reports with citations.", category: "research", uses: 1240, rating: 4.9, icon: "🔬" },
+  { name: "Code Reviewer", desc: "Reviews code for bugs, security issues, and best practices with detailed feedback.", category: "coding", uses: 890, rating: 4.8, icon: "💻" },
+  { name: "Content Writer", desc: "Writes blog posts, social media content, and marketing copy tailored to your brand.", category: "writing", uses: 2100, rating: 4.7, icon: "✍️" },
+  { name: "Data Analyst", desc: "Analyzes datasets and generates insights with visualizations and recommendations.", category: "data", uses: 650, rating: 4.8, icon: "📊" },
+  { name: "Customer Support", desc: "Handles customer inquiries with context-aware, empathetic responses.", category: "support", uses: 3200, rating: 4.6, icon: "🎧" },
+  { name: "Task Planner", desc: "Breaks down complex projects into actionable task lists with timelines.", category: "productivity", uses: 780, rating: 4.9, icon: "📋" },
 ];
 
 export default function Templates() {
+  const [, navigate] = useLocation();
+  const { isAuthenticated } = useAuth();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
+  const [installingSlug, setInstallingSlug] = useState<string | null>(null);
+  const utils = trpc.useUtils();
+
   const { data: templates, isLoading } = trpc.templates.list.useQuery({ limit: 50, offset: 0 });
+
+  const installMutation = trpc.templates.install.useMutation({
+    onSuccess: (data) => {
+      toast.success("Template installed! Redirecting to your new agent...");
+      utils.agents.list.invalidate();
+      setTimeout(() => navigate(`/dashboard/agents`), 1200);
+      setInstallingSlug(null);
+    },
+    onError: (e) => {
+      toast.error(e.message);
+      setInstallingSlug(null);
+    },
+  });
+
+  const handleInstall = (slug: string) => {
+    if (!isAuthenticated) { window.location.href = getLoginUrl(); return; }
+    setInstallingSlug(slug);
+    installMutation.mutate({ templateSlug: slug });
+  };
+
+  const handleFeaturedUse = (templateName: string) => {
+    if (!isAuthenticated) { window.location.href = getLoginUrl(); return; }
+    // For featured (static) templates, navigate to agent builder with pre-filled name
+    navigate(`/dashboard/agents/new?template=${encodeURIComponent(templateName)}`);
+    toast.success(`Opening "${templateName}" template in agent builder...`);
+  };
 
   const filteredFeatured = FEATURED.filter(t => {
     const matchSearch = !search || t.name.toLowerCase().includes(search.toLowerCase()) || t.desc.toLowerCase().includes(search.toLowerCase());
@@ -66,9 +100,13 @@ export default function Templates() {
             ))}
           </div>
           <Button variant="outline" size="sm" className="h-9 text-xs border-border bg-white text-foreground hover:bg-accent"
-            onClick={() => toast.info("Publish template coming soon")}>
+            onClick={() => {
+              if (!isAuthenticated) { window.location.href = getLoginUrl(); return; }
+              navigate("/dashboard/agents/new");
+              toast.info("Create an agent first, then publish it as a template from the agent settings.");
+            }}>
             <Plus className="w-3.5 h-3.5 mr-1.5" />
-            Publish
+            Publish Template
           </Button>
         </div>
 
@@ -95,10 +133,10 @@ export default function Templates() {
                     <p className="text-xs text-muted-foreground line-clamp-2 mb-4">{t.desc}</p>
                     <div className="flex items-center justify-between">
                       <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                        <Download className="w-3 h-3" />{t.uses.toLocaleString()}
+                        <Download className="w-3 h-3" />{t.uses.toLocaleString()} uses
                       </span>
-                      <Button size="sm" className="h-7 text-xs glow-primary opacity-0 group-hover:opacity-100 transition-all"
-                        onClick={() => toast.success(`"${t.name}" template deployed!`)}>
+                      <Button size="sm" className="h-7 text-xs bg-primary hover:bg-primary/90 text-primary-foreground opacity-0 group-hover:opacity-100 transition-all"
+                        onClick={() => handleFeaturedUse(t.name)}>
                         Use Template
                         <ArrowRight className="w-3 h-3 ml-1" />
                       </Button>
@@ -113,9 +151,9 @@ export default function Templates() {
         {/* Community */}
         <div>
           <div className="flex items-center gap-2 mb-4">
-              <LayoutGrid className="w-4 h-4 text-blue-500" />
-              <h3 className="text-sm font-heading font-semibold text-foreground">Community Templates</h3>
-              <span className="text-xs text-muted-foreground">({filteredDb.length})</span>
+            <LayoutGrid className="w-4 h-4 text-blue-500" />
+            <h3 className="text-sm font-heading font-semibold text-foreground">Community Templates</h3>
+            <span className="text-xs text-muted-foreground">({filteredDb.length})</span>
           </div>
 
           {isLoading ? (
@@ -153,13 +191,27 @@ export default function Templates() {
                         {(t as { usageCount?: number }).usageCount ?? 0}
                       </span>
                     </div>
-                    {t.priceCredits > 0 ? (
-                      <Badge variant="outline" className="text-[10px] text-amber-600 border-amber-200 bg-amber-50">
-                        <Zap className="w-2.5 h-2.5 mr-1" />{t.priceCredits}
-                      </Badge>
-                    ) : (
-                      <Badge variant="outline" className="text-[10px] text-emerald-600 border-emerald-200 bg-emerald-50">Free</Badge>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {t.priceCredits > 0 ? (
+                        <Badge variant="outline" className="text-[10px] text-amber-600 border-amber-200 bg-amber-50">
+                          <Zap className="w-2.5 h-2.5 mr-1" />{t.priceCredits} cr
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-[10px] text-emerald-600 border-emerald-200 bg-emerald-50">Free</Badge>
+                      )}
+                      <Button
+                        size="sm"
+                        className="h-6 text-[10px] px-2 bg-primary hover:bg-primary/90 text-primary-foreground opacity-0 group-hover:opacity-100 transition-all"
+                        disabled={installingSlug === t.slug}
+                        onClick={() => handleInstall(t.slug)}
+                      >
+                        {installingSlug === t.slug ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <>Use<ArrowRight className="w-2.5 h-2.5 ml-1" /></>
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ))}

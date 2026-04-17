@@ -153,7 +153,7 @@ export default function Pricing() {
           </div>
           <p className="text-xs text-muted-foreground mt-4">
             Credits never expire. Payments via{" "}
-            <a href="https://payloglobal.com" target="_blank" className="text-primary hover:underline">Payloglobal</a>.
+            <a href="https://stripe.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">Stripe</a>.
           </p>
         </div>
       </div>
