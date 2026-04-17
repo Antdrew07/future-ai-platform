@@ -424,3 +424,11 @@
 - [x] Fix AgentBuilder: form layout for mobile (toolbar wraps, reduced padding)
 - [x] Fix AgentList / AgentGallery: grid cards for mobile (hover-only buttons now always visible on touch)
 - [x] Audit all remaining pages for overflow, hidden inputs, and unreadable text on mobile
+
+## Website Builder Preview Fix
+
+- [x] Detect HTML output in chat messages and render as live iframe preview instead of raw code
+- [x] Add Preview / Code toggle button on HTML message blocks
+- [x] Make iframe responsive (auto-height or fixed height with scroll)
+- [x] Add "Open in new tab" button for full-screen preview
+- [x] Add "Copy code" button on code view

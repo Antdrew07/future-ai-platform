@@ -20,7 +20,8 @@ import {
   Bot, Send, Loader2, Search, Code2, FileText, Globe, Zap,
   CheckCircle2, XCircle, ChevronDown, ChevronRight, Copy,
   Download, ArrowLeft, Sparkles, Terminal, Image, Database,
-  AlertCircle, Cpu, Clock, Coins, Plus, MessageSquare, Activity
+  AlertCircle, Cpu, Clock, Coins, Plus, MessageSquare, Activity,
+  Eye, ExternalLink, Monitor
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -47,6 +48,182 @@ interface ChatMessage {
   timestamp: number;
   steps?: AgentStep[];
   status?: "running" | "complete" | "error";
+}
+
+// ─── HTML Detection Helpers ──────────────────────────────────────────────────
+
+/**
+ * Returns the raw HTML string if the content looks like a website,
+ * otherwise returns null.
+ *
+ * Handles three cases:
+ *  1. The entire message is a full HTML document (starts with <!DOCTYPE or <html)
+ *  2. The message contains a fenced ```html ... ``` code block
+ *  3. The message contains a large inline HTML snippet (>200 chars, has <body>)
+ */
+function extractHtml(content: string): string | null {
+  const trimmed = content.trim();
+
+  // Case 1: bare HTML document
+  if (/^<!doctype\s+html/i.test(trimmed) || /^<html/i.test(trimmed)) {
+    return trimmed;
+  }
+
+  // Case 2: fenced code block  ```html ... ```
+  const fenced = trimmed.match(/```html\s*\n([\s\S]*?)\n?```/i);
+  if (fenced) return fenced[1].trim();
+
+  // Case 3: large inline HTML with structural tags
+  if (
+    trimmed.length > 300 &&
+    /<html[\s>]/i.test(trimmed) &&
+    /<\/html>/i.test(trimmed)
+  ) {
+    const start = trimmed.search(/<html[\s>]/i);
+    const end = trimmed.lastIndexOf("</html>") + "</html>".length;
+    return trimmed.slice(start, end);
+  }
+
+  return null;
+}
+
+// ─── HTML Preview Component ───────────────────────────────────────────────────
+
+function HtmlPreviewMessage({
+  html,
+  fullContent,
+}: {
+  html: string;
+  fullContent: string;
+}) {
+  const [view, setView] = useState<"preview" | "code">("preview");
+
+  const openInTab = () => {
+    const blob = new Blob([html], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    window.open(url, "_blank");
+    // revoke after a short delay so the tab has time to load
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  };
+
+  const copyCode = () => {
+    navigator.clipboard.writeText(html);
+    toast.success("HTML copied to clipboard");
+  };
+
+  return (
+    <div className="rounded-xl border border-border overflow-hidden shadow-sm">
+      {/* Toolbar */}
+      <div className="flex items-center justify-between px-3 py-2 bg-gray-50 border-b border-border">
+        <div className="flex items-center gap-1.5">
+          <Monitor className="w-3.5 h-3.5 text-primary" />
+          <span className="text-xs font-semibold text-foreground">Website Preview</span>
+        </div>
+        <div className="flex items-center gap-1">
+          {/* Preview / Code toggle */}
+          <div className="flex rounded-lg border border-border overflow-hidden">
+            <button
+              onClick={() => setView("preview")}
+              className={`px-2.5 py-1 text-xs font-medium transition-colors ${
+                view === "preview"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-white text-muted-foreground hover:bg-gray-50"
+              }`}
+            >
+              <Eye className="w-3 h-3 inline mr-1" />
+              Preview
+            </button>
+            <button
+              onClick={() => setView("code")}
+              className={`px-2.5 py-1 text-xs font-medium transition-colors border-l border-border ${
+                view === "code"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-white text-muted-foreground hover:bg-gray-50"
+              }`}
+            >
+              <Code2 className="w-3 h-3 inline mr-1" />
+              Code
+            </button>
+          </div>
+          <button
+            onClick={openInTab}
+            title="Open in new tab"
+            className="p-1.5 rounded-lg hover:bg-gray-100 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+          </button>
+          <button
+            onClick={copyCode}
+            title="Copy HTML"
+            className="p-1.5 rounded-lg hover:bg-gray-100 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Copy className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
+
+      {/* Preview pane */}
+      {view === "preview" && (
+        <div className="relative bg-white" style={{ height: "420px" }}>
+          <iframe
+            srcDoc={html}
+            sandbox="allow-scripts allow-same-origin"
+            className="w-full h-full border-0"
+            title="Website preview"
+          />
+        </div>
+      )}
+
+      {/* Code pane */}
+      {view === "code" && (
+        <pre className="text-xs text-gray-700 bg-gray-950 text-green-300 p-4 overflow-auto max-h-[420px] font-mono whitespace-pre-wrap">
+          {html}
+        </pre>
+      )}
+
+      {/* Footer hint */}
+      <div className="px-3 py-2 bg-gray-50 border-t border-border flex items-center justify-between">
+        <span className="text-[10px] text-muted-foreground">
+          Your website is ready — click Open to view full screen
+        </span>
+        <button
+          onClick={openInTab}
+          className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 font-medium transition-colors"
+        >
+          <ExternalLink className="w-3 h-3" />
+          Open full screen
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Smart Message Renderer ───────────────────────────────────────────────────
+
+function AssistantMessageContent({ content }: { content: string }) {
+  const html = extractHtml(content);
+
+  if (html) {
+    // If there is text before/after the HTML block, show it too
+    const htmlBlockStart = content.indexOf(html.slice(0, 40));
+    const preText = htmlBlockStart > 0 ? content.slice(0, htmlBlockStart).trim() : "";
+    return (
+      <div className="space-y-3">
+        {preText && (
+          <div className="prose prose-sm max-w-none text-foreground text-sm leading-relaxed">
+            <Streamdown>{preText}</Streamdown>
+          </div>
+        )}
+        <HtmlPreviewMessage html={html} fullContent={content} />
+      </div>
+    );
+  }
+
+  return (
+    <div className="prose prose-sm max-w-none text-foreground text-sm leading-relaxed">
+      <Streamdown>{content}</Streamdown>
+    </div>
+  );
 }
 
 // ─── Tool Icons ───────────────────────────────────────────────────────────────
@@ -225,13 +402,22 @@ function StepCard({ step, isLast }: { step: AgentStep; isLast?: boolean }) {
                 <button key={i}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-700 hover:bg-emerald-100 transition-all"
                   onClick={() => {
-                    const blob = new Blob([artifact.content], { type: artifact.type });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement("a");
-                    a.href = url; a.download = artifact.name; a.click();
-                    URL.revokeObjectURL(url);
+                    const isHtml = artifact.name.endsWith(".html") || artifact.type === "text/html";
+                    if (isHtml) {
+                      const blob = new Blob([artifact.content], { type: "text/html" });
+                      const url = URL.createObjectURL(blob);
+                      window.open(url, "_blank");
+                      setTimeout(() => URL.revokeObjectURL(url), 5000);
+                    } else {
+                      const blob = new Blob([artifact.content], { type: artifact.type });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement("a");
+                      a.href = url; a.download = artifact.name; a.click();
+                      URL.revokeObjectURL(url);
+                    }
                   }}>
-                  <Download className="w-3 h-3" />{artifact.name}
+                  {artifact.name.endsWith(".html") ? <Eye className="w-3 h-3" /> : <Download className="w-3 h-3" />}
+                  {artifact.name}
                 </button>
               ))}
             </div>
@@ -316,9 +502,7 @@ function ChatPanelContent({
                   : "bg-gray-50 border border-border rounded-2xl rounded-tl-sm px-4 py-3"
               }`}>
                 {msg.role === "assistant" ? (
-                  <div className="prose prose-sm max-w-none text-foreground text-sm leading-relaxed">
-                    <Streamdown>{msg.content}</Streamdown>
-                  </div>
+                  <AssistantMessageContent content={msg.content} />
                 ) : (
                   <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
                 )}
