@@ -361,3 +361,14 @@
 - [x] Chat messages persist in-session (conversation history passed to agent for context)
 - [x] Sending a new message triggers a new task run and streams steps in real-time
 - [x] Mobile responsive: fixed-width left panel, flex-1 right panel; works on all screen sizes
+
+## Billing Page Redesign — Tiered Subscriptions
+
+- [ ] Clean duplicate credit_packs and subscription_plans rows from DB (deduplicate)
+- [ ] Fix seed script to use INSERT IGNORE / upsert so re-running never duplicates
+- [ ] Redesign Billing page: show current plan, tiered plan cards (Free/Starter/Pro/Enterprise), top-up credits section
+- [ ] Each plan card shows: monthly price, monthly credits included, key features, upgrade/downgrade CTA
+- [ ] Top-up section: 3 simple credit pack options (small/medium/large) below the plan cards
+- [ ] Update Pricing page to match the new tier structure
+- [ ] Wire plan upgrade CTAs to Stripe checkout (subscription mode)
+- [ ] Wire top-up CTAs to Stripe checkout (one-time payment mode)

@@ -504,25 +504,27 @@ export async function seedDefaultData() {
     await upsertModelPricing(m);
   }
 
-  // Seed credit packs
-  const existingPacks = await db.select().from(creditPacks).limit(1);
-  if (existingPacks.length === 0) {
-    await db.insert(creditPacks).values([
-      { name: "Starter", credits: 10000, priceUsd: 5, isPopular: false },
-      { name: "Pro", credits: 50000, priceUsd: 20, isPopular: true },
-      { name: "Growth", credits: 200000, priceUsd: 70, isPopular: false },
-      { name: "Scale", credits: 1000000, priceUsd: 300, isPopular: false },
-    ]);
+  // Seed credit packs — upsert by name to prevent duplicates on server restart
+  const packsToSeed = [
+    { name: "Small Top-up",  credits: 1000,  priceUsd: 5,  isPopular: false },
+    { name: "Medium Top-up", credits: 5000,  priceUsd: 19, isPopular: true },
+    { name: "Large Top-up",  credits: 15000, priceUsd: 49, isPopular: false },
+  ];
+  for (const pack of packsToSeed) {
+    const existing = await db.select().from(creditPacks).where(eq(creditPacks.name, pack.name)).limit(1);
+    if (existing.length === 0) await db.insert(creditPacks).values(pack);
   }
 
-  // Seed subscription plans
-  const existingPlans = await db.select().from(subscriptionPlans).limit(1);
-  if (existingPlans.length === 0) {
-    await db.insert(subscriptionPlans).values([
-      { name: "Free", slug: "free", monthlyCredits: 5000, priceUsd: 0, maxAgents: 2, maxTeamMembers: 1, features: ["2 agents", "5,000 credits/mo", "Community support"] },
-      { name: "Pro", slug: "pro", monthlyCredits: 50000, priceUsd: 29, maxAgents: 20, maxTeamMembers: 5, features: ["20 agents", "50,000 credits/mo", "Team collaboration", "API access", "Priority support"] },
-      { name: "Business", slug: "business", monthlyCredits: 200000, priceUsd: 99, maxAgents: 100, maxTeamMembers: 25, features: ["Unlimited agents", "200,000 credits/mo", "Advanced analytics", "Custom models", "SLA support"] },
-    ]);
+  // Seed subscription plans — upsert by slug to prevent duplicates on server restart
+  const plansToSeed = [
+    { name: "Free",     slug: "free",     monthlyCredits: 500,    priceUsd: 0,  maxAgents: 1,   maxTeamMembers: 1,  features: ["1 project", "500 credits/month", "Basic AI tasks", "Community support"] },
+    { name: "Starter",  slug: "starter",  monthlyCredits: 5000,   priceUsd: 9,  maxAgents: 5,   maxTeamMembers: 1,  features: ["5 projects", "5,000 credits/month", "All task types", "Email support"] },
+    { name: "Pro",      slug: "pro",      monthlyCredits: 25000,  priceUsd: 29, maxAgents: 20,  maxTeamMembers: 5,  features: ["Unlimited projects", "25,000 credits/month", "Team collaboration", "API access", "Priority support"] },
+    { name: "Business", slug: "business", monthlyCredits: 100000, priceUsd: 99, maxAgents: 100, maxTeamMembers: 25, features: ["Everything in Pro", "100,000 credits/month", "Advanced analytics", "Custom models", "Dedicated support", "SLA guarantee"] },
+  ];
+  for (const plan of plansToSeed) {
+    const existing = await db.select().from(subscriptionPlans).where(eq(subscriptionPlans.slug, plan.slug)).limit(1);
+    if (existing.length === 0) await db.insert(subscriptionPlans).values(plan);
   }
 }
 
