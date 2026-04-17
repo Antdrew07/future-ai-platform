@@ -85,13 +85,13 @@ function autoSelectModel(messages: LLMMessage[]): { modelId: string; provider: P
   // Code / app building tasks → Claude (best for code generation)
   const isCodeTask = /build|create|code|program|app|website|html|css|javascript|python|react|node|api|database|function|class|component|android|ios|iphone|mobile|flutter|swift|kotlin/.test(combined);
   if (isCodeTask && process.env.ANTHROPIC_API_KEY) {
-    return { modelId: "claude-3-5-sonnet-20241022", provider: "anthropic" };
+    return { modelId: "claude-sonnet-4-20250514", provider: "anthropic" };
   }
 
   // Creative / writing tasks → Claude (best for long-form creative writing)
   const isCreativeTask = /write|book|novel|story|chapter|blog|article|essay|marketing|copy|script|email|letter|poem|creative|brand|slogan|tagline|pitch|proposal|plan|strategy/.test(combined);
   if (isCreativeTask && process.env.ANTHROPIC_API_KEY) {
-    return { modelId: "claude-3-5-sonnet-20241022", provider: "anthropic" };
+    return { modelId: "claude-sonnet-4-20250514", provider: "anthropic" };
   }
 
   // Fast / simple tasks → Groq (ultra-fast, great for quick answers)
@@ -103,7 +103,7 @@ function autoSelectModel(messages: LLMMessage[]): { modelId: string; provider: P
   // Complex reasoning / analysis → Claude
   const isComplexTask = /analyze|analysis|compare|evaluate|assess|review|audit|diagnose|optimize|improve|strategy|decision|recommend/.test(combined);
   if (isComplexTask && process.env.ANTHROPIC_API_KEY) {
-    return { modelId: "claude-3-5-sonnet-20241022", provider: "anthropic" };
+    return { modelId: "claude-sonnet-4-20250514", provider: "anthropic" };
   }
 
   // Business / financial tasks → OpenAI GPT-4o
@@ -114,7 +114,7 @@ function autoSelectModel(messages: LLMMessage[]): { modelId: string; provider: P
 
   // Default: try Claude first, then Groq, then built-in
   if (process.env.ANTHROPIC_API_KEY) {
-    return { modelId: "claude-3-5-sonnet-20241022", provider: "anthropic" };
+    return { modelId: "claude-sonnet-4-20250514", provider: "anthropic" };
   }
   if (process.env.GROQ_API_KEY) {
     return { modelId: "llama-3.3-70b-versatile", provider: "groq" };
