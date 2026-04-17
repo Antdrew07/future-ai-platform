@@ -1,0 +1,1 @@
+ALTER TABLE `domain_purchases` MODIFY COLUMN `registrar` enum('namecheap','godaddy','dynadot') NOT NULL DEFAULT 'dynadot';

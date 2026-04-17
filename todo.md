@@ -492,10 +492,10 @@
 
 ## Visual Preview Panel (Manus-style)
 
-- [ ] Add live visual preview panel in AgentWorkspace right pane (images render inline as generated)
-- [ ] Show generated images as full-size previews in the execution log step cards
-- [ ] Show HTML/website previews in an iframe when agent builds a site
-- [ ] Show code with syntax highlighting inline in step cards
-- [ ] Add tabbed right panel: "Execution Log" | "Preview" | "Live Browser" — Preview tab shows latest artifact
-- [ ] Auto-switch to Preview tab when an image or HTML artifact is generated
-- [ ] Show artifact gallery at bottom of preview panel (all outputs from this task)
+- [x] Add live visual preview panel in AgentWorkspace right pane (images render inline as generated)
+- [x] Show generated images as full-size previews in the execution log step cards
+- [x] Show HTML/website previews in an iframe when agent builds a site
+- [x] Show code with syntax highlighting inline in step cards
+- [x] Add tabbed right panel: "Execution Log" | "Preview" | "Live Browser" — Preview tab shows latest artifact
+- [x] Auto-switch to Preview tab when an image or HTML artifact is generated
+- [x] Show artifact gallery at bottom of preview panel (all outputs from this task)

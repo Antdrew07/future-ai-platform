@@ -345,7 +345,7 @@ export const domainPurchases = mysqlTable("domain_purchases", {
   userId: int("userId").notNull(),
   domain: varchar("domain", { length: 256 }).notNull(),
   tld: varchar("tld", { length: 32 }).notNull(), // e.g. "com", "io", "ai"
-  registrar: mysqlEnum("registrar", ["namecheap", "godaddy"]).default("namecheap").notNull(),
+  registrar: mysqlEnum("registrar", ["namecheap", "godaddy", "dynadot"]).default("dynadot").notNull(),
   registrarOrderId: varchar("registrarOrderId", { length: 256 }),
   stripePaymentId: varchar("stripePaymentId", { length: 256 }),
   priceCharged: float("priceCharged").notNull(), // what we charged the user (USD)
