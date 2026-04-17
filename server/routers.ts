@@ -8,6 +8,7 @@ import { nanoid } from "nanoid";
 import { createHash } from "crypto";
 import {
   upsertUser, getUserByOpenId, getUserByEmail, createUserWithPassword, getUserById, getAllUsers, getUserCount,
+  createPasswordResetToken, getPasswordResetToken, markPasswordResetTokenUsed, updateUserPassword,
   createAgent, getAgentsByUserId, getAgentById, getAgentBySlug, updateAgent, deleteAgent, getPublicAgents,
   createTask, getTasksByUserId, getTasksByAgentId, getTaskById, updateTask, createTaskStep, getTaskSteps,
   getOrCreateConversation, getConversationsByUserId, addMessage, getMessages,
@@ -19,6 +20,7 @@ import {
   getUserAnalytics, getSystemStats, seedDefaultData,
 } from "./db";
 import { routeLLMCall } from "./llmRouter";
+import { sendEmail, buildPasswordResetEmail } from "./email";
 import { invokeLLM } from "./_core/llm";
 import { createCheckoutSession } from "./stripeWebhook";
 import bcrypt from "bcryptjs";
@@ -90,6 +92,50 @@ export const appRouter = router({
       const cookieOptions = getSessionCookieOptions(ctx.req);
       ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
       return { success: true } as const;
+    }),
+
+    forgotPassword: publicProcedure.input(z.object({
+      email: z.string().email(),
+      origin: z.string().url(),
+    })).mutation(async ({ input }) => {
+      // Always return success to prevent email enumeration
+      const user = await getUserByEmail(input.email);
+      if (!user) return { success: true };
+
+      // Generate a secure random token (48 bytes → 96 hex chars)
+      const { randomBytes } = await import("crypto");
+      const token = randomBytes(48).toString("hex");
+      const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+      await createPasswordResetToken(user.id, token, expiresAt);
+
+      const resetUrl = `${input.origin}/reset-password?token=${token}`;
+      const { subject, html, text } = buildPasswordResetEmail({
+        name: user.name ?? "there",
+        resetUrl,
+        expiresInMinutes: 60,
+      });
+
+      await sendEmail({ to: input.email, subject, html, text });
+
+      return { success: true };
+    }),
+
+    resetPassword: publicProcedure.input(z.object({
+      token: z.string().min(1),
+      password: z.string().min(8, "Password must be at least 8 characters"),
+    })).mutation(async ({ input }) => {
+      const record = await getPasswordResetToken(input.token);
+
+      if (!record) throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid or expired reset link" });
+      if (record.usedAt) throw new TRPCError({ code: "BAD_REQUEST", message: "This reset link has already been used" });
+      if (new Date() > record.expiresAt) throw new TRPCError({ code: "BAD_REQUEST", message: "This reset link has expired. Please request a new one." });
+
+      const passwordHash = await bcrypt.hash(input.password, 12);
+      await updateUserPassword(record.userId, passwordHash);
+      await markPasswordResetTokenUsed(input.token);
+
+      return { success: true };
     }),
   }),
 

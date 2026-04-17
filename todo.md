@@ -303,3 +303,15 @@
 - [x] AgentBuilder.tsx: white background
 - [x] Billing.tsx, Settings.tsx, Analytics.tsx, AdminPanel.tsx: white backgrounds
 - [x] All remaining pages: audit and convert any remaining dark backgrounds (AgentGallery, Teams, Templates, Pricing, ManusDialog)
+
+## Forgot Password Flow
+
+- [x] Add passwordResetTokens table to drizzle/schema.ts (token, userId, expiresAt, usedAt)
+- [x] Push DB migration
+- [x] Build auth.forgotPassword tRPC procedure (generate token, send reset email)
+- [x] Build auth.resetPassword tRPC procedure (validate token, hash new password, mark token used)
+- [x] Build ForgotPassword.tsx page (/forgot-password)
+- [x] Build ResetPassword.tsx page (/reset-password?token=...)
+- [x] Add "Forgot password?" link to SignIn.tsx
+- [x] Register /forgot-password and /reset-password routes in App.tsx
+- [x] Write Vitest tests for forgotPassword and resetPassword procedures

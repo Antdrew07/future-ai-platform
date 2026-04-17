@@ -338,3 +338,14 @@ export const usageAnalytics = mysqlTable("usage_analytics", {
 }));
 
 export type UsageAnalytics = typeof usageAnalytics.$inferSelect;
+
+// ─── Password Reset Tokens ────────────────────────────────────────────────────
+export const passwordResetTokens = mysqlTable("password_reset_tokens", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  token: varchar("token", { length: 128 }).notNull().unique(),
+  expiresAt: timestamp("expiresAt").notNull(),
+  usedAt: timestamp("usedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;

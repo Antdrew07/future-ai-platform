@@ -4,7 +4,7 @@ import {
   InsertUser, users, agents, tasks, taskSteps, conversations, messages,
   creditTransactions, creditPacks, subscriptionPlans, userSubscriptions,
   apiKeys, teams, teamMembers, templates, templateInstalls, usageAnalytics,
-  modelPricing,
+  modelPricing, passwordResetTokens,
   type Agent, type Task, type TaskStep, type CreditTransaction,
   type Template, type Team, type TeamMember, type ApiKey,
 } from "../drizzle/schema";
@@ -524,4 +524,30 @@ export async function seedDefaultData() {
       { name: "Business", slug: "business", monthlyCredits: 200000, priceUsd: 99, maxAgents: 100, maxTeamMembers: 25, features: ["Unlimited agents", "200,000 credits/mo", "Advanced analytics", "Custom models", "SLA support"] },
     ]);
   }
+}
+
+// ─── Password Reset Tokens ────────────────────────────────────────────────────
+export async function createPasswordResetToken(userId: number, token: string, expiresAt: Date): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.insert(passwordResetTokens).values({ userId, token, expiresAt });
+}
+
+export async function getPasswordResetToken(token: string) {
+  const db = await getDb();
+  if (!db) return null;
+  const rows = await db.select().from(passwordResetTokens).where(eq(passwordResetTokens.token, token)).limit(1);
+  return rows[0] ?? null;
+}
+
+export async function markPasswordResetTokenUsed(token: string): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(passwordResetTokens).set({ usedAt: new Date() }).where(eq(passwordResetTokens.token, token));
+}
+
+export async function updateUserPassword(userId: number, passwordHash: string): Promise<void> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  await db.update(users).set({ passwordHash, updatedAt: new Date() }).where(eq(users.id, userId));
 }

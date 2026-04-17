@@ -8,6 +8,8 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 // Auth pages
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 // Public pages
 import Home from "./pages/Home";
@@ -38,6 +40,8 @@ function Router() {
       {/* Auth */}
       <Route path="/signin" component={SignIn} />
       <Route path="/signup" component={SignUp} />
+      <Route path="/forgot-password" component={ForgotPassword} />
+      <Route path="/reset-password" component={ResetPassword} />
 
       {/* Public */}
       <Route path="/" component={Home} />

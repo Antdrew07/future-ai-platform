@@ -101,7 +101,10 @@ export default function SignIn() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-foreground/80">Password</label>
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-foreground/80">Password</label>
+                <a href="/forgot-password" className="text-xs text-primary hover:underline font-medium">Forgot password?</a>
+              </div>
               <div className="relative">
                 <Input
                   type={showPassword ? "text" : "password"}
