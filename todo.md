@@ -507,4 +507,4 @@
 - [x] Add useEffect in Domains.tsx to auto-call completePurchase on success redirect (reads ?purchased= and ?session_id= params)
 - [x] Add domain registration logic to Stripe webhook (checkout.session.completed) as server-side fallback
 - [x] Webhook now handles both credit pack purchases AND domain purchases in one handler
-- [ ] Fund Dynadot account to enable live domain registrations (Dynadot returns insufficient_funds — account needs balance)
+- [x] Fund Dynadot account to enable live domain registrations — funded, futureaiplatform2026test.com registered and active
