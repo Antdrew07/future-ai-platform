@@ -463,3 +463,14 @@
 ## GoDaddy Domain Portal Integration (Deferred)
 
 - [ ] GoDaddy API returns ACCESS_DENIED — user must contact apisupport@godaddy.com for production API approval *(blocked: requires GoDaddy manual approval)*
+
+## UX Redesign: Single-Screen Chat (Claude/Manus Style)
+
+- [x] Remove Dashboard → /workspace redirect on prompt submit
+- [x] Rebuild Dashboard as persistent inline chat (home mode + chat mode)
+- [x] Chat panel: user/assistant bubbles, streaming dots, credits display, New Chat button
+- [x] Execution log panel: live step cards, artifacts, live browser panel — all inline
+- [x] Mobile: tab bar switching between Chat and Live Log
+- [x] Domain upsell shown inline after website builds (no redirect)
+- [x] AgentList "Launch Workspace" button updated to "Start Chatting" → goes to /dashboard
+- [x] Recent tasks on home screen are clickable to re-run directly

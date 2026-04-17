@@ -133,10 +133,10 @@ export default function AgentList() {
                     <Button
                       size="sm"
                       className="w-full bg-primary hover:bg-primary/90 text-primary-foreground text-xs h-8 glow-subtle"
-                      onClick={() => navigate(`/workspace/${agent.id}`)}
+                      onClick={() => navigate("/dashboard")}
                     >
                       <Sparkles className="w-3.5 h-3.5 mr-1.5" />
-                      Launch Workspace
+                      Start Chatting
                     </Button>
                   </div>
               </div>
