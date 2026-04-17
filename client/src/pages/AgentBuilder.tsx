@@ -109,7 +109,7 @@ export default function AgentBuilder() {
       subtitle={agentId ? existingAgent?.name : "Configure your autonomous AI agent"}>
       <div className="flex flex-col h-full">
         {/* Toolbar */}
-        <div className="flex items-center gap-3 px-6 py-3 border-b border-border/30 bg-white border-b border-border flex-shrink-0">
+        <div className="flex flex-wrap items-center gap-2 px-3 sm:px-6 py-3 border-b border-border bg-white flex-shrink-0">
           <Link href="/dashboard/agents">
             <Button variant="ghost" size="sm" className="h-8 text-xs text-muted-foreground">
               <ArrowLeft className="w-3.5 h-3.5 mr-1.5" />
@@ -117,7 +117,7 @@ export default function AgentBuilder() {
             </Button>
           </Link>
 
-          <div className="flex items-center gap-1 ml-2">
+          <div className="flex items-center gap-1">
             <Button
               variant={activeTab === "build" ? "secondary" : "ghost"}
               size="sm" className="h-7 text-xs"
@@ -135,7 +135,7 @@ export default function AgentBuilder() {
             </Button>
           </div>
 
-          <div className="ml-auto flex items-center gap-2">
+          <div className="ml-auto flex items-center gap-1.5 flex-wrap justify-end">
             {form.isDeployed && publicUrl && (
               <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg border border-emerald-500/20 bg-emerald-500/5">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />

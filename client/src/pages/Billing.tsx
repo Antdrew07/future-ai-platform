@@ -116,7 +116,7 @@ export default function Billing() {
 
   return (
     <FutureDashboardLayout title="Billing" subtitle="Manage your plan and credits">
-      <div className="max-w-5xl mx-auto px-6 py-8 space-y-10">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-8 sm:space-y-10">
 
         {/* ── Credit Balance Banner ── */}
         <div className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-violet-50 p-6 flex flex-wrap items-center justify-between gap-6">

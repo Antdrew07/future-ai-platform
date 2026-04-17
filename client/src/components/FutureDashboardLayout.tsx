@@ -211,7 +211,7 @@ export default function FutureDashboardLayout({ children, title, subtitle, showN
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Top bar */}
         <header className="h-14 border-b border-border/30 flex items-center px-4 md:px-6 gap-4 flex-shrink-0 glass-strong">
-          <Button variant="ghost" size="icon" className="md:hidden w-8 h-8 rounded-lg" onClick={() => setMobileOpen(true)}>
+          <Button variant="ghost" size="icon" className="md:hidden w-10 h-10 rounded-lg" onClick={() => setMobileOpen(true)}>
             <Menu className="w-4 h-4" />
           </Button>
           <div className="flex-1 min-w-0">

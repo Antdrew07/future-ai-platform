@@ -2,8 +2,9 @@
  * Future AI Platform — Agent Workspace
  *
  * Manus-style split-pane layout:
- * - LEFT:  Persistent back-and-forth conversation (chat bubbles + input)
- * - RIGHT: Live execution log (step cards, tool calls, results)
+ * - Desktop: LEFT = conversation chat, RIGHT = execution log
+ * - Mobile:  Tab-based switching between Chat and Execution Log
+ *            Input box is always pinned to the bottom of the screen
  */
 
 import { useState, useRef, useEffect, useCallback } from "react";
@@ -19,7 +20,7 @@ import {
   Bot, Send, Loader2, Search, Code2, FileText, Globe, Zap,
   CheckCircle2, XCircle, ChevronDown, ChevronRight, Copy,
   Download, ArrowLeft, Sparkles, Terminal, Image, Database,
-  AlertCircle, Cpu, Clock, Coins, Plus
+  AlertCircle, Cpu, Clock, Coins, Plus, MessageSquare, Activity
 } from "lucide-react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -241,6 +242,246 @@ function StepCard({ step, isLast }: { step: AgentStep; isLast?: boolean }) {
   );
 }
 
+// ─── Chat Panel Content ───────────────────────────────────────────────────────
+
+function ChatPanelContent({
+  messages,
+  isRunning,
+  agent,
+  input,
+  setInput,
+  runTask,
+  inputRef,
+  chatEndRef,
+}: {
+  messages: ChatMessage[];
+  isRunning: boolean;
+  agent: { name?: string | null; description?: string | null } | undefined;
+  input: string;
+  setInput: (v: string) => void;
+  runTask: () => void;
+  inputRef: React.RefObject<HTMLTextAreaElement | null>;
+  chatEndRef: React.RefObject<HTMLDivElement | null>;
+}) {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      runTask();
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* Messages area */}
+      <div className="flex-1 overflow-y-auto px-4 py-4">
+        {messages.length === 0 && !isRunning && (
+          <div className="flex flex-col items-center justify-center h-full py-12 text-center">
+            <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-4">
+              <Sparkles className="w-7 h-7 text-primary" />
+            </div>
+            <h2 className="text-base font-semibold text-foreground mb-1">
+              {agent?.name ?? "AI Agent"}
+            </h2>
+            <p className="text-sm text-muted-foreground max-w-[260px] leading-relaxed">
+              {agent?.description ?? "Your personal AI. Ask it anything or give it a task to complete."}
+            </p>
+            <div className="mt-5 flex flex-wrap gap-2 justify-center">
+              {[
+                "Build me an iPhone app",
+                "Write a business plan",
+                "Research the latest trends",
+                "Create a marketing strategy",
+              ].map(s => (
+                <button key={s}
+                  className="px-3 py-1.5 rounded-full bg-muted border border-border text-xs text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                  onClick={() => setInput(s)}>
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="space-y-5">
+          {messages.map((msg) => (
+            <div key={msg.id} className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+              {msg.role === "assistant" && (
+                <div className="w-7 h-7 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 mt-0.5">
+                  <Bot className="w-3.5 h-3.5 text-primary" />
+                </div>
+              )}
+              <div className={`max-w-[85%] ${
+                msg.role === "user"
+                  ? "bg-primary text-primary-foreground rounded-2xl rounded-tr-sm px-4 py-3"
+                  : "bg-gray-50 border border-border rounded-2xl rounded-tl-sm px-4 py-3"
+              }`}>
+                {msg.role === "assistant" ? (
+                  <div className="prose prose-sm max-w-none text-foreground text-sm leading-relaxed">
+                    <Streamdown>{msg.content}</Streamdown>
+                  </div>
+                ) : (
+                  <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                )}
+                {msg.role === "assistant" && msg.creditsUsed && msg.creditsUsed > 0 ? (
+                  <p className="text-[10px] text-muted-foreground mt-2 flex items-center gap-1">
+                    <Coins className="w-2.5 h-2.5" />
+                    {msg.creditsUsed} credits · {new Date(msg.timestamp).toLocaleTimeString()}
+                  </p>
+                ) : null}
+              </div>
+            </div>
+          ))}
+
+          {/* Typing indicator while running */}
+          {isRunning && (
+            <div className="flex gap-3 justify-start">
+              <div className="w-7 h-7 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                <Bot className="w-3.5 h-3.5 text-primary" />
+              </div>
+              <div className="bg-gray-50 border border-border rounded-2xl rounded-tl-sm px-4 py-3">
+                <div className="flex gap-1 items-center">
+                  <span className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "0ms" }} />
+                  <span className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "150ms" }} />
+                  <span className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "300ms" }} />
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+        <div ref={chatEndRef} />
+      </div>
+
+      {/* ── Input Box — always visible at bottom ── */}
+      <div className="shrink-0 p-3 border-t border-border bg-white">
+        <div className="flex items-end gap-2 bg-gray-50 border border-border rounded-2xl px-4 py-3 focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/10 transition-all">
+          <textarea
+            ref={inputRef}
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={isRunning ? "Agent is working..." : "Message your agent..."}
+            rows={1}
+            disabled={isRunning}
+            className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground resize-none outline-none min-h-[24px] max-h-[120px] leading-relaxed disabled:opacity-50"
+            style={{ height: "auto" }}
+            onInput={e => {
+              const el = e.currentTarget;
+              el.style.height = "auto";
+              el.style.height = Math.min(el.scrollHeight, 120) + "px";
+            }}
+          />
+          <Button
+            size="icon"
+            className="h-9 w-9 bg-primary hover:bg-primary/90 rounded-xl shrink-0"
+            onClick={runTask}
+            disabled={!input.trim() || isRunning}
+          >
+            {isRunning
+              ? <Loader2 className="w-4 h-4 animate-spin" />
+              : <Send className="w-4 h-4" />}
+          </Button>
+        </div>
+        <p className="text-[10px] text-muted-foreground text-center mt-1.5 hidden sm:block">
+          Press Enter to send · Shift+Enter for new line
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Execution Log Panel Content ──────────────────────────────────────────────
+
+function LogPanelContent({
+  liveSteps,
+  isRunning,
+  runStatus,
+  allArtifacts,
+  stepsEndRef,
+}: {
+  liveSteps: AgentStep[];
+  isRunning: boolean;
+  runStatus: string;
+  allArtifacts: { name: string; content: string; type: string }[];
+  stepsEndRef: React.RefObject<HTMLDivElement | null>;
+}) {
+  return (
+    <div className="flex flex-col h-full">
+      {/* Log header */}
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-white shrink-0">
+        <div className="flex items-center gap-2">
+          <Terminal className="w-4 h-4 text-muted-foreground" />
+          <span className="text-sm font-medium text-foreground">Execution Log</span>
+          {runStatus !== "idle" && (
+            <Badge variant="outline" className={`text-xs ml-1 ${
+              runStatus === "running" ? "border-emerald-300 text-emerald-600 bg-emerald-50" :
+              runStatus === "complete" ? "border-emerald-300 text-emerald-600 bg-emerald-50" :
+              runStatus === "error" ? "border-red-300 text-red-600 bg-red-50" : ""
+            }`}>
+              {runStatus === "running" ? "Running" : runStatus === "complete" ? "Complete" : "Error"}
+            </Badge>
+          )}
+        </div>
+        {liveSteps.length > 0 && (
+          <span className="text-xs text-muted-foreground">{liveSteps.length} steps</span>
+        )}
+      </div>
+
+      {/* Steps */}
+      <div className="flex-1 overflow-y-auto p-4">
+        {liveSteps.length === 0 && !isRunning && (
+          <div className="flex flex-col items-center justify-center h-full text-center py-16">
+            <div className="w-12 h-12 rounded-xl bg-white border border-border flex items-center justify-center mb-4 shadow-sm">
+              <Terminal className="w-6 h-6 text-muted-foreground" />
+            </div>
+            <p className="text-sm text-muted-foreground">Execution steps will appear here</p>
+            <p className="text-xs text-muted-foreground/60 mt-1">Send a message to see your agent work in real-time</p>
+          </div>
+        )}
+
+        {(liveSteps.length > 0 || isRunning) && (
+          <div className="space-y-2">
+            {liveSteps.map((step, idx) => (
+              <StepCard key={step.id} step={step} isLast={idx === liveSteps.length - 1} />
+            ))}
+            {isRunning && (
+              <div className="flex items-center gap-3 p-3 rounded-xl border border-indigo-200 bg-indigo-50/60">
+                <Loader2 className="w-4 h-4 text-indigo-500 animate-spin shrink-0" />
+                <span className="text-sm text-indigo-700">Agent is working...</span>
+              </div>
+            )}
+            <div ref={stepsEndRef} />
+          </div>
+        )}
+      </div>
+
+      {/* Artifacts panel */}
+      {allArtifacts.length > 0 && (
+        <div className="border-t border-border bg-white px-4 py-3 shrink-0">
+          <div className="flex items-center gap-2 mb-2">
+            <Download className="w-3.5 h-3.5 text-emerald-600" />
+            <span className="text-xs font-semibold text-foreground">Output Files ({allArtifacts.length})</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {allArtifacts.map((artifact, i) => (
+              <button key={i}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-700 hover:bg-emerald-100 transition-all"
+                onClick={() => {
+                  const blob = new Blob([artifact.content], { type: artifact.type });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url; a.download = artifact.name; a.click();
+                  URL.revokeObjectURL(url);
+                }}>
+                <FileText className="w-3 h-3" />{artifact.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function AgentWorkspace() {
@@ -255,15 +496,15 @@ export default function AgentWorkspace() {
     } catch { return ""; }
   });
 
-  // Full conversation: each entry is a user or assistant message
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  // Current live steps for the in-progress run
   const [liveSteps, setLiveSteps] = useState<AgentStep[]>([]);
   const [isRunning, setIsRunning] = useState(false);
   const [runStatus, setRunStatus] = useState<"idle" | "running" | "complete" | "error">("idle");
   const [creditsUsed, setCreditsUsed] = useState(0);
   const [runStartedAt, setRunStartedAt] = useState<number | null>(null);
   const [elapsed, setElapsed] = useState(0);
+  // Mobile: which tab is active
+  const [mobileTab, setMobileTab] = useState<"chat" | "log">("chat");
 
   const chatEndRef = useRef<HTMLDivElement>(null);
   const stepsEndRef = useRef<HTMLDivElement>(null);
@@ -283,6 +524,16 @@ export default function AgentWorkspace() {
   useEffect(() => {
     stepsEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [liveSteps.length]);
+
+  // Switch to log tab automatically when agent starts running on mobile
+  useEffect(() => {
+    if (isRunning) setMobileTab("log");
+  }, [isRunning]);
+
+  // Switch back to chat tab when task completes
+  useEffect(() => {
+    if (runStatus === "complete") setMobileTab("chat");
+  }, [runStatus]);
 
   // Elapsed timer
   useEffect(() => {
@@ -308,7 +559,6 @@ export default function AgentWorkspace() {
     setRunStartedAt(Date.now());
     setElapsed(0);
 
-    // Add user message to chat
     const userMsg: ChatMessage = {
       id: `user-${Date.now()}`,
       role: "user",
@@ -317,7 +567,6 @@ export default function AgentWorkspace() {
     };
     setMessages(prev => [...prev, userMsg]);
 
-    // Build conversation history for context
     const history = messages.map(m => ({ role: m.role, content: m.content }));
 
     try {
@@ -387,13 +636,11 @@ export default function AgentWorkspace() {
         buffer = processBuffer(buffer);
       }
 
-      // Fallback: extract final answer from steps if not in complete event
       if (!finalAnswer) {
         const completeStep = [...liveSteps].reverse().find(s => s.type === "complete");
         finalAnswer = completeStep?.content ?? "";
       }
 
-      // Add assistant reply to chat
       if (finalAnswer) {
         const assistantMsg: ChatMessage = {
           id: `assistant-${Date.now()}`,
@@ -417,13 +664,6 @@ export default function AgentWorkspace() {
     }
   }, [input, isRunning, agentId, messages, liveSteps, refetchCredits]);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      void runTask();
-    }
-  };
-
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -438,33 +678,31 @@ export default function AgentWorkspace() {
   const allArtifacts = liveSteps.flatMap(s => s.artifacts ?? []);
 
   return (
-    <div className="h-screen flex flex-col bg-background overflow-hidden">
+    <div className="h-[100dvh] flex flex-col bg-background overflow-hidden">
 
       {/* ── Top Header ── */}
-      <header className="flex items-center gap-3 px-4 py-2.5 border-b border-border bg-white shrink-0 shadow-sm">
+      <header className="flex items-center gap-2 px-3 sm:px-4 py-2.5 border-b border-border bg-white shrink-0 shadow-sm">
         <Button
           variant="ghost" size="icon"
-          className="text-muted-foreground hover:text-foreground h-8 w-8 shrink-0"
+          className="text-muted-foreground hover:text-foreground h-9 w-9 shrink-0"
           onClick={() => navigate("/dashboard/agents")}
         >
           <ArrowLeft className="w-4 h-4" />
         </Button>
 
-        <div className="flex items-center gap-2.5 min-w-0">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
           <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
             <Bot className="w-4 h-4 text-primary" />
           </div>
           <div className="min-w-0">
             <h1 className="text-sm font-semibold text-foreground truncate">{agent?.name ?? "AI Agent"}</h1>
-            <p className="text-[11px] text-muted-foreground truncate">Powered by Future AI</p>
+            <p className="text-[11px] text-muted-foreground truncate hidden sm:block">Powered by Future AI</p>
           </div>
         </div>
 
-        <div className="flex-1" />
-
-        {/* Run stats */}
+        {/* Run stats — hidden on very small screens */}
         {isRunning && (
-          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+          <div className="hidden sm:flex items-center gap-3 text-xs text-muted-foreground">
             <span className="flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               Working...
@@ -475,28 +713,29 @@ export default function AgentWorkspace() {
             </span>
           </div>
         )}
-        {!isRunning && creditsUsed > 0 && (
-          <span className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Coins className="w-3 h-3" />
-            {creditsUsed} credits used
+        {isRunning && (
+          <span className="flex sm:hidden items-center gap-1 text-xs text-emerald-600">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            {elapsed}s
           </span>
         )}
 
         {/* Credit balance */}
         {creditBalance !== undefined && (
-          <div className={`flex items-center gap-1 text-xs font-medium px-2.5 py-1 rounded-full border ${
+          <div className={`flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full border ${
             creditBalance <= 10
               ? "border-red-200 bg-red-50 text-red-600"
               : "border-primary/20 bg-primary/5 text-primary"
           }`}>
             <Coins className="w-3 h-3" />
-            {creditBalance} credits
+            <span className="hidden xs:inline">{creditBalance}</span>
+            <span className="xs:hidden">{creditBalance > 999 ? `${Math.floor(creditBalance/1000)}k` : creditBalance}</span>
           </div>
         )}
 
         <Button
           variant="outline" size="sm"
-          className="text-xs h-8 gap-1.5 border-border"
+          className="text-xs h-8 gap-1 border-border hidden sm:flex"
           onClick={() => {
             setMessages([]);
             setLiveSteps([]);
@@ -509,206 +748,75 @@ export default function AgentWorkspace() {
         </Button>
       </header>
 
-      {/* ── Main Split Pane ── */}
-      <div className="flex-1 flex overflow-hidden">
+      {/* ── Mobile Tab Bar ── */}
+      <div className="md:hidden flex border-b border-border bg-white shrink-0">
+        <button
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors ${
+            mobileTab === "chat"
+              ? "text-primary border-b-2 border-primary"
+              : "text-muted-foreground"
+          }`}
+          onClick={() => setMobileTab("chat")}
+        >
+          <MessageSquare className="w-4 h-4" />
+          Chat
+        </button>
+        <button
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium transition-colors relative ${
+            mobileTab === "log"
+              ? "text-primary border-b-2 border-primary"
+              : "text-muted-foreground"
+          }`}
+          onClick={() => setMobileTab("log")}
+        >
+          <Activity className="w-4 h-4" />
+          Live Log
+          {isRunning && (
+            <span className="absolute top-2 right-6 w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          )}
+          {liveSteps.length > 0 && !isRunning && (
+            <span className="ml-1 text-xs text-muted-foreground">({liveSteps.length})</span>
+          )}
+        </button>
+      </div>
+
+      {/* ── Main Content ── */}
+      <div className="flex-1 flex overflow-hidden min-h-0">
 
         {/* ══════════════════════════════════════════
-            LEFT: Conversation Panel
+            LEFT / MOBILE CHAT: Conversation Panel
         ══════════════════════════════════════════ */}
-        <div className="w-[400px] xl:w-[440px] shrink-0 flex flex-col border-r border-border bg-white">
-
-          {/* Chat messages */}
-          <ScrollArea className="flex-1 px-4 py-4">
-            {messages.length === 0 && !isRunning && (
-              <div className="flex flex-col items-center justify-center h-full py-12 text-center">
-                <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-4">
-                  <Sparkles className="w-7 h-7 text-primary" />
-                </div>
-                <h2 className="text-base font-semibold text-foreground mb-1">
-                  {agent?.name ?? "AI Agent"}
-                </h2>
-                <p className="text-sm text-muted-foreground max-w-[260px] leading-relaxed">
-                  {agent?.description ?? "Your personal AI. Ask it anything or give it a task to complete."}
-                </p>
-                <div className="mt-5 flex flex-wrap gap-2 justify-center">
-                  {[
-                    "Build me an iPhone app",
-                    "Write a business plan",
-                    "Research the latest trends",
-                    "Create a marketing strategy",
-                  ].map(s => (
-                    <button key={s}
-                      className="px-3 py-1.5 rounded-full bg-muted border border-border text-xs text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
-                      onClick={() => setInput(s)}>
-                      {s}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div className="space-y-5">
-              {messages.map((msg) => (
-                <div key={msg.id} className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                  {msg.role === "assistant" && (
-                    <div className="w-7 h-7 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 mt-0.5">
-                      <Bot className="w-3.5 h-3.5 text-primary" />
-                    </div>
-                  )}
-                  <div className={`max-w-[85%] ${
-                    msg.role === "user"
-                      ? "bg-primary text-primary-foreground rounded-2xl rounded-tr-sm px-4 py-3"
-                      : "bg-gray-50 border border-border rounded-2xl rounded-tl-sm px-4 py-3"
-                  }`}>
-                    {msg.role === "assistant" ? (
-                      <div className="prose prose-sm max-w-none text-foreground text-sm leading-relaxed">
-                        <Streamdown>{msg.content}</Streamdown>
-                      </div>
-                    ) : (
-                      <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-                    )}
-                    {msg.role === "assistant" && msg.creditsUsed && msg.creditsUsed > 0 ? (
-                      <p className="text-[10px] text-muted-foreground mt-2 flex items-center gap-1">
-                        <Coins className="w-2.5 h-2.5" />
-                        {msg.creditsUsed} credits · {new Date(msg.timestamp).toLocaleTimeString()}
-                      </p>
-                    ) : null}
-                  </div>
-                </div>
-              ))}
-
-              {/* Typing indicator while running */}
-              {isRunning && (
-                <div className="flex gap-3 justify-start">
-                  <div className="w-7 h-7 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-                    <Bot className="w-3.5 h-3.5 text-primary" />
-                  </div>
-                  <div className="bg-gray-50 border border-border rounded-2xl rounded-tl-sm px-4 py-3">
-                    <div className="flex gap-1 items-center">
-                      <span className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "0ms" }} />
-                      <span className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "150ms" }} />
-                      <span className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "300ms" }} />
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-            <div ref={chatEndRef} />
-          </ScrollArea>
-
-          {/* ── Input Box ── */}
-          <div className="p-3 border-t border-border bg-white">
-            <div className="flex items-end gap-2 bg-gray-50 border border-border rounded-2xl px-4 py-3 focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-primary/10 transition-all">
-              <textarea
-                ref={inputRef}
-                value={input}
-                onChange={e => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder={isRunning ? "Agent is working..." : "Message your agent... (Enter to send)"}
-                rows={1}
-                disabled={isRunning}
-                className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground resize-none outline-none min-h-[24px] max-h-[120px] leading-relaxed disabled:opacity-50"
-                style={{ height: "auto" }}
-                onInput={e => {
-                  const el = e.currentTarget;
-                  el.style.height = "auto";
-                  el.style.height = Math.min(el.scrollHeight, 120) + "px";
-                }}
-              />
-              <Button
-                size="icon"
-                className="h-8 w-8 bg-primary hover:bg-primary/90 rounded-xl shrink-0"
-                onClick={() => void runTask()}
-                disabled={!input.trim() || isRunning}
-              >
-                {isRunning
-                  ? <Loader2 className="w-4 h-4 animate-spin" />
-                  : <Send className="w-4 h-4" />}
-              </Button>
-            </div>
-            <p className="text-[10px] text-muted-foreground text-center mt-1.5">
-              Press Enter to send · Shift+Enter for new line
-            </p>
-          </div>
+        <div className={`
+          flex flex-col bg-white
+          w-full md:w-[400px] xl:w-[440px] md:shrink-0 md:border-r md:border-border
+          ${mobileTab === "chat" ? "flex" : "hidden md:flex"}
+        `}>
+          <ChatPanelContent
+            messages={messages}
+            isRunning={isRunning}
+            agent={agent}
+            input={input}
+            setInput={setInput}
+            runTask={() => void runTask()}
+            inputRef={inputRef}
+            chatEndRef={chatEndRef}
+          />
         </div>
 
         {/* ══════════════════════════════════════════
-            RIGHT: Execution Log Panel
+            RIGHT / MOBILE LOG: Execution Log Panel
         ══════════════════════════════════════════ */}
-        <div className="flex-1 flex flex-col overflow-hidden bg-gray-50/50">
-
-          {/* Log header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-border bg-white shrink-0">
-            <div className="flex items-center gap-2">
-              <Terminal className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm font-medium text-foreground">Execution Log</span>
-              {runStatus !== "idle" && (
-                <Badge variant="outline" className={`text-xs ml-1 ${
-                  runStatus === "running" ? "border-emerald-300 text-emerald-600 bg-emerald-50" :
-                  runStatus === "complete" ? "border-emerald-300 text-emerald-600 bg-emerald-50" :
-                  runStatus === "error" ? "border-red-300 text-red-600 bg-red-50" : ""
-                }`}>
-                  {runStatus === "running" ? "Running" : runStatus === "complete" ? "Complete" : "Error"}
-                </Badge>
-              )}
-            </div>
-            {liveSteps.length > 0 && (
-              <span className="text-xs text-muted-foreground">{liveSteps.length} steps</span>
-            )}
-          </div>
-
-          {/* Steps */}
-          <ScrollArea className="flex-1 p-4">
-            {liveSteps.length === 0 && !isRunning && (
-              <div className="flex flex-col items-center justify-center h-full text-center py-16">
-                <div className="w-12 h-12 rounded-xl bg-white border border-border flex items-center justify-center mb-4 shadow-sm">
-                  <Terminal className="w-6 h-6 text-muted-foreground" />
-                </div>
-                <p className="text-sm text-muted-foreground">Execution steps will appear here</p>
-                <p className="text-xs text-muted-foreground/60 mt-1">Send a message to see your agent work in real-time</p>
-              </div>
-            )}
-
-            {(liveSteps.length > 0 || isRunning) && (
-              <div className="space-y-2">
-                {liveSteps.map((step, idx) => (
-                  <StepCard key={step.id} step={step} isLast={idx === liveSteps.length - 1} />
-                ))}
-                {isRunning && (
-                  <div className="flex items-center gap-3 p-3 rounded-xl border border-indigo-200 bg-indigo-50/60">
-                    <Loader2 className="w-4 h-4 text-indigo-500 animate-spin shrink-0" />
-                    <span className="text-sm text-indigo-700">Agent is working...</span>
-                  </div>
-                )}
-                <div ref={stepsEndRef} />
-              </div>
-            )}
-          </ScrollArea>
-
-          {/* Artifacts panel */}
-          {allArtifacts.length > 0 && (
-            <div className="border-t border-border bg-white px-4 py-3 shrink-0">
-              <div className="flex items-center gap-2 mb-2">
-                <Download className="w-3.5 h-3.5 text-emerald-600" />
-                <span className="text-xs font-semibold text-foreground">Output Files ({allArtifacts.length})</span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {allArtifacts.map((artifact, i) => (
-                  <button key={i}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-700 hover:bg-emerald-100 transition-all"
-                    onClick={() => {
-                      const blob = new Blob([artifact.content], { type: artifact.type });
-                      const url = URL.createObjectURL(blob);
-                      const a = document.createElement("a");
-                      a.href = url; a.download = artifact.name; a.click();
-                      URL.revokeObjectURL(url);
-                    }}>
-                    <FileText className="w-3 h-3" />{artifact.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+        <div className={`
+          flex-1 flex flex-col overflow-hidden bg-gray-50/50
+          ${mobileTab === "log" ? "flex" : "hidden md:flex"}
+        `}>
+          <LogPanelContent
+            liveSteps={liveSteps}
+            isRunning={isRunning}
+            runStatus={runStatus}
+            allArtifacts={allArtifacts}
+            stepsEndRef={stepsEndRef}
+          />
         </div>
       </div>
     </div>

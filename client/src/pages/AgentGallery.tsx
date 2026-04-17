@@ -176,10 +176,8 @@ export default function AgentGallery() {
                 <div className="flex items-center justify-between pt-3 border-t border-border">
                   <div className="text-[10px] text-muted-foreground">
                     <span className="font-medium text-foreground">{agent.tasks.toLocaleString()}</span> tasks
-                    <span className="mx-1.5 text-border">·</span>
-                    <span>{agent.model}</span>
                   </div>
-                  <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all">
+                  <div className="flex gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-all">
                     <Button size="sm" variant="outline" className="h-6 px-2 text-[10px] border-border bg-white text-foreground hover:bg-accent"
                       onClick={() => handleTryAgent(agent.name)}>
                       <Copy className="w-2.5 h-2.5 mr-1" />Clone

@@ -314,7 +314,7 @@ export default function Home() {
 
       {/* ── Stats ── */}
       <section className="bg-white border-y border-border py-12 px-4">
-        <div className="max-w-3xl mx-auto grid grid-cols-3 gap-6 text-center">
+        <div className="max-w-3xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
           <div>
             <div className="text-4xl font-black text-primary mb-1">
               <AnimatedCounter target={50000} suffix="+" />
@@ -450,7 +450,7 @@ export default function Home() {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-10">
+          <div className="grid sm:grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
             {[
               {
                 num: "1",
@@ -519,7 +519,7 @@ export default function Home() {
             <h2 className="text-4xl font-black mb-3">Real people. Real transformations.</h2>
             <p className="text-muted-foreground text-lg">People just like you — with big ideas and no tech background.</p>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
             {TESTIMONIALS.map((t) => (
               <div key={t.name} className="bg-white border border-border rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex gap-0.5 mb-4">
@@ -545,7 +545,7 @@ export default function Home() {
           <p className="text-lg text-muted-foreground mb-10 max-w-xl mx-auto">
             Your first tasks are on me. No credit card required. Upgrade only when you're ready for more.
           </p>
-          <div className="grid sm:grid-cols-3 gap-4 mb-10">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
             {[
               { name: "Free", price: "$0", desc: "Get started today, no card needed", highlight: false },
               { name: "Pro", price: "$29/mo", desc: "Unlimited projects for power users", highlight: true },

@@ -412,3 +412,15 @@
 - [x] Ensure no provider names (OpenAI, Anthropic, Claude, Groq, Perplexity) appear anywhere in user-facing UI
 - [x] Update AgentBuilder to remove model field from agent creation form
 - [x] Fix agent stopping bug: add 90s per-step timeout + retry on transient errors + always send terminal SSE event
+
+## Mobile Audit & Fixes
+
+- [x] Fix AgentWorkspace: chat input box inaccessible on mobile (covered by keyboard / off-screen)
+- [x] Fix AgentWorkspace: split-pane layout unusable on mobile (both panels need to stack vertically with tab switching)
+- [x] Fix FutureDashboardLayout: sidebar overlaps content on mobile (needs hamburger menu / drawer)
+- [x] Fix Home.tsx: hero, use-case cards, and nav bar for mobile viewports
+- [x] Fix SignIn / SignUp: two-column layout needs to collapse to single column on mobile (already responsive)
+- [x] Fix Billing / Pricing: plan cards need to stack on mobile
+- [x] Fix AgentBuilder: form layout for mobile (toolbar wraps, reduced padding)
+- [x] Fix AgentList / AgentGallery: grid cards for mobile (hover-only buttons now always visible on touch)
+- [x] Audit all remaining pages for overflow, hidden inputs, and unreadable text on mobile

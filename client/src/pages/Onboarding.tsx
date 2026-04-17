@@ -163,7 +163,7 @@ export default function Onboarding() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {[
                   { icon: Globe, label: "Builds websites", bg: "bg-blue-50", iconColor: "text-blue-600" },
                   { icon: Code2, label: "Builds apps", bg: "bg-emerald-50", iconColor: "text-emerald-600" },
@@ -276,7 +276,7 @@ export default function Onboarding() {
                   </div>
                   <div className="text-left">
                     <div className="font-heading font-semibold text-foreground text-sm">{createdAgentName}</div>
-                    <div className="text-[10px] text-muted-foreground">Future-1 Ultra · Ready to run</div>
+                    <div className="text-[10px] text-muted-foreground">Powered by Future AI · Ready to run</div>
                   </div>
                 </div>
                 {task && (
