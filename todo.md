@@ -432,3 +432,11 @@
 - [x] Make iframe responsive (auto-height or fixed height with scroll)
 - [x] Add "Open in new tab" button for full-screen preview
 - [x] Add "Copy code" button on code view
+
+## Business Plan & Pricing Update
+
+- [x] Generate unit economics spreadsheet with new pricing tiers ($49/$100/$199/$500)
+- [x] Write full business plan document (PDF)
+- [x] Update pricing tiers in Billing.tsx
+- [x] Update pricing tiers in Home.tsx pricing section
+- [x] Update Stripe product prices in server

@@ -545,11 +545,12 @@ export default function Home() {
           <p className="text-lg text-muted-foreground mb-10 max-w-xl mx-auto">
             Your first tasks are on me. No credit card required. Upgrade only when you're ready for more.
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10">
             {[
-              { name: "Free", price: "$0", desc: "Get started today, no card needed", highlight: false },
-              { name: "Pro", price: "$29/mo", desc: "Unlimited projects for power users", highlight: true },
-              { name: "Business", price: "$99/mo", desc: "For teams and growing businesses", highlight: false },
+              { name: "Free Trial", price: "$0", desc: "7 days free, no card needed", highlight: false },
+              { name: "Starter", price: "$49/mo", desc: "For solopreneurs & freelancers", highlight: false },
+              { name: "Pro", price: "$100/mo", desc: "For growing businesses", highlight: true },
+              { name: "Business", price: "$199/mo", desc: "For agencies & teams", highlight: false },
             ].map((plan) => (
               <div key={plan.name} className={`rounded-2xl p-5 border text-left ${plan.highlight ? "border-primary/40 bg-primary/5 ring-1 ring-primary/20" : "border-border bg-gray-50"}`}>
                 {plan.highlight && <div className="text-[10px] font-bold text-primary uppercase tracking-widest mb-1">Most Popular</div>}

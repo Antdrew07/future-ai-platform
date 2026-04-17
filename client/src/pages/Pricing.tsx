@@ -9,44 +9,108 @@ import { CheckCircle2, Sparkles, Zap, ArrowLeft } from "lucide-react";
 
 const PLANS = [
   {
-    name: "Free",
+    name: "Free Trial",
     price: 0,
-    credits: 500,
-    period: "month",
-    description: "Try Future at no cost",
-    features: ["500 credits/month", "1 project", "Basic AI tasks", "Community support"],
-    cta: "Get Started Free",
+    credits: 50,
+    powerCredits: 50,
+    quickCredits: 500,
+    period: "7 days",
+    description: "Full access for 7 days — no card needed",
+    features: [
+      "7-day full-feature trial",
+      "50 Power Credits to try any task",
+      "Build a website, write a report, or research anything",
+      "No credit card required",
+    ],
+    cta: "Start Free Trial",
     highlight: false,
+    badge: null,
   },
   {
     name: "Starter",
-    price: 9,
-    credits: 5000,
+    price: 49,
+    credits: 500,
+    powerCredits: 500,
+    quickCredits: 5000,
     period: "month",
-    description: "Perfect for individuals",
-    features: ["5,000 credits/month", "5 projects", "All task types", "Email support"],
+    description: "For solopreneurs and freelancers",
+    features: [
+      "500 Power Credits / month",
+      "5,000 Quick Credits / month",
+      "~50 website builds or research tasks",
+      "Unlimited projects",
+      "Email support",
+      "Mobile app access",
+    ],
     cta: "Start Starter",
     highlight: false,
+    badge: null,
   },
   {
     name: "Pro",
-    price: 29,
-    credits: 25000,
+    price: 100,
+    credits: 1200,
+    powerCredits: 1200,
+    quickCredits: 12000,
     period: "month",
-    description: "For power users and small teams",
-    features: ["25,000 credits/month", "Unlimited projects", "Team collaboration (up to 5)", "API access", "Priority support"],
+    description: "For growing businesses and consultants",
+    features: [
+      "1,200 Power Credits / month",
+      "12,000 Quick Credits / month",
+      "~120 website builds or research tasks",
+      "Unlimited projects",
+      "Priority support",
+      "API access",
+      "Advanced analytics",
+    ],
     cta: "Start Pro",
     highlight: true,
+    badge: "Most Popular",
   },
   {
     name: "Business",
-    price: 99,
-    credits: 100000,
+    price: 199,
+    credits: 2800,
+    powerCredits: 2800,
+    quickCredits: 28000,
     period: "month",
-    description: "For growing teams and organizations",
-    features: ["100,000 credits/month", "Everything in Pro", "Up to 25 team members", "Advanced analytics", "Custom models", "Dedicated support", "SLA guarantee"],
+    description: "For agencies and teams",
+    features: [
+      "2,800 Power Credits / month",
+      "28,000 Quick Credits / month",
+      "~280 website builds or research tasks",
+      "Everything in Pro",
+      "Up to 10 team members",
+      "Custom AI agents",
+      "Dedicated support",
+      "SLA guarantee",
+    ],
     cta: "Start Business",
     highlight: false,
+    badge: null,
+  },
+  {
+    name: "Enterprise",
+    price: 500,
+    credits: 8000,
+    powerCredits: 8000,
+    quickCredits: 80000,
+    period: "month",
+    description: "For large organizations",
+    features: [
+      "8,000 Power Credits / month",
+      "80,000 Quick Credits / month",
+      "~800 website builds or research tasks",
+      "Everything in Business",
+      "Unlimited team members",
+      "White-label options",
+      "Custom integrations",
+      "Dedicated account manager",
+      "99.9% uptime SLA",
+    ],
+    cta: "Contact Sales",
+    highlight: false,
+    badge: "Best Value",
   },
 ];
 
@@ -94,50 +158,58 @@ export default function Pricing() {
         </div>
 
         {/* Plans */}
-        <div className="grid md:grid-cols-3 gap-6 mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-16">
           {PLANS.map((plan) => (
-            <div key={plan.name} className={`relative bg-white border border-border rounded-xl shadow-sm ${plan.highlight ? "border-primary/30 ring-1 ring-primary/20 shadow-lg shadow-primary/10" : ""}`}>
-              {plan.highlight && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <Badge className="bg-primary text-primary-foreground text-xs px-3">Most Popular</Badge>
+            <div key={plan.name} className={`relative bg-white border border-border rounded-xl shadow-sm flex flex-col ${plan.highlight ? "border-primary/30 ring-1 ring-primary/20 shadow-lg shadow-primary/10" : ""}`}>
+              {plan.badge && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap">
+                  <Badge className={`text-xs px-3 ${plan.highlight ? "bg-primary text-primary-foreground" : "bg-amber-500 text-white"}`}>{plan.badge}</Badge>
                 </div>
               )}
-              <div className="px-5 pt-5 pb-4">
-                <h3 className="text-base font-heading font-semibold">{plan.name}</h3>
-                <div className="text-3xl font-black mt-2">
+              <div className="px-4 pt-5 pb-3">
+                <h3 className="text-sm font-heading font-semibold">{plan.name}</h3>
+                <div className="text-2xl font-black mt-1.5">
                   {plan.price === 0 ? "Free" : `$${plan.price}`}
-                  {plan.price > 0 && <span className="text-sm font-normal text-muted-foreground">/mo</span>}
+                  {plan.price > 0 && <span className="text-xs font-normal text-muted-foreground">/mo</span>}
                 </div>
-                <div className="text-xs text-muted-foreground">{plan.description}</div>
+                <div className="text-[11px] text-muted-foreground mt-0.5">{plan.description}</div>
               </div>
-              <div className="px-5 pb-5 space-y-4">
-                <div className="flex items-center gap-2 p-3 rounded-lg bg-muted border border-border">
-                  <Zap className="w-4 h-4 text-yellow-400" />
-                  <span className="text-sm font-medium">{plan.credits.toLocaleString()} credits/month</span>
+              <div className="px-4 pb-4 space-y-3 flex-1 flex flex-col">
+                <div className="rounded-lg bg-muted border border-border p-2.5 space-y-1">
+                  <div className="flex items-center gap-1.5">
+                    <Zap className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+                    <span className="text-xs font-semibold text-foreground">{plan.powerCredits.toLocaleString()} Power Credits</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Zap className="w-3.5 h-3.5 text-yellow-400 flex-shrink-0" />
+                    <span className="text-xs text-muted-foreground">{plan.quickCredits.toLocaleString()} Quick Credits</span>
+                  </div>
                 </div>
-                <ul className="space-y-2">
+                <ul className="space-y-1.5 flex-1">
                   {plan.features.map((f) => (
-                    <li key={f} className="flex items-center gap-2 text-sm">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
+                    <li key={f} className="flex items-start gap-1.5 text-xs">
+                      <CheckCircle2 className="w-3 h-3 text-emerald-500 flex-shrink-0 mt-0.5" />
                       {f}
                     </li>
                   ))}
                 </ul>
-                {isAuthenticated ? (
-                  <Link href="/dashboard/billing">
-                    <Button className={`w-full ${plan.highlight ? "glow-primary" : ""}`}
-                      variant={plan.highlight ? "default" : "outline"}>
-                      {plan.cta}
-                    </Button>
-                  </Link>
-                ) : (
-                  <a href={getLoginUrl()}>
-                    <Button className={`w-full ${plan.highlight ? "glow-primary" : ""}`}
-                      variant={plan.highlight ? "default" : "outline"}>
-                      {plan.cta}
-                    </Button>
-                  </a>
-                )}
+                <div className="mt-auto pt-2">
+                  {isAuthenticated ? (
+                    <Link href="/dashboard/billing">
+                      <Button className={`w-full text-xs ${plan.highlight ? "glow-primary" : ""}`}
+                        variant={plan.highlight ? "default" : "outline"} size="sm">
+                        {plan.cta}
+                      </Button>
+                    </Link>
+                  ) : (
+                    <a href={getLoginUrl()}>
+                      <Button className={`w-full text-xs ${plan.highlight ? "glow-primary" : ""}`}
+                        variant={plan.highlight ? "default" : "outline"} size="sm">
+                        {plan.cta}
+                      </Button>
+                    </a>
+                  )}
+                </div>
               </div>
             </div>
           ))}
