@@ -214,8 +214,8 @@ export const domainRouter = router({
           },
           quantity: 1,
         }],
-        success_url: `${input.origin}/domains?purchased=${input.domain}&session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${input.origin}/domains?cancelled=true`,
+        success_url: `${input.origin}/dashboard/domains?purchased=${input.domain}&session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${input.origin}/dashboard/domains?cancelled=true`,
         metadata: {
           user_id: ctx.user.id.toString(),
           domain: input.domain,

@@ -499,3 +499,12 @@
 - [x] Add tabbed right panel: "Execution Log" | "Preview" | "Live Browser" — Preview tab shows latest artifact
 - [x] Auto-switch to Preview tab when an image or HTML artifact is generated
 - [x] Show artifact gallery at bottom of preview panel (all outputs from this task)
+
+## Stripe Domain Purchase Fix (Apr 17, 2026)
+
+- [x] Fix Stripe success_url: was /domains (404), now /dashboard/domains
+- [x] Fix Stripe cancel_url: was /domains (404), now /dashboard/domains
+- [x] Add useEffect in Domains.tsx to auto-call completePurchase on success redirect (reads ?purchased= and ?session_id= params)
+- [x] Add domain registration logic to Stripe webhook (checkout.session.completed) as server-side fallback
+- [x] Webhook now handles both credit pack purchases AND domain purchases in one handler
+- [ ] Fund Dynadot account to enable live domain registrations (Dynadot returns insufficient_funds — account needs balance)

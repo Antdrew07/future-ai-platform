@@ -1,6 +1,8 @@
 import Stripe from "stripe";
 import type { Request, Response } from "express";
-import { addCredits, getUserById } from "./db";
+import { addCredits, getUserById, getDb } from "./db";
+import { domainPurchases } from "../drizzle/schema";
+import { eq, and } from "drizzle-orm";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "", {
   apiVersion: "2026-03-25.dahlia",
@@ -59,10 +61,68 @@ export async function handleStripeWebhook(req: Request, res: Response) {
         const session = event.data.object as Stripe.Checkout.Session;
         const userId = session.metadata?.user_id ? parseInt(session.metadata.user_id) : null;
         const credits = session.metadata?.credits ? parseInt(session.metadata.credits) : null;
+        const domain = session.metadata?.domain ?? null;
 
+        // Handle credit pack purchase
         if (userId && credits) {
           await addCredits(userId, credits, "purchase", `Credit pack purchase via Stripe (${session.id})`);
           console.log(`[Stripe] Added ${credits} credits to user ${userId}`);
+        }
+
+        // Handle domain purchase — trigger Dynadot registration
+        if (userId && domain) {
+          console.log(`[Stripe] Domain purchase completed for ${domain}, triggering Dynadot registration...`);
+          try {
+            const meta = session.metadata ?? {};
+            const years = parseInt(meta.years ?? "1", 10);
+            const rawPhone = meta.reg_phone ?? "";
+            const phone = rawPhone.startsWith("+") ? rawPhone : `+1.${rawPhone.replace(/\D/g, "")}`;
+
+            const DYNADOT_API = "https://api.dynadot.com/api3.json";
+            const DYNADOT_KEY = process.env.DYNADOT_API_KEY ?? "";
+            const url = new URL(DYNADOT_API);
+            url.searchParams.set("key", DYNADOT_KEY);
+            url.searchParams.set("command", "register");
+            url.searchParams.set("domain", domain);
+            url.searchParams.set("duration", years.toString());
+            url.searchParams.set("currency", "USD");
+            url.searchParams.set("registrant_contact0_first_name", meta.reg_firstName ?? "");
+            url.searchParams.set("registrant_contact0_last_name", meta.reg_lastName ?? "");
+            url.searchParams.set("registrant_contact0_email", meta.reg_email ?? "");
+            url.searchParams.set("registrant_contact0_phone_num", phone);
+            url.searchParams.set("registrant_contact0_address1", meta.reg_address ?? "");
+            url.searchParams.set("registrant_contact0_city", meta.reg_city ?? "");
+            url.searchParams.set("registrant_contact0_state", meta.reg_stateProvince ?? "");
+            url.searchParams.set("registrant_contact0_zipcode", meta.reg_postalCode ?? "");
+            url.searchParams.set("registrant_contact0_country", meta.reg_country ?? "US");
+
+            const regRes = await fetch(url.toString(), { signal: AbortSignal.timeout(30000) });
+            const regJson = await regRes.json() as any;
+            const resp = regJson?.RegisterResponse;
+            const success = resp?.Status === "success" || resp?.ResponseCode === "0" || resp?.ResponseCode === 0;
+
+            const dbConn = await getDb();
+            if (dbConn) {
+              const expiresAt = new Date();
+              expiresAt.setFullYear(expiresAt.getFullYear() + years);
+              await dbConn.update(domainPurchases)
+                .set({
+                  status: success ? "active" : "failed",
+                  stripePaymentId: session.payment_intent as string,
+                  expiresAt: success ? expiresAt : undefined,
+                  updatedAt: new Date(),
+                })
+                .where(and(eq(domainPurchases.domain, domain), eq(domainPurchases.userId, userId)));
+            }
+
+            if (success) {
+              console.log(`[Stripe] Domain ${domain} registered successfully via Dynadot`);
+            } else {
+              console.error(`[Stripe] Dynadot registration failed for ${domain}:`, JSON.stringify(resp));
+            }
+          } catch (domainErr: any) {
+            console.error(`[Stripe] Domain registration error for ${domain}:`, domainErr.message);
+          }
         }
         break;
       }

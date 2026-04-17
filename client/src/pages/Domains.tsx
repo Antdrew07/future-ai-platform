@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -275,6 +275,39 @@ export default function DomainsPage() {
   const [query, setQuery] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [buyDomain, setBuyDomain] = useState<{ domain: string; price: number } | null>(null);
+  const [completingPurchase, setCompletingPurchase] = useState(false);
+
+  const utils = trpc.useUtils();
+  const completePurchase = trpc.domains.completePurchase.useMutation({
+    onSuccess: (data) => {
+      toast.success(`🎉 Domain ${data.domain} registered successfully!`);
+      utils.domains.listMyDomains.invalidate();
+      // Clean up URL params
+      const url = new URL(window.location.href);
+      url.searchParams.delete("purchased");
+      url.searchParams.delete("session_id");
+      window.history.replaceState({}, "", url.toString());
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+    onSettled: () => {
+      setCompletingPurchase(false);
+    },
+  });
+
+  // Handle Stripe success redirect — auto-complete the domain purchase
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const purchased = params.get("purchased");
+    const sessionId = params.get("session_id");
+    if (purchased && sessionId && !completingPurchase) {
+      setCompletingPurchase(true);
+      toast.info(`Processing domain registration for ${purchased}...`);
+      completePurchase.mutate({ domain: purchased, stripeSessionId: sessionId });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const { data: searchResults, isLoading: searching } = trpc.domains.search.useQuery(
     { query: searchQuery },
