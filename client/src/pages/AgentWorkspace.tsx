@@ -62,20 +62,11 @@ interface ChatMessage {
  * Shown after a website build completes. A dismissible suggestion card —
  * never blocks the user from continuing their work.
  */
-function DomainUpsell({ prompt }: { prompt: string }) {
+function DomainUpsell({ prompt: _prompt }: { prompt: string }) {
   const [, navigate] = useWouterLocation();
   const [dismissed, setDismissed] = useState(false);
-  // Extract a short keyword from the prompt for domain search
-  const keyword = prompt
-    .toLowerCase()
-    .replace(/build|create|make|website|site|for|me|a|an|the|my|\.|,|!/g, "")
-    .trim()
-    .split(/\s+/)
-    .filter(w => w.length > 2)
-    .slice(0, 2)
-    .join("");
-
-  const searchQuery = keyword || "mybusiness";
+  // Use a fixed generic search — never derive domain names from the user's chat query
+  const searchQuery = "myapp";
   const { data, isLoading } = trpc.domains.search.useQuery(
     { query: searchQuery },
     { enabled: !!searchQuery }

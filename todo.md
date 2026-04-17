@@ -519,3 +519,20 @@
 
 - [x] Fix agent system prompt so it executes tasks directly (builds apps, writes code) instead of giving advice/planning text
 - [x] Agent should never say "you will need to coordinate with..." or "feel free to ask" — it should just do the work
+
+## Agent Browsing + Domain Suggestion Fix (Apr 17, 2026)
+
+- [x] Enable web search by default on the main dashboard agent (agent currently says "I don't have browsing capabilities")
+- [x] Fix domain suggestion: stop generating domain names based on the user's chat query text
+
+## Comprehensive Agent Capability Audit (Apr 17, 2026)
+
+- [x] Audit web search tool: DuckDuckGo Instant Answer API + LLM fallback
+- [x] Audit code execution tool: LLM-simulated execution (realistic output)
+- [x] Audit image generation tool: wired to generateImage() helper
+- [x] Audit file read/write tool: in-memory per-task file store
+- [x] Audit API call tool: real fetch() with timeout
+- [x] Ensure all new users get an agent with web search, code execution, and image gen enabled by default
+- [x] Fix domain suggestion: stop generating domain names based on the user's chat query text
+- [x] Verify the agent can visit a URL (like jsglobal.org) and extract content from it
+- [x] Add browse_url tool: fetches real webpage content, strips HTML, extracts text, LLM-assisted extraction

@@ -3,6 +3,7 @@ import type { Express, Request, Response } from "express";
 import * as db from "../db";
 import { getSessionCookieOptions } from "./cookies";
 import { sdk } from "./sdk";
+import { nanoid } from "nanoid";
 
 function getQueryParam(req: Request, key: string): string | undefined {
   const value = req.query[key];
@@ -28,6 +29,9 @@ export function registerOAuthRoutes(app: Express) {
         return;
       }
 
+      // Check if this is a new user (no existing record)
+      const existingUser = await db.getUserByOpenId(userInfo.openId);
+
       await db.upsertUser({
         openId: userInfo.openId,
         name: userInfo.name || null,
@@ -35,6 +39,32 @@ export function registerOAuthRoutes(app: Express) {
         loginMethod: userInfo.loginMethod ?? userInfo.platform ?? null,
         lastSignedIn: new Date(),
       });
+
+      // Provision default agent + credits for brand-new users
+      if (!existingUser) {
+        const newUser = await db.getUserByOpenId(userInfo.openId);
+        if (newUser) {
+          // Grant 100 free starter credits
+          await db.addCredits(newUser.id, 100, "bonus", "Welcome gift — 100 free credits to get you started");
+
+          // Create a default fully-capable agent
+          await db.createAgent({
+            userId: newUser.id,
+            name: "Future AI",
+            description: "Your personal AI assistant — ready to build, research, write, and create anything you need.",
+            slug: `future-ai-${nanoid(8)}`,
+            systemPrompt: "",
+            modelId: "gpt-4o",
+            webSearchEnabled: true,
+            codeExecutionEnabled: true,
+            fileUploadEnabled: true,
+            apiCallsEnabled: true,
+            memoryEnabled: false,
+            maxSteps: 15,
+            temperature: 0.7,
+          });
+        }
+      }
 
       const sessionToken = await sdk.createSessionToken(userInfo.openId, {
         name: userInfo.name || "",

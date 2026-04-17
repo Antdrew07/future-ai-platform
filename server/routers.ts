@@ -63,6 +63,23 @@ export const appRouter = router({
       // Grant 100 free starter credits
       await addCredits(user.id, 100, "bonus", "Welcome gift — 100 free credits to get you started");
 
+      // Create a default fully-capable agent for the new user
+      await createAgent({
+        userId: user.id,
+        name: "Future AI",
+        description: "Your personal AI assistant — ready to build, research, write, and create anything you need.",
+        slug: `future-ai-${nanoid(8)}`,
+        systemPrompt: "",
+        modelId: "gpt-4o",
+        webSearchEnabled: true,
+        codeExecutionEnabled: true,
+        fileUploadEnabled: true,
+        apiCallsEnabled: true,
+        memoryEnabled: false,
+        maxSteps: 15,
+        temperature: 0.7,
+      });
+
       // Issue session cookie
       const sessionToken = await sdk.signSession({ openId, appId: "future", name: input.name }, { expiresInMs: ONE_YEAR_MS });
       const cookieOptions = getSessionCookieOptions(ctx.req);

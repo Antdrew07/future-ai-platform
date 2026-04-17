@@ -30,6 +30,22 @@ export const AGENT_TOOLS = [
   {
     type: "function" as const,
     function: {
+      name: "browse_url",
+      description: "Visit a URL and read the content of the webpage. Use this to access websites, read articles, check documentation, or extract information from any web page. Always use this when the user provides a URL or asks you to visit a website.",
+      parameters: {
+        type: "object",
+        properties: {
+          url: { type: "string", description: "The full URL to visit (must start with http:// or https://)" },
+          extract: { type: "string", description: "What specific information to extract from the page (optional, e.g. 'main content', 'contact info', 'pricing')" },
+        },
+        required: ["url"],
+        additionalProperties: false,
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
       name: "code_execute",
       description: "Write and execute Python or JavaScript code to perform calculations, data analysis, file processing, or any computational task. Returns stdout, stderr, and any output files.",
       parameters: {
@@ -242,6 +258,84 @@ async function executeWebSearch(args: { query: string; num_results?: number }): 
   }
 }
 
+async function executeBrowseUrl(args: { url: string; extract?: string }): Promise<ToolResult> {
+  try {
+    // Ensure URL has protocol
+    let targetUrl = args.url.trim();
+    if (!targetUrl.startsWith("http://") && !targetUrl.startsWith("https://")) {
+      targetUrl = `https://${targetUrl}`;
+    }
+
+    const response = await fetch(targetUrl, {
+      method: "GET",
+      headers: {
+        "User-Agent": "Mozilla/5.0 (compatible; FutureAI-Agent/1.0; +https://futureos.io)",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
+      },
+      signal: AbortSignal.timeout(15000),
+    });
+
+    if (!response.ok) {
+      return {
+        success: false,
+        output: "",
+        error: `Failed to fetch ${targetUrl}: HTTP ${response.status} ${response.statusText}`,
+      };
+    }
+
+    const contentType = response.headers.get("content-type") ?? "";
+    let rawContent: string;
+
+    if (contentType.includes("application/json")) {
+      const json = await response.json();
+      rawContent = JSON.stringify(json, null, 2);
+    } else {
+      rawContent = await response.text();
+    }
+
+    // Strip HTML tags to get readable text
+    const textContent = rawContent
+      .replace(/<script[\s\S]*?<\/script>/gi, "")
+      .replace(/<style[\s\S]*?<\/style>/gi, "")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/&nbsp;/g, " ")
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .replace(/\s{3,}/g, "\n\n")
+      .trim();
+
+    // Limit to 6000 chars to avoid context overflow
+    const truncated = textContent.length > 6000
+      ? textContent.substring(0, 6000) + "\n\n... (content truncated, page has more)"
+      : textContent;
+
+    // If extract hint provided, use LLM to focus the content
+    if (args.extract && truncated.length > 500) {
+      const llmResult = await invokeLLM({
+        messages: [
+          { role: "system", content: "You are a web content extractor. Extract exactly what the user asks for from the provided webpage text. Be concise and accurate." },
+          { role: "user", content: `From this webpage content:\n\n${truncated}\n\nExtract: ${args.extract}` },
+        ],
+      });
+      const extracted = llmResult.choices?.[0]?.message?.content;
+      return {
+        success: true,
+        output: `**Content from ${targetUrl}** (extracted: ${args.extract}):\n\n${typeof extracted === "string" ? extracted : truncated}`,
+      };
+    }
+
+    return {
+      success: true,
+      output: `**Content from ${targetUrl}:**\n\n${truncated}`,
+    };
+  } catch (err) {
+    return { success: false, output: "", error: `Failed to browse ${args.url}: ${String(err)}` };
+  }
+}
+
 async function executeCodeExecution(args: { language: string; code: string; description: string }, taskId: string): Promise<ToolResult> {
   // Use LLM to simulate code execution with realistic output
   // In production, this would use a sandboxed execution environment (e.g., Judge0, Piston API, or Docker)
@@ -398,6 +492,9 @@ export async function executeTool(
     case "web_search":
       return executeWebSearch(toolArgs as { query: string; num_results?: number });
 
+    case "browse_url":
+      return executeBrowseUrl(toolArgs as { url: string; extract?: string });
+
     case "code_execute":
       return executeCodeExecution(
         toolArgs as { language: string; code: string; description: string },
@@ -445,6 +542,7 @@ export function getToolsForAgent(agent: {
   return AGENT_TOOLS.filter(tool => {
     switch (tool.function.name) {
       case "web_search": return agent.webSearchEnabled;
+      case "browse_url": return agent.webSearchEnabled; // browse_url goes with web search capability
       case "code_execute": return agent.codeExecutionEnabled;
       case "read_file":
       case "write_file": return agent.fileUploadEnabled || agent.codeExecutionEnabled;

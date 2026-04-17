@@ -71,14 +71,11 @@ interface ChatMessage {
 
 // ─── Domain Upsell ────────────────────────────────────────────────────────────
 
-function DomainUpsell({ prompt }: { prompt: string }) {
+function DomainUpsell({ prompt: _prompt }: { prompt: string }) {
   const [, navigate] = useWouterLocation();
   const [dismissed, setDismissed] = useState(false);
-  const keyword = prompt
-    .toLowerCase()
-    .replace(/build|create|make|website|site|for|me|a|an|the|my|\.|,|!/g, "")
-    .trim().split(/\s+/).filter(w => w.length > 2).slice(0, 2).join("");
-  const searchQuery = keyword || "mybusiness";
+  // Use a fixed generic search — never derive domain names from the user's chat query
+  const searchQuery = "myapp";
   const { data } = trpc.domains.search.useQuery({ query: searchQuery }, { enabled: !!searchQuery });
   const available = data?.results.filter(r => r.available).slice(0, 3) ?? [];
   if (dismissed || available.length === 0) return null;

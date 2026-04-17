@@ -388,7 +388,10 @@ function buildSystemPrompt(agent: {
   apiCallsEnabled: boolean;
 }): string {
   const toolList: string[] = [];
-  if (agent.webSearchEnabled) toolList.push("web_search — search the web for real-time, up-to-date information");
+  if (agent.webSearchEnabled) {
+    toolList.push("web_search — search the web for real-time, up-to-date information");
+    toolList.push("browse_url — visit any URL and read the full content of a webpage");
+  }
   if (agent.codeExecutionEnabled) toolList.push("code_execute — write and run Python, JavaScript, or shell code");
   if (agent.fileUploadEnabled) toolList.push("read_file / write_file — read or create files as deliverables");
   if (agent.apiCallsEnabled) toolList.push("api_call — make HTTP requests to external services and APIs");
