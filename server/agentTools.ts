@@ -229,6 +229,72 @@ export const AGENT_TOOLS = [
   {
     type: "function" as const,
     function: {
+      name: "create_presentation",
+      description: "Create a downloadable HTML slide deck / presentation from an outline. Use for pitch decks, presentations, reports, or any slide-based content.",
+      parameters: {
+        type: "object",
+        properties: {
+          title: { type: "string", description: "Presentation title" },
+          slides: {
+            type: "array",
+            description: "Array of slides",
+            items: {
+              type: "object",
+              properties: {
+                title: { type: "string", description: "Slide title" },
+                content: { type: "string", description: "Slide body content (bullet points, text, etc.)" },
+                notes: { type: "string", description: "Speaker notes (optional)" },
+              },
+              required: ["title", "content"],
+              additionalProperties: false,
+            },
+          },
+          theme: { type: "string", enum: ["dark", "light", "blue", "minimal"], description: "Visual theme", default: "dark" },
+          filename: { type: "string", description: "Output filename without extension" },
+        },
+        required: ["title", "slides", "filename"],
+        additionalProperties: false,
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "github_repo",
+      description: "Read a public GitHub repository: list files, read file contents, view README, explore code structure.",
+      parameters: {
+        type: "object",
+        properties: {
+          repo: { type: "string", description: "GitHub repo in owner/repo format (e.g. 'vercel/next.js')" },
+          action: { type: "string", enum: ["list_files", "read_file", "get_readme", "get_info"], description: "What to do" },
+          path: { type: "string", description: "File path for read_file action (e.g. 'src/index.ts')" },
+          branch: { type: "string", description: "Branch name (default: main)" },
+        },
+        required: ["repo", "action"],
+        additionalProperties: false,
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
+      name: "schedule_task",
+      description: "Schedule a follow-up task to run at a future time. Use when the user asks to be reminded, or to run something later.",
+      parameters: {
+        type: "object",
+        properties: {
+          task: { type: "string", description: "Description of what to do" },
+          run_at: { type: "string", description: "ISO 8601 datetime string for when to run (e.g. '2026-04-18T09:00:00Z')" },
+          notes: { type: "string", description: "Additional context or instructions" },
+        },
+        required: ["task", "run_at"],
+        additionalProperties: false,
+      },
+    },
+  },
+  {
+    type: "function" as const,
+    function: {
       name: "task_complete",
       description: "REQUIRED: Call this when the task is fully done. Provide the complete final answer, result, or summary for the user.",
       parameters: {
@@ -672,6 +738,193 @@ async function executeGenerateImage(args: { prompt: string; style?: string }): P
   }
 }
 
+// ─── New Tool Executors ──────────────────────────────────────────────────────
+
+async function executeCreatePresentation(
+  args: { title: string; slides: Array<{ title: string; content: string; notes?: string }>; theme?: string; filename: string },
+  taskId: string
+): Promise<ToolResult> {
+  const files = getTaskFiles(taskId);
+  const theme = args.theme ?? "dark";
+
+  const themeStyles: Record<string, string> = {
+    dark: "background:#1a1a2e;color:#eee;--accent:#7c3aed;",
+    light: "background:#fff;color:#222;--accent:#2563eb;",
+    blue: "background:#0f172a;color:#e2e8f0;--accent:#38bdf8;",
+    minimal: "background:#f8f8f8;color:#333;--accent:#111;",
+  };
+
+  const style = themeStyles[theme] ?? themeStyles.dark;
+
+  const slideHtml = args.slides.map((slide, i) => {
+    const lines = slide.content.split("\n").filter(l => l.trim());
+    const bullets = lines.map(l => `<li>${l.replace(/^[-*•]\s*/, "")}</li>`).join("\n");
+    return `
+    <div class="slide" id="slide-${i + 1}" style="display:${i === 0 ? "flex" : "none"}">
+      <div class="slide-number">${i + 1} / ${args.slides.length}</div>
+      <h2>${slide.title}</h2>
+      <ul>${bullets}</ul>
+      ${slide.notes ? `<div class="notes">📝 ${slide.notes}</div>` : ""}
+    </div>`;
+  }).join("\n");
+
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${args.title}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; ${style} height: 100vh; overflow: hidden; }
+    .container { width: 100%; height: 100vh; position: relative; }
+    .slide { display: none; flex-direction: column; justify-content: center; padding: 60px 80px; height: 100vh; position: relative; }
+    .slide.active { display: flex; }
+    .slide-number { position: absolute; top: 20px; right: 30px; opacity: 0.5; font-size: 14px; }
+    h1.main-title { font-size: 3rem; text-align: center; margin-bottom: 1rem; color: var(--accent); }
+    h2 { font-size: 2rem; margin-bottom: 1.5rem; color: var(--accent); }
+    ul { list-style: none; padding: 0; }
+    ul li { padding: 10px 0; font-size: 1.25rem; padding-left: 1.5rem; position: relative; }
+    ul li::before { content: '▸'; position: absolute; left: 0; color: var(--accent); }
+    .notes { position: absolute; bottom: 20px; left: 80px; right: 80px; font-size: 0.85rem; opacity: 0.5; font-style: italic; }
+    .nav { position: fixed; bottom: 30px; right: 40px; display: flex; gap: 12px; }
+    .nav button { background: var(--accent); color: #fff; border: none; padding: 10px 24px; border-radius: 6px; cursor: pointer; font-size: 1rem; }
+    .nav button:hover { opacity: 0.85; }
+    .progress { position: fixed; bottom: 0; left: 0; height: 4px; background: var(--accent); transition: width 0.3s; }
+    .title-slide { align-items: center; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="slide title-slide" id="slide-0" style="display:flex">
+      <div class="slide-number">1 / ${args.slides.length + 1}</div>
+      <h1 class="main-title">${args.title}</h1>
+    </div>
+    ${slideHtml}
+    <div class="nav">
+      <button onclick="prev()">← Prev</button>
+      <button onclick="next()">Next →</button>
+    </div>
+    <div class="progress" id="progress"></div>
+  </div>
+  <script>
+    let current = 0;
+    const total = ${args.slides.length + 1};
+    function show(n) {
+      document.querySelectorAll('.slide').forEach((s, i) => s.style.display = i === n ? 'flex' : 'none');
+      document.getElementById('progress').style.width = ((n + 1) / total * 100) + '%';
+      current = n;
+    }
+    function next() { if (current < total - 1) show(current + 1); }
+    function prev() { if (current > 0) show(current - 1); }
+    document.addEventListener('keydown', e => { if (e.key === 'ArrowRight' || e.key === 'Space') next(); if (e.key === 'ArrowLeft') prev(); });
+    show(0);
+  </script>
+</body>
+</html>`;
+
+  const fname = `${args.filename.replace(/[^a-zA-Z0-9._-]/g, "-")}.html`;
+  const tmpFile = tmpPath(".html");
+  writeFileSync(tmpFile, html, "utf8");
+  const url = uploadFile(tmpFile);
+  files.set(fname, { content: html, url });
+  try { unlinkSync(tmpFile); } catch { /* ignore */ }
+
+  return {
+    success: true,
+    output: `✓ Presentation **${fname}** created with ${args.slides.length + 1} slides${url ? `\n📥 [Open/Download Presentation](${url})` : ""}`,
+    artifacts: [{ name: fname, content: html, type: "text/html", url }],
+  };
+}
+
+async function executeGithubRepo(
+  args: { repo: string; action: string; path?: string; branch?: string }
+): Promise<ToolResult> {
+  const branch = args.branch ?? "main";
+  const baseUrl = `https://api.github.com/repos/${args.repo}`;
+  const headers: Record<string, string> = {
+    "Accept": "application/vnd.github.v3+json",
+    "User-Agent": "Future-AI-Agent/1.0",
+  };
+
+  try {
+    if (args.action === "get_info") {
+      const res = await fetch(baseUrl, { headers, signal: AbortSignal.timeout(10000) });
+      if (!res.ok) return { success: false, output: "", error: `GitHub API: ${res.status} ${res.statusText}` };
+      const data = await res.json() as Record<string, unknown>;
+      return { success: true, output: `**${args.repo}**\n⭐ ${data.stargazers_count} stars | 🍴 ${data.forks_count} forks | ${data.language}\n\n${data.description}\n\nDefault branch: ${data.default_branch}\nLast updated: ${data.updated_at}` };
+    }
+
+    if (args.action === "get_readme") {
+      const res = await fetch(`${baseUrl}/readme`, { headers, signal: AbortSignal.timeout(10000) });
+      if (!res.ok) return { success: false, output: "", error: `No README found` };
+      const data = await res.json() as { content?: string };
+      const content = Buffer.from(data.content ?? "", "base64").toString("utf8");
+      return { success: true, output: `**README for ${args.repo}:**\n\n${content.substring(0, 6000)}${content.length > 6000 ? "\n... (truncated)" : ""}` };
+    }
+
+    if (args.action === "list_files") {
+      const treePath = args.path ? `${baseUrl}/contents/${args.path}` : `${baseUrl}/git/trees/${branch}?recursive=1`;
+      const res = await fetch(treePath, { headers, signal: AbortSignal.timeout(10000) });
+      if (!res.ok) return { success: false, output: "", error: `GitHub API: ${res.status}` };
+      const data = await res.json() as { tree?: Array<{ path: string; type: string }> } | Array<{ name: string; type: string }>;
+      if (Array.isArray(data)) {
+        const items = data.map((f: { name: string; type: string }) => `${f.type === "dir" ? "📁" : "📄"} ${f.name}`).join("\n");
+        return { success: true, output: `**Files in ${args.repo}/${args.path ?? ""}:**\n${items}` };
+      }
+      const tree = (data as { tree?: Array<{ path: string; type: string }> }).tree ?? [];
+      const files = tree.filter(f => f.type === "blob").map(f => f.path).slice(0, 100).join("\n");
+      return { success: true, output: `**File tree for ${args.repo}:**\n${files}` };
+    }
+
+    if (args.action === "read_file") {
+      if (!args.path) return { success: false, output: "", error: "path is required for read_file" };
+      const res = await fetch(`${baseUrl}/contents/${args.path}?ref=${branch}`, { headers, signal: AbortSignal.timeout(10000) });
+      if (!res.ok) return { success: false, output: "", error: `File not found: ${args.path}` };
+      const data = await res.json() as { content?: string; encoding?: string; size?: number };
+      if (data.encoding === "base64" && data.content) {
+        const content = Buffer.from(data.content, "base64").toString("utf8");
+        const truncated = content.length > 6000 ? content.substring(0, 6000) + "\n... (truncated)" : content;
+        return { success: true, output: `**${args.path}** (${data.size} bytes):\n\`\`\`\n${truncated}\n\`\`\`` };
+      }
+      return { success: false, output: "", error: "Could not decode file content" };
+    }
+
+    return { success: false, output: "", error: `Unknown action: ${args.action}` };
+  } catch (err) {
+    return { success: false, output: "", error: `GitHub API failed: ${String(err)}` };
+  }
+}
+
+async function executeScheduleTask(
+  args: { task: string; run_at: string; notes?: string },
+  userId: number
+): Promise<ToolResult> {
+  try {
+    const { getDb } = await import("./db");
+    const { scheduledTasks } = await import("../drizzle/schema");
+    const db = await getDb();
+    if (!db) return { success: false, output: "", error: "Database not available" };
+
+    const runAt = new Date(args.run_at);
+    if (isNaN(runAt.getTime())) return { success: false, output: "", error: `Invalid datetime: ${args.run_at}` };
+
+    await db.insert(scheduledTasks).values({
+      userId,
+      agentId: 0, // no specific agent for user-scheduled tasks
+      title: args.task.substring(0, 512),
+      prompt: args.notes ? `${args.task}\n\nNotes: ${args.notes}` : args.task,
+      scheduledFor: runAt,
+      status: "pending",
+    });
+
+    const formatted = runAt.toLocaleString("en-US", { dateStyle: "full", timeStyle: "short", timeZone: "UTC" });
+    return { success: true, output: `✓ Task scheduled for **${formatted} UTC**:\n"${args.task}"` };
+  } catch (err) {
+    return { success: false, output: "", error: `Scheduling failed: ${String(err)}` };
+  }
+}
+
 // ─── Main Tool Dispatcher ─────────────────────────────────────────────────────
 
 export async function executeTool(
@@ -724,6 +977,18 @@ export async function executeTool(
     case "generate_image":
       return executeGenerateImage(toolArgs as { prompt: string; style?: string });
 
+    case "create_presentation":
+      return executeCreatePresentation(
+        toolArgs as { title: string; slides: Array<{ title: string; content: string; notes?: string }>; theme?: string; filename: string },
+        taskId
+      );
+
+    case "github_repo":
+      return executeGithubRepo(toolArgs as { repo: string; action: string; path?: string; branch?: string });
+
+    case "schedule_task":
+      return executeScheduleTask(toolArgs as { task: string; run_at: string; notes?: string }, 0);
+
     case "task_complete":
       return {
         success: true,
@@ -766,7 +1031,12 @@ export function getToolsForAgent(agent: {
         return agent.apiCallsEnabled;
       case "analyze_data":
       case "generate_image":
+      case "create_presentation":
       case "task_complete":
+        return true; // always available
+      case "github_repo":
+        return agent.webSearchEnabled; // needs internet access
+      case "schedule_task":
         return true; // always available
       default:
         return false;

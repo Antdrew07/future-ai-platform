@@ -14,7 +14,7 @@
 
 import { routeLLMCall, type LLMMessage, type LLMTool } from "./llmRouter";
 import { executeTool, getToolsForAgent, getTaskFiles, clearTaskFiles } from "./agentTools";
-import { getAgentById, createTaskStep, updateTask } from "./db";
+import { getAgentById, createTaskStep, updateTask, getOrCreateConversation, getMessages, addMessage } from "./db";
 import type { Response } from "express";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -37,6 +37,7 @@ export interface AgentRunOptions {
   agentId: number;
   userId: number;
   userMessage: string;
+  sessionId?: string; // For memory: conversation session identifier
   conversationHistory?: Array<{ role: string; content: string }>;
   onStep: (step: AgentStep) => void;
   onComplete: (result: { success: boolean; finalAnswer: string; steps: AgentStep[]; creditsUsed: number }) => void;
@@ -57,7 +58,7 @@ export function sendSSE(res: Response, event: string, data: unknown) {
 // ─── Main Agentic Loop ────────────────────────────────────────────────────────
 
 export async function runAgentLoop(options: AgentRunOptions): Promise<void> {
-  const { taskId, agentId, userId, userMessage, onStep, onComplete, onError } = options;
+  const { taskId, agentId, userId, userMessage, sessionId, onStep, onComplete, onError } = options;
   const steps: AgentStep[] = [];
   let totalCreditsUsed = 0;
   let stepIndex = 0;
@@ -108,16 +109,37 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<void> {
       apiCallsEnabled: agent.apiCallsEnabled,
     });
 
+    // Load memory from DB if enabled
+    let conversationId: number | null = null;
+    let memoryHistory: LLMMessage[] = [];
+    if (agent.memoryEnabled && sessionId) {
+      try {
+        const conv = await getOrCreateConversation(agentId, sessionId, userId);
+        conversationId = conv.id;
+        const priorMessages = await getMessages(conv.id);
+        // Inject last 20 messages as memory context
+        memoryHistory = priorMessages.slice(-20).map(m => ({
+          role: (m.role === "user" || m.role === "assistant") ? m.role : "user" as "user" | "assistant",
+          content: typeof m.content === "string" ? m.content : JSON.stringify(m.content),
+        }));
+        // Save user message to memory
+        await addMessage({ conversationId: conv.id, role: "user", content: userMessage }).catch(() => {});
+      } catch (memErr) {
+        console.warn("[AgentLoop] Memory load failed:", memErr);
+      }
+    }
+
     // Build conversation messages
     const messages: LLMMessage[] = [
       {
         role: "system",
         content: buildSystemPrompt(agent),
       },
-      ...(options.conversationHistory ?? []).map(m => ({
+      // Inject memory history if available, otherwise use provided conversationHistory
+      ...(memoryHistory.length > 0 ? memoryHistory : (options.conversationHistory ?? []).map(m => ({
         role: m.role as "user" | "assistant",
         content: m.content,
-      })),
+      }))),
       { role: "user", content: userMessage },
     ];
 
@@ -347,6 +369,11 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<void> {
       });
     }
 
+    // Save assistant final answer to memory
+    if (agent.memoryEnabled && conversationId) {
+      await addMessage({ conversationId, role: "assistant", content: finalAnswer }).catch(() => {});
+    }
+
     // Update task status
     await updateTask(taskId, { status: "completed" }).catch(console.error);
 
@@ -414,6 +441,11 @@ function buildSystemPrompt(agent: {
   }
   toolList.push("analyze_data — analyze data, find patterns, compute statistics, generate insights");
   toolList.push("generate_image — create images from text descriptions using AI");
+  toolList.push("create_presentation — build a full interactive HTML slide deck / pitch deck");
+  if (agent.webSearchEnabled) {
+    toolList.push("github_repo — read any public GitHub repository: list files, read code, view README");
+  }
+  toolList.push("schedule_task — schedule a follow-up task to run at a future time");
   toolList.push("task_complete — REQUIRED: call this with the complete final answer when done");
 
   const toolSection = toolList.length > 0
@@ -481,6 +513,22 @@ You always produce the COMPLETE, FINISHED deliverable. If they ask for an app �
 - Use scrape_web to extract structured data from pages
 - Never say you "can't access" a URL — you can
 
+### Presentations & Slide Decks
+- Use create_presentation to build a complete interactive HTML slide deck
+- Include a title slide, all content slides, and navigation controls
+- Choose a theme appropriate to the topic (dark for tech, light for business, blue for corporate)
+- Export as a downloadable HTML file the user can open in any browser
+
+### GitHub / Code Repositories
+- Use github_repo to read any public GitHub repository
+- Use get_readme first to understand the project, then list_files for structure
+- Use read_file to examine specific source files
+- Build on or analyze the code as requested
+
+### Task Scheduling
+- Use schedule_task when the user asks to be reminded or to run something later
+- Always confirm what was scheduled and when
+
 ## AUTONOMOUS PLANNING
 For complex tasks, think step by step:
 1. Understand what the user actually wants (the real goal, not just the literal request)
@@ -516,6 +564,9 @@ function getToolTitle(toolName: string, args: Record<string, unknown>): string {
     case "api_call": return `🔗 API: ${String(args.method ?? "GET")} ${String(args.url ?? "").substring(0, 50)}`;
     case "analyze_data": return `📊 Analyzing data`;
     case "generate_image": return `🎨 Generating image`;
+    case "create_presentation": return `📊 Building presentation: ${String(args.title ?? "")}`;
+    case "github_repo": return `🐛 GitHub: ${String(args.action ?? "")} ${String(args.repo ?? "")}`;
+    case "schedule_task": return `⏰ Scheduling: ${String(args.task ?? "").substring(0, 50)}`;
     case "task_complete": return `✅ Task complete`;
     default: return `🔧 Using tool: ${toolName}`;
   }
@@ -535,6 +586,9 @@ function getToolDescription(toolName: string, args: Record<string, unknown>): st
     case "api_call": return `${String(args.method ?? "GET")} ${String(args.url ?? "")}`;
     case "analyze_data": return `Task: ${String(args.task ?? "")}`;
     case "generate_image": return `Prompt: ${String(args.prompt ?? "").substring(0, 200)}`;
+    case "create_presentation": return `Creating ${Array.isArray(args.slides) ? (args.slides as unknown[]).length : 0} slides: "${String(args.title ?? "")}" (theme: ${String(args.theme ?? "dark")})`;
+    case "github_repo": return `${String(args.action ?? "")} on ${String(args.repo ?? "")}${args.path ? ` → ${String(args.path)}` : ""}`;
+    case "schedule_task": return `Task: "${String(args.task ?? "")}" scheduled for ${String(args.run_at ?? "")}`;
     case "task_complete": return String(args.result ?? "").substring(0, 300);
     default: return JSON.stringify(args).substring(0, 200);
   }

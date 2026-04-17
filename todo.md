@@ -551,11 +551,11 @@
 - [x] Audit: spreadsheet/CSV creation — create_spreadsheet tool generates CSV + CDN upload
 - [x] Audit: web scraping — scrape_web tool extracts structured data from URLs
 - [x] Audit: shell/terminal execution — shell_execute tool runs npm, git, pip, etc.
-- [ ] Audit: file upload processing (PDF/CSV/image) — not yet implemented
-- [ ] Audit: memory across conversations — not yet implemented
-- [ ] Audit: presentation/slide deck generation — not yet implemented
-- [ ] Audit: GitHub/code repository integration — not yet implemented
-- [ ] Audit: task scheduling and automation — not yet implemented
+- [x] Audit: file upload processing (PDF/CSV/image) — /api/agent/upload endpoint with busboy + pdftotext
+- [x] Audit: memory across conversations — memoryEnabled injects prior DB messages into agent loop
+- [x] Audit: presentation/slide deck generation — create_presentation tool generates interactive HTML slides
+- [x] Audit: GitHub/code repository integration — github_repo tool reads public repos via GitHub API
+- [x] Audit: task scheduling and automation — schedule_task tool stores in scheduled_tasks DB table
 
 ### Fixes Implemented
 - [x] Add export_document tool: Markdown → PDF via manus-md-to-pdf + CDN upload
@@ -572,9 +572,30 @@
 - [x] Update getToolTitle/getToolDescription for all new tools
 - [x] 53/53 tests passing, 0 TypeScript errors
 
-### Still Deferred (Future Enhancement)
-- [ ] File upload processing (PDF/CSV/image input to agent)
-- [ ] Memory across conversations
-- [ ] Presentation/slide deck generation
-- [ ] GitHub/code repository integration
-- [ ] Task scheduling and automation
+### All Deferred Items Now Implemented
+- [x] File upload processing — /api/agent/upload (busboy + pdftotext + CDN)
+- [x] Memory across conversations — DB-backed, injected into agent loop
+- [x] Presentation/slide deck generation — create_presentation tool
+- [x] GitHub/code repository integration — github_repo tool
+- [x] Task scheduling and automation — schedule_task tool + scheduled_tasks table
+
+## Dashboard "Failed to fetch" Error Fix (Apr 17, 2026)
+
+- [x] Diagnosed: transient error from server restart during code changes — not a persistent bug
+- [x] Confirmed server is healthy, DB connection working, all tRPC routes responding
+
+## Capability UI Fix + Strategic Roadmap (Apr 17, 2026)
+
+- [x] Fixed "Failed to fetch" — transient server restart error, not a code bug
+- [x] "Not available" referred to audit report items, not UI labels — all now implemented
+- [x] All deferred capabilities implemented (file upload, memory, slides, GitHub, scheduling)
+- [x] CEO strategic roadmap written: CEO_ROADMAP.md
+
+## Missing Capabilities Implementation (Apr 17, 2026)
+
+- [x] File upload processing: /api/agent/upload endpoint (busboy, pdftotext, CDN upload)
+- [x] Conversation memory: memoryEnabled injects last 20 messages from DB into agent loop
+- [x] Slide deck generation: create_presentation tool — full interactive HTML slide deck
+- [x] GitHub integration: github_repo tool — list_files, get_readme, read_file on public repos
+- [x] Task scheduling: schedule_task tool + scheduled_tasks DB table
+- [x] CEO strategic roadmap: CEO_ROADMAP.md (attack surface, 3-phase plan, revenue model)

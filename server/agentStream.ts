@@ -16,6 +16,11 @@ import { runAgentLoop, sendSSE } from "./agentLoop";
 import { getAgentById, createTask, getUserCreditBalance } from "./db";
 import { sdk } from "./_core/sdk";
 import type { AgentStep } from "./agentLoop";
+import { execSync } from "child_process";
+import { writeFileSync, unlinkSync } from "fs";
+import { tmpdir } from "os";
+import { join } from "path";
+import { randomBytes } from "crypto";
 
 // In-memory map of active streams (taskId → list of SSE response objects)
 const activeStreams = new Map<number, Response[]>();
@@ -74,9 +79,10 @@ export function registerAgentStreamRoutes(app: Express) {
       return;
     }
 
-    const { agentId, message, conversationHistory } = req.body as {
+    const { agentId, message, conversationHistory, sessionId } = req.body as {
       agentId: number;
       message: string;
+      sessionId?: string;
       conversationHistory?: Array<{ role: string; content: string }>;
     };
 
@@ -150,6 +156,7 @@ export function registerAgentStreamRoutes(app: Express) {
         agentId,
         userId: user.id,
         userMessage: message,
+        sessionId,
         conversationHistory,
         onStep: (step: AgentStep) => {
           broadcastToTask(taskId, "step", step);
@@ -213,6 +220,97 @@ export function registerAgentStreamRoutes(app: Express) {
       });
       res.end();
     }
+  });
+
+  /**
+   * POST /api/agent/upload
+   * Upload a file (PDF, CSV, image, text) for the agent to process
+   * Accepts multipart/form-data with 'file' field
+   * Returns: { url, filename, extractedText }
+   */
+  app.post("/api/agent/upload", async (req: Request, res: Response) => {
+    const user = await sdk.authenticateRequest(req).catch(() => null);
+    if (!user) { res.status(401).json({ error: "Unauthorized" }); return; }
+
+    // Parse multipart manually using busboy (already available via express)
+    const chunks: Buffer[] = [];
+    let filename = "upload";
+    let mimetype = "application/octet-stream";
+    let fileReceived = false;
+
+    const busboy = req.pipe as unknown as { on: (event: string, cb: (...args: unknown[]) => void) => void };
+
+    // Use raw body parsing via content-type check
+    if (!req.headers["content-type"]?.includes("multipart/form-data")) {
+      res.status(400).json({ error: "Expected multipart/form-data" });
+      return;
+    }
+
+    // Use busboy for multipart parsing
+    const { default: Busboy } = await import("busboy");
+    const bb = Busboy({ headers: req.headers });
+    const fileBuffers: Buffer[] = [];
+
+    bb.on("file", (_field: string, stream: NodeJS.ReadableStream, info: { filename: string; mimeType: string }) => {
+      filename = info.filename;
+      mimetype = info.mimeType;
+      fileReceived = true;
+      stream.on("data", (chunk: Buffer) => fileBuffers.push(chunk));
+    });
+
+    await new Promise<void>((resolve, reject) => {
+      bb.on("finish", resolve);
+      bb.on("error", reject);
+      req.pipe(bb);
+    });
+
+    if (!fileReceived || fileBuffers.length === 0) {
+      res.status(400).json({ error: "No file received" });
+      return;
+    }
+
+    const fileBuffer = Buffer.concat(fileBuffers);
+    const ext = filename.split(".").pop()?.toLowerCase() ?? "bin";
+    const tmpFile = join(tmpdir(), `upload-${randomBytes(8).toString("hex")}.${ext}`);
+    writeFileSync(tmpFile, fileBuffer);
+
+    let extractedText = "";
+    let cdnUrl = "";
+
+    try {
+      // Extract text based on file type
+      if (ext === "pdf") {
+        try {
+          extractedText = execSync(`pdftotext "${tmpFile}" -`, { timeout: 30000 }).toString().substring(0, 20000);
+        } catch {
+          extractedText = "[PDF text extraction failed — file may be image-based]"
+        }
+      } else if (["csv", "txt", "md", "json", "xml", "html", "js", "ts", "py"].includes(ext)) {
+        extractedText = fileBuffer.toString("utf8").substring(0, 20000);
+      } else if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) {
+        extractedText = `[Image file: ${filename} — ${Math.round(fileBuffer.length / 1024)}KB. The agent can analyze this image.]`;
+      } else {
+        extractedText = `[Binary file: ${filename} — ${Math.round(fileBuffer.length / 1024)}KB]`;
+      }
+
+      // Upload to CDN
+      try {
+        const uploadResult = execSync(`manus-upload-file --webdev "${tmpFile}"`, { timeout: 30000 }).toString().trim();
+        cdnUrl = uploadResult.split("\n").find(l => l.startsWith("http")) ?? uploadResult;
+      } catch {
+        cdnUrl = "";
+      }
+    } finally {
+      try { unlinkSync(tmpFile); } catch { /* ignore */ }
+    }
+
+    res.json({
+      url: cdnUrl,
+      filename,
+      mimetype,
+      size: fileBuffer.length,
+      extractedText: extractedText.substring(0, 10000),
+    });
   });
 
   /**

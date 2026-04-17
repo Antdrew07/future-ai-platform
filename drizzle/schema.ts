@@ -384,6 +384,46 @@ export const browserSessions = mysqlTable("browser_sessions", {
 export type BrowserSession = typeof browserSessions.$inferSelect;
 export type InsertBrowserSession = typeof browserSessions.$inferInsert;
 
+// ─── Scheduled Tasks ────────────────────────────────────────────────────────
+export const scheduledTasks = mysqlTable("scheduled_tasks", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  agentId: int("agentId").notNull(),
+  title: varchar("title", { length: 512 }).notNull(),
+  prompt: text("prompt").notNull(),
+  scheduledFor: timestamp("scheduledFor").notNull(),
+  status: mysqlEnum("status", ["pending", "running", "completed", "failed", "cancelled"]).default("pending").notNull(),
+  taskId: int("taskId"), // linked task once executed
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  userIdx: index("sched_user_idx").on(table.userId),
+  statusIdx: index("sched_status_idx").on(table.status),
+  schedIdx: index("sched_time_idx").on(table.scheduledFor),
+}));
+
+export type ScheduledTask = typeof scheduledTasks.$inferSelect;
+export type InsertScheduledTask = typeof scheduledTasks.$inferInsert;
+
+// ─── Uploaded Files ───────────────────────────────────────────────────────────
+export const uploadedFiles = mysqlTable("uploaded_files", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  taskId: int("taskId"),
+  filename: varchar("filename", { length: 512 }).notNull(),
+  mimeType: varchar("mimeType", { length: 128 }).notNull(),
+  sizeBytes: int("sizeBytes").notNull(),
+  s3Key: varchar("s3Key", { length: 512 }).notNull(),
+  url: text("url").notNull(),
+  extractedText: text("extractedText"), // extracted content for agent context
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  userIdx: index("upload_user_idx").on(table.userId),
+}));
+
+export type UploadedFile = typeof uploadedFiles.$inferSelect;
+export type InsertUploadedFile = typeof uploadedFiles.$inferInsert;
+
 // ─── Password Reset Tokens ────────────────────────────────────────────────────
 export const passwordResetTokens = mysqlTable("password_reset_tokens", {
   id: int("id").autoincrement().primaryKey(),
