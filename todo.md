@@ -508,3 +508,9 @@
 - [x] Add domain registration logic to Stripe webhook (checkout.session.completed) as server-side fallback
 - [x] Webhook now handles both credit pack purchases AND domain purchases in one handler
 - [x] Fund Dynadot account to enable live domain registrations — funded, futureaiplatform2026test.com registered and active
+
+## Domain Upsell UX Fix (Apr 17, 2026)
+
+- [x] Replace blocking domain upsell modal/overlay with a dismissible suggestion card
+- [x] User can close/skip the suggestion and continue working without purchasing a domain
+- [x] Suggestion card should be subtle — small banner or inline card, not a full modal
