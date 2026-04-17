@@ -33,10 +33,11 @@ function formatCredits(n: number) {
 
 // ─── Fallback data (shown while DB loads) ────────────────────────────────────
 const FALLBACK_PLANS = [
-  { id: 1, slug: "free",     name: "Free",     priceUsd: 0,  monthlyCredits: 500,    features: ["1 project", "500 credits/month", "Basic AI tasks", "Community support"] },
-  { id: 2, slug: "starter",  name: "Starter",  priceUsd: 9,  monthlyCredits: 5000,   features: ["5 projects", "5,000 credits/month", "All task types", "Email support"] },
-  { id: 3, slug: "pro",      name: "Pro",       priceUsd: 29, monthlyCredits: 25000,  features: ["Unlimited projects", "25,000 credits/month", "Team collaboration", "API access", "Priority support"] },
-  { id: 4, slug: "business", name: "Business",  priceUsd: 99, monthlyCredits: 100000, features: ["Everything in Pro", "100,000 credits/month", "Advanced analytics", "Custom models", "Dedicated support"] },
+  { id: 1, slug: "free",       name: "Free",       priceUsd: 0,   monthlyCredits: 500,    features: ["3 agents", "500 credits/month", "Community support", "Basic analytics"] },
+  { id: 2, slug: "starter",    name: "Starter",    priceUsd: 19,  monthlyCredits: 2000,   features: ["10 agents", "2,000 credits/month", "Email support", "Full analytics", "API access"] },
+  { id: 3, slug: "pro",        name: "Pro",         priceUsd: 49,  monthlyCredits: 8000,   features: ["Unlimited agents", "8,000 credits/month", "Priority support", "Advanced analytics", "API access", "Team collaboration"] },
+  { id: 4, slug: "business",   name: "Business",   priceUsd: 99,  monthlyCredits: 100000, features: ["Everything in Pro", "100,000 credits/month", "Advanced analytics", "Custom models", "Dedicated support", "SLA guarantee"] },
+  { id: 5, slug: "enterprise", name: "Enterprise",  priceUsd: 199, monthlyCredits: 50000,  features: ["Unlimited everything", "50,000 credits/month", "Dedicated support", "Custom SLA", "On-premise option"] },
 ];
 
 const FALLBACK_PACKS = [

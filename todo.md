@@ -599,3 +599,7 @@
 - [x] GitHub integration: github_repo tool — list_files, get_readme, read_file on public repos
 - [x] Task scheduling: schedule_task tool + scheduled_tasks DB table
 - [x] CEO strategic roadmap: CEO_ROADMAP.md (attack surface, 3-phase plan, revenue model)
+
+## Billing Page Price Fix (Apr 17, 2026)
+
+- [x] Fix wrong prices on billing page: corrected DB values (Starter $19, Pro $49, Business $99, Enterprise $199) and updated FALLBACK_PLANS in Billing.tsx to match
