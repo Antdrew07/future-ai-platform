@@ -1,16 +1,22 @@
 /**
- * Future AI Platform — Smart LLM Router
+ * Future AI Platform — Intelligent LLM Router
  *
- * Automatically selects the best AI model for each task.
+ * Automatically selects the best AI model for each task using semantic classification.
  * Users never see model names or provider details — Future handles everything.
  *
- * Auto-routing logic:
- *   Web/research tasks     → Perplexity (real-time search)
- *   Code/build tasks       → Claude 3.5 Sonnet (best for code)
- *   Creative/writing tasks → Claude 3.5 Sonnet (best for long-form)
- *   Fast/simple tasks      → Groq Llama 3.3 70B (ultra-fast)
- *   Complex reasoning      → Claude 3.5 Sonnet (best reasoning)
- *   Fallback               → Built-in Forge (always available)
+ * How it works:
+ *   1. A fast Groq/OpenAI call classifies the task into one of 6 categories
+ *   2. Each category maps to the best available provider + model
+ *   3. A robust fallback chain ensures tasks always complete
+ *
+ * Routing categories:
+ *   code_build        → Claude Opus (best for code & technical work)
+ *   research_web      → Perplexity sonar-pro (real-time web search)
+ *   creative_writing  → Claude Opus (best for long-form content)
+ *   data_analysis     → GPT-4o (strong math & data reasoning)
+ *   quick_answer      → Groq Llama 3.3 70B (ultra-fast, low latency)
+ *   complex_reasoning → Claude Opus (strongest multi-step reasoning)
+ *   Fallback          → Claude → GPT-4o → Groq → Built-in Forge
  */
 
 import { invokeLLM } from "./_core/llm";
@@ -63,68 +69,186 @@ export interface LLMRouterResult {
 
 type Provider = "openai" | "anthropic" | "perplexity" | "gemini" | "groq" | "future";
 
-// ─── Smart Auto-Routing ───────────────────────────────────────────────────────
+// ─── Intelligent Meta-Router ─────────────────────────────────────────────────
 
 /**
- * Classifies the user's task and returns the best model + provider.
- * This is completely invisible to the user — they just see "Future AI".
+ * Task categories that the meta-router can classify into.
+ * Each maps to the best available provider for that workload.
  */
-function autoSelectModel(messages: LLMMessage[]): { modelId: string; provider: Provider } {
-  // Get the last user message to classify the task
-  const userMessages = messages.filter(m => m.role === "user");
-  const lastUserMsg = userMessages[userMessages.length - 1]?.content?.toLowerCase() ?? "";
-  const systemMsg = messages.find(m => m.role === "system")?.content?.toLowerCase() ?? "";
-  const combined = lastUserMsg + " " + systemMsg;
+type TaskCategory =
+  | "code_build"        // Writing code, building apps, debugging, technical implementation
+  | "research_web"      // Finding current info, news, prices, facts that need web search
+  | "creative_writing"  // Stories, books, marketing copy, scripts, long-form content
+  | "data_analysis"     // Analyzing data, spreadsheets, charts, statistics, reports
+  | "quick_answer"      // Simple Q&A, definitions, translations, short summaries
+  | "complex_reasoning"; // Strategy, planning, multi-step reasoning, business decisions
 
-  // Web search / research tasks → Perplexity (has real-time web access)
-  const isWebTask = /search|research|find|look up|latest|news|current|today|recent|2024|2025|2026|website.*copy|copy.*website|elevation church|scrape|crawl|what is|who is|how much|price of|stock|weather/.test(combined);
-  if (isWebTask && process.env.PERPLEXITY_API_KEY) {
+interface RoutingDecision {
+  category: TaskCategory;
+  reasoning: string;  // Brief explanation of why this category was chosen
+  needs_web_search: boolean; // Whether real-time web data is needed
+}
+
+/**
+ * Maps a task category to the best available provider + model.
+ * Priority order reflects capability fit for each workload.
+ */
+function categoryToModel(category: TaskCategory, needsWebSearch: boolean): { modelId: string; provider: Provider } {
+  // Web search always goes to Perplexity when available — it has live internet access
+  if (needsWebSearch && process.env.PERPLEXITY_API_KEY) {
     return { modelId: "sonar-pro", provider: "perplexity" };
   }
 
-  // Code / app building tasks → Claude (best for code generation)
-  const isCodeTask = /build|create|code|program|app|website|html|css|javascript|python|react|node|api|database|function|class|component|android|ios|iphone|mobile|flutter|swift|kotlin/.test(combined);
-  if (isCodeTask && process.env.ANTHROPIC_API_KEY) {
-    return { modelId: "claude-sonnet-4-20250514", provider: "anthropic" };
+  switch (category) {
+    case "code_build":
+      // Claude is the best at code generation and technical implementation
+      if (process.env.ANTHROPIC_API_KEY) return { modelId: "claude-opus-4-5", provider: "anthropic" };
+      if (process.env.OPENAI_API_KEY) return { modelId: "gpt-4o", provider: "openai" };
+      if (process.env.GROQ_API_KEY) return { modelId: "llama-3.3-70b-versatile", provider: "groq" };
+      break;
+
+    case "research_web":
+      // Perplexity is best for web research (already handled above if available)
+      if (process.env.OPENAI_API_KEY) return { modelId: "gpt-4o", provider: "openai" };
+      if (process.env.ANTHROPIC_API_KEY) return { modelId: "claude-opus-4-5", provider: "anthropic" };
+      break;
+
+    case "creative_writing":
+      // Claude excels at long-form creative writing and nuanced tone
+      if (process.env.ANTHROPIC_API_KEY) return { modelId: "claude-opus-4-5", provider: "anthropic" };
+      if (process.env.OPENAI_API_KEY) return { modelId: "gpt-4o", provider: "openai" };
+      break;
+
+    case "data_analysis":
+      // OpenAI GPT-4o has strong data/math reasoning; Claude is a solid alternative
+      if (process.env.OPENAI_API_KEY) return { modelId: "gpt-4o", provider: "openai" };
+      if (process.env.ANTHROPIC_API_KEY) return { modelId: "claude-opus-4-5", provider: "anthropic" };
+      break;
+
+    case "quick_answer":
+      // Groq is ultra-fast for simple tasks; great UX for short answers
+      if (process.env.GROQ_API_KEY) return { modelId: "llama-3.3-70b-versatile", provider: "groq" };
+      if (process.env.OPENAI_API_KEY) return { modelId: "gpt-4o-mini", provider: "openai" };
+      if (process.env.ANTHROPIC_API_KEY) return { modelId: "claude-haiku-4-5", provider: "anthropic" };
+      break;
+
+    case "complex_reasoning":
+      // Claude Opus is the strongest at multi-step reasoning and strategy
+      if (process.env.ANTHROPIC_API_KEY) return { modelId: "claude-opus-4-5", provider: "anthropic" };
+      if (process.env.OPENAI_API_KEY) return { modelId: "gpt-4o", provider: "openai" };
+      break;
   }
 
-  // Creative / writing tasks → Claude (best for long-form creative writing)
-  const isCreativeTask = /write|book|novel|story|chapter|blog|article|essay|marketing|copy|script|email|letter|poem|creative|brand|slogan|tagline|pitch|proposal|plan|strategy/.test(combined);
-  if (isCreativeTask && process.env.ANTHROPIC_API_KEY) {
-    return { modelId: "claude-sonnet-4-20250514", provider: "anthropic" };
-  }
-
-  // Fast / simple tasks → Groq (ultra-fast, great for quick answers)
-  const isFastTask = /summarize|translate|explain|what does|define|list|give me|tell me|help me understand|quick|simple|brief/.test(combined);
-  if (isFastTask && process.env.GROQ_API_KEY) {
-    return { modelId: "llama-3.3-70b-versatile", provider: "groq" };
-  }
-
-  // Complex reasoning / analysis → Claude
-  const isComplexTask = /analyze|analysis|compare|evaluate|assess|review|audit|diagnose|optimize|improve|strategy|decision|recommend/.test(combined);
-  if (isComplexTask && process.env.ANTHROPIC_API_KEY) {
-    return { modelId: "claude-sonnet-4-20250514", provider: "anthropic" };
-  }
-
-  // Business / financial tasks → OpenAI GPT-4o
-  const isBusinessTask = /business plan|financial|revenue|profit|market|startup|investor|pitch deck|valuation|forecast|budget|roi|kpi/.test(combined);
-  if (isBusinessTask && process.env.OPENAI_API_KEY) {
-    return { modelId: "gpt-4o", provider: "openai" };
-  }
-
-  // Default: try Claude first, then Groq, then built-in
-  if (process.env.ANTHROPIC_API_KEY) {
-    return { modelId: "claude-sonnet-4-20250514", provider: "anthropic" };
-  }
-  if (process.env.GROQ_API_KEY) {
-    return { modelId: "llama-3.3-70b-versatile", provider: "groq" };
-  }
-  if (process.env.OPENAI_API_KEY) {
-    return { modelId: "gpt-4o", provider: "openai" };
-  }
-
-  // Always-available fallback
+  // Universal fallback chain
+  if (process.env.ANTHROPIC_API_KEY) return { modelId: "claude-opus-4-5", provider: "anthropic" };
+  if (process.env.OPENAI_API_KEY) return { modelId: "gpt-4o", provider: "openai" };
+  if (process.env.GROQ_API_KEY) return { modelId: "llama-3.3-70b-versatile", provider: "groq" };
   return { modelId: "future-agent-1", provider: "future" };
+}
+
+/**
+ * Intelligent meta-router: uses a fast LLM to semantically classify the task
+ * and return the best model for it. Falls back to a safe default if classification fails.
+ *
+ * Uses Groq (Llama 3.3 70B) for classification — it's fast (~200ms) and free,
+ * so it adds minimal latency while providing genuine semantic understanding.
+ */
+async function intelligentAutoSelect(messages: LLMMessage[]): Promise<{ modelId: string; provider: Provider }> {
+  // Build a concise task description from the conversation
+  const userMessages = messages.filter(m => m.role === "user");
+  const lastUserMsg = userMessages[userMessages.length - 1]?.content ?? "";
+  const systemMsg = messages.find(m => m.role === "system")?.content ?? "";
+
+  // Truncate to keep the classification call fast
+  const taskDescription = [
+    systemMsg ? `System context: ${systemMsg.substring(0, 300)}` : "",
+    `User request: ${lastUserMsg.substring(0, 600)}`,
+  ].filter(Boolean).join("\n");
+
+  const classificationPrompt = `You are a task router for an AI platform. Classify the following task into exactly one category and determine if it needs real-time web data.
+
+Categories:
+- code_build: Writing, debugging, or building code, apps, websites, scripts, APIs, databases
+- research_web: Finding current facts, news, prices, recent events, live data that requires web search
+- creative_writing: Stories, books, marketing copy, emails, scripts, long-form content, branding
+- data_analysis: Analyzing data, spreadsheets, statistics, financial models, reports, charts
+- quick_answer: Simple questions, definitions, translations, brief summaries, factual lookups
+- complex_reasoning: Strategy, business planning, multi-step problem solving, comparisons, recommendations
+
+Task to classify:
+${taskDescription}
+
+Respond with JSON only.`;
+
+  try {
+    // Use Groq for fast classification — if Groq unavailable, use OpenAI
+    const classifierApiKey = process.env.GROQ_API_KEY || process.env.OPENAI_API_KEY;
+    const classifierEndpoint = process.env.GROQ_API_KEY
+      ? "https://api.groq.com/openai/v1/chat/completions"
+      : "https://api.openai.com/v1/chat/completions";
+    const classifierModel = process.env.GROQ_API_KEY
+      ? "llama-3.3-70b-versatile"
+      : "gpt-4o-mini";
+
+    if (!classifierApiKey) throw new Error("No classifier API key available");
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000); // 8s max for classification
+
+    let decision: RoutingDecision;
+
+    try {
+      const response = await fetch(classifierEndpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${classifierApiKey}`,
+        },
+        body: JSON.stringify({
+          model: classifierModel,
+          messages: [{ role: "user", content: classificationPrompt }],
+          temperature: 0,
+          max_tokens: 150,
+          response_format: { type: "json_object" },
+        }),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) throw new Error(`Classifier HTTP ${response.status}`);
+
+      const data = await response.json() as {
+        choices: Array<{ message: { content: string } }>;
+      };
+      const raw = data.choices[0]?.message?.content ?? "{}";
+      decision = JSON.parse(raw) as RoutingDecision;
+    } finally {
+      clearTimeout(timeout);
+    }
+
+    // Validate the decision
+    const validCategories: TaskCategory[] = [
+      "code_build", "research_web", "creative_writing",
+      "data_analysis", "quick_answer", "complex_reasoning",
+    ];
+    if (!validCategories.includes(decision.category)) {
+      throw new Error(`Invalid category: ${decision.category}`);
+    }
+
+    const selected = categoryToModel(decision.category, decision.needs_web_search ?? false);
+    console.log(
+      `[LLMRouter] Meta-router → category="${decision.category}" web=${decision.needs_web_search} → ${selected.provider}/${selected.modelId}` +
+      (decision.reasoning ? ` (${decision.reasoning.substring(0, 80)})` : "")
+    );
+    return selected;
+
+  } catch (err) {
+    // If classification fails for any reason, fall back to a safe capable default
+    console.warn("[LLMRouter] Meta-router classification failed, using safe default:", String(err).substring(0, 100));
+    if (process.env.ANTHROPIC_API_KEY) return { modelId: "claude-opus-4-5", provider: "anthropic" };
+    if (process.env.OPENAI_API_KEY) return { modelId: "gpt-4o", provider: "openai" };
+    if (process.env.GROQ_API_KEY) return { modelId: "llama-3.3-70b-versatile", provider: "groq" };
+    return { modelId: "future-agent-1", provider: "future" };
+  }
 }
 
 // ─── Provider Detection (for explicit modelId override) ──────────────────────
@@ -528,11 +652,19 @@ async function callGroq(opts: LLMRouterOptions & { modelId: string }): Promise<P
 // ─── Future Agent (Built-in Forge — Always Available) ────────────────────────
 
 async function callFutureAgent(opts: LLMRouterOptions): Promise<ProviderResult> {
-  const response = await invokeLLM({
-    messages: opts.messages as Parameters<typeof invokeLLM>[0]["messages"],
-    ...(opts.tools && { tools: opts.tools }),
-    ...(opts.tools && { tool_choice: opts.tool_choice ?? "auto" }),
-  });
+  // Wrap invokeLLM with a 90-second timeout to prevent infinite hangs
+  const timeoutPromise = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error("Future AI request timed out after 90s")), 90000)
+  );
+
+  const response = await Promise.race([
+    invokeLLM({
+      messages: opts.messages as Parameters<typeof invokeLLM>[0]["messages"],
+      ...(opts.tools && { tools: opts.tools }),
+      ...(opts.tools && { tool_choice: opts.tool_choice ?? "auto" }),
+    }),
+    timeoutPromise,
+  ]);
 
   const choice = response.choices?.[0];
   const rawContent = choice?.message?.content;
@@ -607,15 +739,14 @@ export async function routeLLMCall(opts: LLMRouterOptions): Promise<LLMRouterRes
   let provider: Provider;
 
   if (!selectedModelId || selectedModelId.startsWith("future-agent-") || selectedModelId === "auto") {
-    const selected = autoSelectModel(opts.messages);
+    const selected = await intelligentAutoSelect(opts.messages);
     selectedModelId = selected.modelId;
     provider = selected.provider;
-    console.log(`[LLMRouter] Auto-selected: ${provider} (${selectedModelId})`);
   } else {
     provider = getProvider(selectedModelId);
   }
 
-  const result = await callWithFallback(provider, { ...opts, modelId: selectedModelId });
+  const result = await callWithFallback(provider, { ...opts, modelId: selectedModelId! });
 
   // ── Credit calculation (flat rate, no DB lookup) ──
   const costs = CREDIT_COSTS[provider];

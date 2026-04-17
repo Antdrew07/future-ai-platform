@@ -607,3 +607,10 @@
 ## Pricing Strategy Restore (Apr 17, 2026)
 
 - [x] Restore original pricing: Free $0, Starter $49, Pro $100, Business $199, Enterprise $500 (from Pricing.tsx strategy) — corrected in DB and Billing.tsx fallback
+
+## Infinite Loop Bug Fix
+- [ ] Add max-iteration limit (30 iterations) to agentLoop.ts
+- [ ] Add per-task timeout (5 minutes) to agentLoop.ts
+- [ ] Graceful termination: return partial result with explanation when limit hit
+- [ ] Add Stop Task button in Dashboard.tsx and AgentWorkspace.tsx
+- [ ] Add step counter in execution log (Step N/30)

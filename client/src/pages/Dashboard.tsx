@@ -26,7 +26,7 @@ import {
   ChevronRight, Download, Eye, ExternalLink, Monitor, Copy,
   Database, Image, AlertCircle, Cpu, Clock, Coins, Activity,
   MessageSquare, Plus, ShoppingCart, MonitorPlay, X, Maximize2,
-  Minimize2, RefreshCw
+  Minimize2, RefreshCw, Square
 } from "lucide-react";
 import { useLocation as useWouterLocation } from "wouter";
 
@@ -331,10 +331,40 @@ export default function Dashboard() {
   // Whether the user has sent at least one message (switches from "home" to "chat" mode)
   const [chatStarted, setChatStarted] = useState(false);
 
+  const [currentTaskId, setCurrentTaskId] = useState<number | null>(null);
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const stepsEndRef = useRef<HTMLDivElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  const cancelTask = trpc.tasks.cancel.useMutation({
+    onSuccess: () => {
+      setIsRunning(false);
+      setRunStatus("error");
+      toast.info("Task stopped.");
+      void refetchBalance();
+    },
+    onError: () => {
+      // Even if cancel fails on server, stop the UI
+      setIsRunning(false);
+      setRunStatus("error");
+    },
+  });
+
+  const stopTask = useCallback(() => {
+    // Abort the SSE fetch stream immediately
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = null;
+    // Cancel the task in DB
+    if (currentTaskId) {
+      cancelTask.mutate({ id: currentTaskId });
+    } else {
+      setIsRunning(false);
+      setRunStatus("error");
+    }
+  }, [currentTaskId, cancelTask]);
 
   const { data: agents } = trpc.agents.list.useQuery();
   const { data: balance, refetch: refetchBalance } = trpc.credits.balance.useQuery(undefined, { refetchInterval: 30000 });
@@ -395,11 +425,15 @@ export default function Dashboard() {
     const agentId = getAgentId();
 
     try {
+      const abortController = new AbortController();
+      abortControllerRef.current = abortController;
+
       const response = await fetch("/api/agent/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ agentId, message: task, conversationHistory: history }),
+        signal: abortController.signal,
       });
       if (!response.ok) {
         const err = await response.json() as { error?: string };
@@ -427,7 +461,10 @@ export default function Dashboard() {
           if (!eventType || !dataLine) continue;
           try {
             const data = JSON.parse(dataLine) as Record<string, unknown>;
-            if (eventType === "step") {
+            if (eventType === "task_created") {
+              const taskCreated = data as { taskId?: number };
+              if (taskCreated.taskId) setCurrentTaskId(taskCreated.taskId);
+            } else if (eventType === "step") {
               const step = data as unknown as AgentStep;
               setLiveSteps(prev => [...prev, step]);
               if (step.toolName === "browse_web" && step.browserSessionId && step.browserLiveViewUrl) {
@@ -708,7 +745,23 @@ export default function Dashboard() {
                   </button>
                 )}
               </div>
-              {liveSteps.length > 0 && <span className="text-xs text-muted-foreground">{liveSteps.length} steps</span>}
+              <div className="flex items-center gap-2">
+                {liveSteps.length > 0 && (
+                  <span className="text-xs text-muted-foreground font-mono">
+                    {isRunning ? `Step ${liveSteps.length}/30` : `${liveSteps.length} steps`}
+                  </span>
+                )}
+                {isRunning && (
+                  <button
+                    onClick={stopTask}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 border border-red-200 text-red-600 text-xs font-medium hover:bg-red-100 transition-all"
+                    title="Stop this task"
+                  >
+                    <Square className="w-3 h-3 fill-red-600" />
+                    Stop
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Live browser */}

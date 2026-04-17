@@ -22,7 +22,7 @@ import {
   Download, ArrowLeft, Sparkles, Terminal, Image, Database,
   AlertCircle, Cpu, Clock, Coins, Plus, MessageSquare, Activity,
   Eye, ExternalLink, Monitor, ShoppingCart, MonitorPlay, X,
-  Maximize2, Minimize2, RefreshCw, ZoomIn
+  Maximize2, Minimize2, RefreshCw, ZoomIn, Square
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useLocation as useWouterLocation } from "wouter";
@@ -971,6 +971,7 @@ function LogPanelContent({
   activeBrowserSession,
   onShowBrowser,
   onCloseBrowser,
+  onStopTask,
 }: {
   liveSteps: AgentStep[];
   isRunning: boolean;
@@ -980,6 +981,7 @@ function LogPanelContent({
   activeBrowserSession: { sessionId: string; liveViewUrl: string } | null;
   onShowBrowser: (sessionId: string, liveViewUrl: string) => void;
   onCloseBrowser: () => void;
+  onStopTask?: () => void;
 }) {
   // Track which tab is active — auto-switch to Preview when new artifacts arrive
   const [activeTab, setActiveTab] = useState<"log" | "preview" | "browser">("log");
@@ -1053,9 +1055,23 @@ function LogPanelContent({
               )}
             </TabsTrigger>
           </TabsList>
-          {liveSteps.length > 0 && (
-            <span className="text-xs text-muted-foreground">{liveSteps.length} steps</span>
-          )}
+          <div className="flex items-center gap-2">
+            {liveSteps.length > 0 && (
+              <span className="text-xs text-muted-foreground font-mono">
+                {isRunning ? `Step ${liveSteps.length}/30` : `${liveSteps.length} steps`}
+              </span>
+            )}
+            {isRunning && (
+              <button
+                onClick={onStopTask}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-50 border border-red-200 text-red-600 text-xs font-medium hover:bg-red-100 transition-all"
+                title="Stop this task"
+              >
+                <Square className="w-3 h-3 fill-red-600" />
+                Stop
+              </button>
+            )}
+          </div>
         </div>
 
         {/* ── Execution Log Tab ── */}
@@ -1253,14 +1269,41 @@ export default function AgentWorkspace() {
     liveViewUrl: string;
   } | null>(null);
 
+  const [currentTaskId, setCurrentTaskId] = useState<number | null>(null);
+
   const chatEndRef = useRef<HTMLDivElement>(null);
   const stepsEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const { data: agentList } = trpc.agents.list.useQuery();
   const agent = agentList?.find(a => a.id === parseInt(agentId ?? "0"));
   const { data: creditBalance, refetch: refetchCredits } = trpc.credits.balance.useQuery(undefined, { refetchInterval: 30000 });
+
+  const cancelTask = trpc.tasks.cancel.useMutation({
+    onSuccess: () => {
+      setIsRunning(false);
+      setRunStatus("error");
+      toast.info("Task stopped.");
+      void refetchCredits();
+    },
+    onError: () => {
+      setIsRunning(false);
+      setRunStatus("error");
+    },
+  });
+
+  const stopTask = useCallback(() => {
+    abortControllerRef.current?.abort();
+    abortControllerRef.current = null;
+    if (currentTaskId) {
+      cancelTask.mutate({ id: currentTaskId });
+    } else {
+      setIsRunning(false);
+      setRunStatus("error");
+    }
+  }, [currentTaskId, cancelTask]);
 
   // Auto-scroll chat to bottom
   useEffect(() => {
@@ -1332,6 +1375,9 @@ export default function AgentWorkspace() {
     const history = messages.map(m => ({ role: m.role, content: m.content }));
 
     try {
+      const abortController = new AbortController();
+      abortControllerRef.current = abortController;
+
       const response = await fetch("/api/agent/run", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1341,6 +1387,7 @@ export default function AgentWorkspace() {
           message: userMessage,
           conversationHistory: history,
         }),
+        signal: abortController.signal,
       });
 
       if (!response.ok) {
@@ -1369,7 +1416,10 @@ export default function AgentWorkspace() {
           if (!eventType || !dataLine) continue;
           try {
             const data = JSON.parse(dataLine) as Record<string, unknown>;
-            if (eventType === "step") {
+            if (eventType === "task_created") {
+              const taskCreated = data as { taskId?: number };
+              if (taskCreated.taskId) setCurrentTaskId(taskCreated.taskId);
+            } else if (eventType === "step") {
               const step = data as unknown as AgentStep;
               setLiveSteps(prev => [...prev, step]);
               // Auto-show live browser when a browse_web tool call includes a session
@@ -1610,6 +1660,7 @@ export default function AgentWorkspace() {
             activeBrowserSession={activeBrowserSession}
             onShowBrowser={handleShowBrowser}
             onCloseBrowser={handleCloseBrowser}
+            onStopTask={stopTask}
           />
         </div>
       </div>
