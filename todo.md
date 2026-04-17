@@ -446,7 +446,7 @@
 - [x] Validate Browserbase API key and Project ID with a test session
 - [x] Build browserbaseRouter.ts: createSession, getSessionStatus, terminateSession endpoints
 - [x] Add Browserbase session creation to agentTools.ts (browse_web tool)
-- [ ] Build live browser view component in AgentWorkspace (iframe showing live session) *(in progress)*
+- [x] Build live browser view component in AgentWorkspace (iframe showing live session)
 - [x] Add session cost tracking (deduct credits per browser session)
 - [x] Write Vitest tests for Browserbase router
 
