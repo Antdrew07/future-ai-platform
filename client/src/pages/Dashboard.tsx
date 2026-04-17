@@ -55,7 +55,7 @@ interface AgentStep {
   toolName?: string;
   isError?: boolean;
   timestamp: number;
-  artifacts?: { name: string; content: string; type: string }[];
+  artifacts?: { name: string; content: string; type: string; url?: string }[];
   browserSessionId?: string;
   browserLiveViewUrl?: string;
 }
@@ -200,7 +200,11 @@ function getStepIcon(step: AgentStep) {
     case "tool_call":
       if (step.toolName === "web_search") return <Search className="w-3.5 h-3.5 text-blue-500" />;
       if (step.toolName === "code_execute") return <Code2 className="w-3.5 h-3.5 text-emerald-500" />;
-      if (step.toolName === "browse_web") return <MonitorPlay className="w-3.5 h-3.5 text-indigo-500" />;
+      if (step.toolName === "browse_url" || step.toolName === "browse_web") return <MonitorPlay className="w-3.5 h-3.5 text-indigo-500" />;
+      if (step.toolName === "scrape_web") return <Database className="w-3.5 h-3.5 text-cyan-500" />;
+      if (step.toolName === "shell_execute") return <Terminal className="w-3.5 h-3.5 text-orange-500" />;
+      if (step.toolName === "export_document") return <FileText className="w-3.5 h-3.5 text-amber-500" />;
+      if (step.toolName === "create_spreadsheet") return <Database className="w-3.5 h-3.5 text-green-500" />;
       return <Zap className="w-3.5 h-3.5 text-orange-500" />;
     case "tool_result": return step.isError ? <XCircle className="w-3.5 h-3.5 text-red-500" /> : <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />;
     case "complete": return <Sparkles className="w-3.5 h-3.5 text-amber-500" />;
@@ -255,6 +259,9 @@ function StepCard({ step, isLast, onShowBrowser }: { step: AgentStep; isLast?: b
               {step.artifacts.map((a, i) => (
                 <button key={i} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-700 hover:bg-emerald-100 transition-all"
                   onClick={() => {
+                    if (a.url) {
+                      const el = document.createElement("a"); el.href = a.url; el.download = a.name; el.target = "_blank"; el.click(); return;
+                    }
                     const blob = new Blob([a.content], { type: a.type });
                     const url = URL.createObjectURL(blob);
                     if (a.name.endsWith(".html")) { window.open(url, "_blank"); setTimeout(() => URL.revokeObjectURL(url), 5000); }

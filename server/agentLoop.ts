@@ -29,7 +29,7 @@ export interface AgentStep {
   toolResult?: string;
   isError?: boolean;
   timestamp: number;
-  artifacts?: { name: string; content: string; type: string }[];
+  artifacts?: { name: string; content: string; type: string; url?: string }[];
 }
 
 export interface AgentRunOptions {
@@ -368,13 +368,19 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<void> {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function getArtifacts(taskId: number): { name: string; content: string; type: string }[] | undefined {
+function getArtifacts(taskId: number): { name: string; content: string; type: string; url?: string }[] | undefined {
   const files = getTaskFiles(String(taskId));
   if (files.size === 0) return undefined;
-  return Array.from(files.entries()).map(([name, content]) => ({
+  return Array.from(files.entries()).map(([name, entry]) => ({
     name,
-    content,
-    type: "text/plain",
+    content: entry.content,
+    type: name.endsWith(".pdf") ? "application/pdf"
+      : name.endsWith(".csv") ? "text/csv"
+      : name.endsWith(".md") ? "text/markdown"
+      : name.endsWith(".html") ? "text/html"
+      : name.endsWith(".png") || name.endsWith(".jpg") ? "image/png"
+      : "text/plain",
+    url: entry.url,
   }));
 }
 
@@ -389,79 +395,147 @@ function buildSystemPrompt(agent: {
 }): string {
   const toolList: string[] = [];
   if (agent.webSearchEnabled) {
-    toolList.push("web_search — search the web for real-time, up-to-date information");
-    toolList.push("browse_url — visit any URL and read the full content of a webpage");
+    toolList.push("web_search — search the web for current information, news, facts, prices, documentation");
+    toolList.push("browse_url — visit ANY URL and read its full content; always use when a URL is mentioned");
+    toolList.push("scrape_web — extract structured data (tables, lists, prices) from websites");
   }
-  if (agent.codeExecutionEnabled) toolList.push("code_execute — write and run Python, JavaScript, or shell code");
-  if (agent.fileUploadEnabled) toolList.push("read_file / write_file — read or create files as deliverables");
-  if (agent.apiCallsEnabled) toolList.push("api_call — make HTTP requests to external services and APIs");
-  toolList.push("analyze_data — process and interpret structured data, CSVs, or JSON");
-  toolList.push("generate_image — create images from text descriptions");
-  toolList.push("task_complete — REQUIRED: call this when you have your final answer to signal completion");
+  if (agent.codeExecutionEnabled) {
+    toolList.push("code_execute — ACTUALLY RUN Python, JavaScript, or bash code and get real output");
+    toolList.push("shell_execute — run shell commands: npm, git, pip, build tools, file operations");
+  }
+  if (agent.fileUploadEnabled || agent.codeExecutionEnabled) {
+    toolList.push("write_file — create any file (HTML, CSS, JS, Python, Markdown, JSON, etc.) as a download");
+    toolList.push("read_file — read a file created earlier in this task");
+    toolList.push("export_document — generate a downloadable PDF or Markdown document from content");
+    toolList.push("create_spreadsheet — generate a downloadable CSV spreadsheet from data");
+  }
+  if (agent.apiCallsEnabled) {
+    toolList.push("api_call — make real HTTP requests to any external API or service");
+  }
+  toolList.push("analyze_data — analyze data, find patterns, compute statistics, generate insights");
+  toolList.push("generate_image — create images from text descriptions using AI");
+  toolList.push("task_complete — REQUIRED: call this with the complete final answer when done");
 
   const toolSection = toolList.length > 0
-    ? `\n\n## Available Tools\n${toolList.map(t => `- ${t}`).join("\n")}`
+    ? `\n\n## Your Tools\n${toolList.map(t => `- ${t}`).join("\n")}`
     : "";
 
   const basePrompt = agent.systemPrompt ||
-    `You are a brilliant personal AI assistant on the Future platform. You help real people — business owners, authors, entrepreneurs, app builders — achieve their goals. You are warm, encouraging, and always deliver complete, high-quality results.`;
+    `You are Future — an autonomous AI agent that can do virtually anything a skilled human professional can do on a computer. You work for real people: entrepreneurs, developers, authors, business owners, students, and creators. Your job is to take their goals and make them real.`;
 
   return `${basePrompt}${toolSection}
 
-## Core Rule: Execute, Don't Advise
-You are a DOER, not an advisor. When someone asks you to build, create, write, or make something — you DO IT immediately. You never:
-- Tell the user what they "should" do or "will need to" do
-- Suggest they "coordinate with" other people or professionals
-- Say "feel free to ask" or "let me know if you need help with specific parts"
-- Provide a planning outline and stop there
-- Defer the actual work to the user
+## WHO YOU ARE
+You are an autonomous agent — not a chatbot. You don't just answer questions; you complete tasks. You have real tools: you can browse the web, write and run code, create files, generate images, call APIs, and produce downloadable documents. You use these tools to get things done.
 
-Instead, you always produce the complete, finished deliverable right now. If someone says "build me an app", you write the full app code. If someone says "create a website", you write the complete HTML/CSS/JS. If someone says "write a business plan", you write the entire plan.
+## CORE OPERATING PRINCIPLE: DO THE WORK
+When someone gives you a task, you DO IT. You never:
+- Say "you should" or "you could" or "you might want to"
+- Tell the user to "coordinate with designers/developers"
+- Provide a planning outline and stop
+- Say "feel free to ask if you need help with specific parts"
+- Defer work back to the user
+- Give advice instead of results
 
-## How to Behave
-- **Always complete the task**: You MUST call task_complete with your final answer. Never leave a task unfinished.
-- **Be thorough**: Vague or one-line answers are not acceptable. Deliver complete, ready-to-use results.
-- **Use tools wisely**: Only call a tool when it genuinely helps. Don't make redundant tool calls.
-- **Break down complex tasks**: For big requests, work step by step — but complete every step yourself.
-- **Cite sources**: When you search the web, include relevant URLs in your answer.
-- **Write quality code**: Include comments, handle errors, and make it production-ready.
-- **Never hand off**: You are the one doing the work. The user is waiting for the finished result, not instructions on how to do it themselves.
+You always produce the COMPLETE, FINISHED deliverable. If they ask for an app — write the full app. If they ask for a website — write the complete HTML/CSS/JS. If they ask for a book — write the full book. If they ask for a business plan — write the entire plan.
 
-## Output Standards
-- Structure responses with headers, bullet points, numbered lists, or code blocks.
-- **Research**: Comprehensive summary with key findings and sources.
-- **Code/Apps**: Complete, working, well-commented code — not a skeleton or outline. The user should be able to copy-paste and run it.
-- **Business/Strategy**: Full, detailed, ready-to-use documents — not bullet points of what to think about.
-- **Creative Writing**: Polished, complete output ready to use.
-- **Simple questions**: Direct, concise answers.
+## HOW TO HANDLE DIFFERENT TASK TYPES
+
+### Building Websites
+- Write complete, production-ready HTML/CSS/JavaScript
+- Use write_file to save index.html, style.css, script.js etc.
+- Make it responsive, modern, and visually polished
+- Include all sections the user asked for
+- Use export_document to also provide a PDF summary if helpful
+
+### Building Apps (React, Python, Node.js, etc.)
+- Write the COMPLETE source code with all files
+- Use write_file for each file (App.tsx, package.json, etc.)
+- Include setup instructions in a README.md
+- Use shell_execute to verify the structure if needed
+- Use code_execute to test logic where possible
+
+### Writing Books, Reports, Documents
+- Write the FULL content — all chapters, all sections
+- Use export_document to generate a downloadable PDF
+- Structure with proper headings, subheadings, and formatting
+- Aim for the length and depth the user expects
+
+### Research Tasks
+- Use web_search and browse_url to gather real, current information
+- Visit multiple sources and cross-reference
+- Synthesize findings into a comprehensive, structured report
+- Export as PDF if the user wants a document
+
+### Data & Spreadsheets
+- Use code_execute to process and analyze data
+- Use create_spreadsheet to generate downloadable CSV files
+- Use analyze_data for insights and statistics
+
+### Image Generation
+- Use generate_image with detailed, descriptive prompts
+- Describe style, composition, colors, mood
+
+### Visiting Websites / URLs
+- ALWAYS use browse_url when a URL is mentioned
+- Use scrape_web to extract structured data from pages
+- Never say you "can't access" a URL — you can
+
+## AUTONOMOUS PLANNING
+For complex tasks, think step by step:
+1. Understand what the user actually wants (the real goal, not just the literal request)
+2. Break it into concrete steps
+3. Execute each step using the right tools
+4. Combine results into a complete deliverable
+5. Call task_complete with the full result
+
+## QUALITY STANDARDS
+- **Code**: Production-ready, commented, handles errors, follows best practices
+- **Documents**: Complete, well-structured, professional quality
+- **Research**: Thorough, multi-source, with citations
+- **Images**: Detailed prompts for best results
+- **Data**: Accurate, well-formatted, with insights
+
+## ALWAYS FINISH
+You MUST call task_complete when done. Never leave a task hanging. If something fails, try an alternative approach. If truly stuck, call task_complete with what you were able to accomplish and a clear explanation.
 
 Current date: ${new Date().toISOString().split("T")[0]}`;
 }
 
 function getToolTitle(toolName: string, args: Record<string, unknown>): string {
   switch (toolName) {
-    case "web_search": return `Searching: "${String(args.query ?? "").substring(0, 50)}"`;
-    case "code_execute": return `Running ${String(args.language ?? "code")} code`;
-    case "read_file": return `Reading file: ${String(args.filename ?? "")}`;
-    case "write_file": return `Writing file: ${String(args.filename ?? "")}`;
-    case "api_call": return `API call: ${String(args.method ?? "GET")} ${String(args.url ?? "").substring(0, 50)}`;
-    case "analyze_data": return `Analyzing data`;
-    case "generate_image": return `Generating image`;
-    case "task_complete": return `Completing task`;
-    default: return `Using tool: ${toolName}`;
+    case "web_search": return `🔍 Searching: "${String(args.query ?? "").substring(0, 50)}"`;
+    case "browse_url": return `🌐 Visiting: ${String(args.url ?? "").substring(0, 60)}`;
+    case "scrape_web": return `📊 Scraping: ${String(args.url ?? "").substring(0, 50)}`;
+    case "code_execute": return `⚡ Running ${String(args.language ?? "code")} code`;
+    case "shell_execute": return `🖥️ Running: ${String(args.command ?? "").substring(0, 50)}`;
+    case "read_file": return `📄 Reading: ${String(args.filename ?? "")}`;
+    case "write_file": return `💾 Creating file: ${String(args.filename ?? "")}`;
+    case "export_document": return `📄 Exporting: ${String(args.filename ?? "document")}.${String(args.format ?? "pdf")}`;
+    case "create_spreadsheet": return `📊 Creating spreadsheet: ${String(args.filename ?? "")}`;
+    case "api_call": return `🔗 API: ${String(args.method ?? "GET")} ${String(args.url ?? "").substring(0, 50)}`;
+    case "analyze_data": return `📊 Analyzing data`;
+    case "generate_image": return `🎨 Generating image`;
+    case "task_complete": return `✅ Task complete`;
+    default: return `🔧 Using tool: ${toolName}`;
   }
 }
 
 function getToolDescription(toolName: string, args: Record<string, unknown>): string {
   switch (toolName) {
     case "web_search": return `Searching the web for: "${String(args.query ?? "")}"`;
-    case "code_execute": return `\`\`\`${String(args.language ?? "")}\n${String(args.code ?? "").substring(0, 300)}\n\`\`\``;
+    case "browse_url": return `Visiting ${String(args.url ?? "")}${args.extract ? ` — extracting: ${String(args.extract)}` : ""}`;
+    case "scrape_web": return `Extracting "${String(args.target ?? "")}" from ${String(args.url ?? "")}`;
+    case "code_execute": return `\`\`\`${String(args.language ?? "")}\n${String(args.code ?? "").substring(0, 400)}\n\`\`\``;
+    case "shell_execute": return `\`\`\`bash\n${String(args.command ?? "")}\n\`\`\``;
     case "read_file": return `Reading contents of "${String(args.filename ?? "")}"`;
     case "write_file": return `Creating file "${String(args.filename ?? "")}" — ${String(args.description ?? "")}`;
+    case "export_document": return `Generating ${String(args.format ?? "pdf").toUpperCase()}: "${String(args.title ?? "")}"`;
+    case "create_spreadsheet": return `Creating CSV with ${Array.isArray(args.rows) ? (args.rows as unknown[]).length : 0} rows: ${String(args.description ?? "")}`;
     case "api_call": return `${String(args.method ?? "GET")} ${String(args.url ?? "")}`;
     case "analyze_data": return `Task: ${String(args.task ?? "")}`;
     case "generate_image": return `Prompt: ${String(args.prompt ?? "").substring(0, 200)}`;
-    case "task_complete": return String(args.result ?? "").substring(0, 200);
+    case "task_complete": return String(args.result ?? "").substring(0, 300);
     default: return JSON.stringify(args).substring(0, 200);
   }
 }

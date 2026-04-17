@@ -39,8 +39,8 @@ interface AgentStep {
   toolResult?: string;
   isError?: boolean;
   timestamp: number;
-  artifacts?: { name: string; content: string; type: string }[];
-  // Browserbase session info (attached to browse_web tool calls)
+  artifacts?: { name: string; content: string; type: string; url?: string }[];
+  // Browserbase session info (attached to browse_url/browse_web tool calls)
   browserSessionId?: string;
   browserLiveViewUrl?: string;
 }
@@ -309,7 +309,12 @@ function getToolIcon(toolName?: string) {
     case "analyze_data": return <Database className="w-3.5 h-3.5 text-cyan-500" />;
     case "generate_image": return <Image className="w-3.5 h-3.5 text-pink-500" />;
     case "task_complete": return <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />;
+    case "browse_url":
     case "browse_web": return <MonitorPlay className="w-3.5 h-3.5 text-indigo-500" />;
+    case "scrape_web": return <Database className="w-3.5 h-3.5 text-cyan-500" />;
+    case "shell_execute": return <Terminal className="w-3.5 h-3.5 text-orange-500" />;
+    case "export_document": return <FileText className="w-3.5 h-3.5 text-amber-500" />;
+    case "create_spreadsheet": return <Database className="w-3.5 h-3.5 text-green-500" />;
     default: return <Zap className="w-3.5 h-3.5 text-orange-500" />;
   }
 }
@@ -496,6 +501,15 @@ function StepCard({
                 <button key={i}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-700 hover:bg-emerald-100 transition-all"
                   onClick={() => {
+                    // Prefer CDN URL for binary files (PDFs, images, CSVs)
+                    if (artifact.url) {
+                      const a = document.createElement("a");
+                      a.href = artifact.url;
+                      a.download = artifact.name;
+                      a.target = "_blank";
+                      a.click();
+                      return;
+                    }
                     const isHtml = artifact.name.endsWith(".html") || artifact.type === "text/html";
                     if (isHtml) {
                       const blob = new Blob([artifact.content], { type: "text/html" });

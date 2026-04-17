@@ -536,3 +536,45 @@
 - [x] Fix domain suggestion: stop generating domain names based on the user's chat query text
 - [x] Verify the agent can visit a URL (like jsglobal.org) and extract content from it
 - [x] Add browse_url tool: fetches real webpage content, strips HTML, extracts text, LLM-assisted extraction
+
+## Manus-Parity Capability Audit (Apr 17, 2026)
+
+### Gap Analysis
+- [x] Audit: website builder — agent writes full HTML/CSS/JS, saved as downloadable artifact
+- [x] Audit: app scaffolding — agent writes complete React/Node.js app files via write_file
+- [x] Audit: book/document writing — agent writes full content, exports as PDF via export_document
+- [x] Audit: PDF export — export_document tool uses manus-md-to-pdf + CDN upload
+- [x] Audit: real code execution — code_execute uses child_process (Python + Node.js + bash)
+- [x] Audit: multi-step autonomous planning — think → tool_call → observe loop in agentLoop.ts
+- [x] Audit: image generation — generate_image tool wired to generateImage() helper
+- [x] Audit: data analysis — analyze_data tool with LLM-powered insights
+- [x] Audit: spreadsheet/CSV creation — create_spreadsheet tool generates CSV + CDN upload
+- [x] Audit: web scraping — scrape_web tool extracts structured data from URLs
+- [x] Audit: shell/terminal execution — shell_execute tool runs npm, git, pip, etc.
+- [ ] Audit: file upload processing (PDF/CSV/image) — not yet implemented
+- [ ] Audit: memory across conversations — not yet implemented
+- [ ] Audit: presentation/slide deck generation — not yet implemented
+- [ ] Audit: GitHub/code repository integration — not yet implemented
+- [ ] Audit: task scheduling and automation — not yet implemented
+
+### Fixes Implemented
+- [x] Add export_document tool: Markdown → PDF via manus-md-to-pdf + CDN upload
+- [x] Add create_spreadsheet tool: data → CSV + CDN upload
+- [x] Add scrape_web tool: structured data extraction from URLs
+- [x] Add shell_execute tool: real shell commands (npm, git, pip, etc.)
+- [x] Upgrade code_execute to real child_process execution (Python + Node.js + bash)
+- [x] Upgrade system prompt: Manus-level task decomposition, autonomous planning, per-task-type instructions
+- [x] Ensure agent writes complete working website HTML in one response (write_file tool)
+- [x] Ensure agent scaffolds React/Node.js apps with full file structure (write_file per file)
+- [x] Fix AgentStep type: add url field for CDN artifact URLs
+- [x] Fix artifact download: prefer CDN URL for binary files (PDFs, CSVs, images)
+- [x] Fix tool icon mapping: browse_url, scrape_web, shell_execute, export_document, create_spreadsheet
+- [x] Update getToolTitle/getToolDescription for all new tools
+- [x] 53/53 tests passing, 0 TypeScript errors
+
+### Still Deferred (Future Enhancement)
+- [ ] File upload processing (PDF/CSV/image input to agent)
+- [ ] Memory across conversations
+- [ ] Presentation/slide deck generation
+- [ ] GitHub/code repository integration
+- [ ] Task scheduling and automation
