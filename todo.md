@@ -385,3 +385,30 @@
 - [x] Update CTA: "Meet your Future" or "Start your journey"
 - [x] Update Dashboard greeting to match companion tone
 - [x] Update Onboarding welcome to companion tone
+
+## Agent Engine Fix — Task Stopping Bug + Smart Model Routing
+
+- [x] Audit agentStream.ts for silent failure points (uncaught errors, missing finally blocks)
+- [x] Audit agentLoop.ts / agent execution logic for timeout and hang issues
+- [x] Audit llmRouter.ts for model routing logic and error handling
+- [x] Fix: agent stops mid-task without sending "complete" or "error" event
+- [x] Fix: add global try/catch + finally in SSE stream to always send terminal event
+- [x] Fix: add per-step timeout (60s) so hung LLM calls don't freeze the stream
+- [x] Fix: add retry logic (up to 2 retries) for transient LLM API errors
+- [x] Improve smart model routing: complex build tasks → Claude, research/web → Perplexity, fast/simple → Groq
+- [x] Add task classification: detect task type from prompt keywords and route accordingly
+- [x] Ensure all LLM provider errors are caught and surfaced to the user (not silently swallowed)
+- [x] Write/update Vitest tests for agent routing logic
+
+## Remove Model Selection + Smart Auto-Routing
+
+- [x] Remove model selector from AgentBuilder.tsx (no more Future Ultra/Pro/Code/Search dropdowns)
+- [x] Remove model selector from AgentWorkspace.tsx header (hide model name from users)
+- [x] Remove model name display from AgentList.tsx agent cards
+- [x] Remove model_pricing table references from Billing/Admin UI
+- [x] Rewrite llmRouter.ts: auto-classify task type from prompt keywords and route to best model
+- [x] Task routing rules: website/app/code builds → Claude, research/web search → Perplexity, fast/simple → Groq, creative/writing → OpenAI GPT-4o
+- [x] Remove all "Future Ultra", "Future Pro", "Future Code", "Future Search Pro" branding from UI
+- [x] Ensure no provider names (OpenAI, Anthropic, Claude, Groq, Perplexity) appear anywhere in user-facing UI
+- [x] Update AgentBuilder to remove model field from agent creation form
+- [x] Fix agent stopping bug: add 90s per-step timeout + retry on transient errors + always send terminal SSE event

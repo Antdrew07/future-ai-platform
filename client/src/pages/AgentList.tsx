@@ -25,13 +25,6 @@ export default function AgentList() {
     onError: (e) => toast.error(e.message),
   });
 
-  const MODEL_LABELS: Record<string, string> = {
-    "gpt-4o": "Future-1 Pro",
-    "gpt-4o-mini": "Future-1 Mini",
-    "claude-3-5-sonnet-20241022": "Future-1 Code",
-    "claude-3-haiku-20240307": "Future-1 Fast",
-    "future-agent-1": "Future-1 Ultra",
-  };
 
   return (
     <FutureDashboardLayout title="My Agents" subtitle="Create and manage your AI agents">
@@ -124,7 +117,7 @@ export default function AgentList() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1.5">
                         <Badge variant="secondary" className="text-xs px-2 py-0.5">
-                          {MODEL_LABELS[agent.modelId] ?? agent.modelId}
+                          Future AI
                         </Badge>
                         {agent.isPublic ? (
                           <Globe className="w-3.5 h-3.5 text-muted-foreground" />
@@ -156,7 +149,7 @@ export default function AgentList() {
             </div>
             <h3 className="text-xl font-bold mb-2">Create your first agent</h3>
             <p className="text-muted-foreground mb-8 max-w-sm">
-              Build an autonomous AI agent that can search the web, execute code, and complete complex tasks.
+              Build a personal AI assistant that can write, research, build apps, and help you succeed at anything.
             </p>
             <Link href="/dashboard/agents/new">
               <Button className="glow-primary">

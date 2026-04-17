@@ -456,7 +456,7 @@ export default function AgentWorkspace() {
           </div>
           <div className="min-w-0">
             <h1 className="text-sm font-semibold text-foreground truncate">{agent?.name ?? "AI Agent"}</h1>
-            <p className="text-[11px] text-muted-foreground truncate">{agent?.modelId ?? "Loading..."}</p>
+            <p className="text-[11px] text-muted-foreground truncate">Powered by Future AI</p>
           </div>
         </div>
 

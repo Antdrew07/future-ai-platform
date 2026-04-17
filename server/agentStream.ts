@@ -1,9 +1,14 @@
 /**
  * Future AI Platform — Agent Streaming Endpoint
- * 
+ *
  * Provides SSE (Server-Sent Events) endpoint for real-time agent execution.
  * Route: POST /api/agent/run  — starts a task and streams steps
  * Route: GET  /api/agent/stream/:taskId — reconnect to existing stream
+ *
+ * Fixes in this version:
+ * 1. SSE heartbeat every 15s prevents proxy/browser/CDN timeouts on long tasks
+ * 2. Heartbeat is cleared on task completion/error/disconnect
+ * 3. insertId extraction is more robust (handles both MySQL and TiDB responses)
  */
 
 import type { Express, Request, Response } from "express";
@@ -31,6 +36,28 @@ function broadcastToTask(taskId: number, event: string, data: unknown) {
   for (const res of streams) {
     sendSSE(res, event, data);
   }
+}
+
+function closeAllStreams(taskId: number) {
+  const streams = activeStreams.get(taskId) ?? [];
+  for (const s of streams) {
+    try { s.end(); } catch { /* ignore */ }
+  }
+  activeStreams.delete(taskId);
+}
+
+function extractInsertId(result: unknown): number {
+  if (result && typeof result === "object") {
+    const r = result as Record<string, unknown>;
+    // Drizzle MySQL returns insertId directly
+    if (typeof r.insertId === "number" && r.insertId > 0) return r.insertId;
+    // Some adapters wrap it
+    if (Array.isArray(r) && r.length > 0) {
+      const first = r[0] as Record<string, unknown>;
+      if (typeof first.insertId === "number") return first.insertId;
+    }
+  }
+  return 0;
 }
 
 export function registerAgentStreamRoutes(app: Express) {
@@ -61,7 +88,7 @@ export function registerAgentStreamRoutes(app: Express) {
     // Check credit balance
     const balance = await getUserCreditBalance(user.id);
     if (balance < 1) {
-      res.status(402).json({ error: "Insufficient credits. Please purchase more credits to continue." });
+      res.status(402).json({ error: "You've run out of credits. Please upgrade your plan to continue." });
       return;
     }
 
@@ -81,7 +108,11 @@ export function registerAgentStreamRoutes(app: Express) {
       status: "running",
     });
 
-    const taskId = (taskResult as unknown as { insertId: number }).insertId;
+    const taskId = extractInsertId(taskResult);
+    if (!taskId) {
+      res.status(500).json({ error: "Failed to create task. Please try again." });
+      return;
+    }
 
     // Set SSE headers
     res.setHeader("Content-Type", "text/event-stream");
@@ -96,44 +127,54 @@ export function registerAgentStreamRoutes(app: Express) {
     // Send initial event with taskId
     sendSSE(res, "task_created", { taskId, agentId, status: "running" });
 
+    // ── Heartbeat: send a ping every 15s to keep the connection alive ────────
+    // This prevents proxies, CDNs, and browsers from closing idle SSE connections
+    const heartbeatInterval = setInterval(() => {
+      try {
+        res.write(": heartbeat\n\n");
+      } catch {
+        clearInterval(heartbeatInterval);
+      }
+    }, 15000);
+
     // Handle client disconnect
     req.on("close", () => {
+      clearInterval(heartbeatInterval);
       removeStream(taskId, res);
     });
 
     // Run the agentic loop
-    await runAgentLoop({
-      taskId,
-      agentId,
-      userId: user.id,
-      userMessage: message,
-      conversationHistory,
-      onStep: (step: AgentStep) => {
-        broadcastToTask(taskId, "step", step);
-      },
-      onComplete: (result) => {
-        broadcastToTask(taskId, "complete", {
-          taskId,
-          finalAnswer: result.finalAnswer,
-          creditsUsed: result.creditsUsed,
-          stepCount: result.steps.length,
-        });
-        // Close all streams for this task
-        const streams = activeStreams.get(taskId) ?? [];
-        for (const s of streams) {
-          s.end();
-        }
-        activeStreams.delete(taskId);
-      },
-      onError: (error) => {
-        broadcastToTask(taskId, "error", { taskId, error });
-        const streams = activeStreams.get(taskId) ?? [];
-        for (const s of streams) {
-          s.end();
-        }
-        activeStreams.delete(taskId);
-      },
-    });
+    try {
+      await runAgentLoop({
+        taskId,
+        agentId,
+        userId: user.id,
+        userMessage: message,
+        conversationHistory,
+        onStep: (step: AgentStep) => {
+          broadcastToTask(taskId, "step", step);
+        },
+        onComplete: (result) => {
+          clearInterval(heartbeatInterval);
+          broadcastToTask(taskId, "complete", {
+            taskId,
+            finalAnswer: result.finalAnswer,
+            creditsUsed: result.creditsUsed,
+            stepCount: result.steps.length,
+          });
+          closeAllStreams(taskId);
+        },
+        onError: (error) => {
+          clearInterval(heartbeatInterval);
+          broadcastToTask(taskId, "error", { taskId, error });
+          closeAllStreams(taskId);
+        },
+      });
+    } catch (err) {
+      clearInterval(heartbeatInterval);
+      broadcastToTask(taskId, "error", { taskId, error: String(err) });
+      closeAllStreams(taskId);
+    }
   });
 
   /**
@@ -159,16 +200,17 @@ export function registerAgentStreamRoutes(app: Express) {
     res.setHeader("X-Accel-Buffering", "no");
     res.flushHeaders();
 
-    addStream(taskId, res);
+    const isActive = (activeStreams.get(taskId)?.length ?? 0) > 0;
 
-    req.on("close", () => {
-      removeStream(taskId, res);
-    });
-
-    // If task is already done, send a done event immediately
-    const activeTaskStreams = activeStreams.get(taskId);
-    if (!activeTaskStreams || activeTaskStreams.length === 0) {
-      sendSSE(res, "info", { message: "Task may have already completed. Check task history." });
+    if (isActive) {
+      // Task is still running — attach to it
+      addStream(taskId, res);
+      req.on("close", () => removeStream(taskId, res));
+    } else {
+      // Task already completed — inform client
+      sendSSE(res, "info", {
+        message: "This task has already completed. Check your task history for results.",
+      });
       res.end();
     }
   });
@@ -176,7 +218,7 @@ export function registerAgentStreamRoutes(app: Express) {
   /**
    * POST /api/agent/chat
    * Simple non-streaming chat with an agent (for embed/API use)
-   * Body: { agentId, message, sessionId? }
+   * Body: { agentId, message }
    */
   app.post("/api/agent/chat", async (req: Request, res: Response) => {
     const user = await sdk.authenticateRequest(req).catch(() => null);
@@ -204,7 +246,11 @@ export function registerAgentStreamRoutes(app: Express) {
       status: "running",
     });
 
-    const taskId = (taskResult as unknown as { insertId: number }).insertId;
+    const taskId = extractInsertId(taskResult);
+    if (!taskId) {
+      res.status(500).json({ error: "Failed to create task" });
+      return;
+    }
 
     await runAgentLoop({
       taskId,
@@ -217,7 +263,7 @@ export function registerAgentStreamRoutes(app: Express) {
         creditsUsed = result.creditsUsed;
       },
       onError: (error) => {
-        finalAnswer = `Error: ${error}`;
+        finalAnswer = `I encountered an issue: ${error}. Please try again.`;
       },
     });
 

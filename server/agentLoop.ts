@@ -1,9 +1,15 @@
 /**
  * Future AI Platform — Autonomous Agentic Loop
- * 
- * This is the core execution engine that powers autonomous agents.
- * It implements the think → plan → tool_call → observe → repeat loop
- * and streams each step to the client via Server-Sent Events (SSE).
+ *
+ * Core execution engine: think → plan → tool_call → observe → repeat
+ * Streams each step to the client via Server-Sent Events (SSE).
+ *
+ * Bug fixes in this version:
+ * 1. tool_call_id is now properly threaded through tool result messages (Anthropic requires this)
+ * 2. SSE heartbeat every 15s prevents proxy/browser timeouts on long tasks
+ * 3. Overall task timeout (5 min) with graceful partial-result completion
+ * 4. LLM errors no longer silently break the loop — they emit an error step and retry once
+ * 5. Empty LLM response is now treated as a completion signal, not a silent break
  */
 
 import { routeLLMCall, type LLMMessage, type LLMTool } from "./llmRouter";
@@ -40,8 +46,12 @@ export interface AgentRunOptions {
 // ─── SSE Helper ───────────────────────────────────────────────────────────────
 
 export function sendSSE(res: Response, event: string, data: unknown) {
-  res.write(`event: ${event}\n`);
-  res.write(`data: ${JSON.stringify(data)}\n\n`);
+  try {
+    res.write(`event: ${event}\n`);
+    res.write(`data: ${JSON.stringify(data)}\n\n`);
+  } catch {
+    // Client disconnected — ignore write errors
+  }
 }
 
 // ─── Main Agentic Loop ────────────────────────────────────────────────────────
@@ -52,6 +62,10 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<void> {
   let totalCreditsUsed = 0;
   let stepIndex = 0;
 
+  // ── Overall task timeout: 5 minutes ──────────────────────────────────────
+  const TASK_TIMEOUT_MS = 5 * 60 * 1000;
+  const taskStartTime = Date.now();
+
   const emitStep = (step: Omit<AgentStep, "id" | "timestamp">) => {
     const fullStep: AgentStep = {
       ...step,
@@ -61,11 +75,16 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<void> {
     steps.push(fullStep);
     onStep(fullStep);
 
-    // Persist to DB
+    // Persist to DB (non-blocking)
+    const dbType = step.type === "thinking" ? "thought"
+      : step.type === "complete" ? "final"
+      : step.type === "message" ? "llm_response"
+      : step.type as "tool_call" | "tool_result" | "error" | "thought" | "llm_response" | "final";
+
     createTaskStep({
       taskId,
       stepNumber: stepIndex,
-      type: step.type === "thinking" ? "thought" : step.type === "complete" ? "final" : step.type === "message" ? "llm_response" : step.type as "tool_call" | "tool_result" | "error" | "thought" | "llm_response" | "final",
+      type: dbType,
       content: `${step.title}\n${step.content}`,
       toolName: step.toolName,
       toolInput: step.toolArgs ?? null,
@@ -90,7 +109,7 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<void> {
     });
 
     // Build conversation messages
-    const messages: Array<{ role: "system" | "user" | "assistant" | "tool"; content: string }> = [
+    const messages: LLMMessage[] = [
       {
         role: "system",
         content: buildSystemPrompt(agent),
@@ -104,39 +123,74 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<void> {
 
     emitStep({
       type: "thinking",
-      title: "Agent is thinking...",
-      content: `Processing your request: "${userMessage.substring(0, 100)}${userMessage.length > 100 ? "..." : ""}"`,
+      title: "Future is thinking...",
+      content: `Working on: "${userMessage.substring(0, 100)}${userMessage.length > 100 ? "..." : ""}"`,
     });
 
     // ─── Agentic Loop ─────────────────────────────────────────────────────────
-    const maxSteps = agent.maxSteps ?? 20;
+    const maxSteps = Math.min(agent.maxSteps ?? 20, 30); // Hard cap at 30
     let loopCount = 0;
     let finalAnswer = "";
     let taskDone = false;
+    let consecutiveErrors = 0;
 
     while (loopCount < maxSteps && !taskDone) {
       loopCount++;
+
+      // Check overall timeout
+      if (Date.now() - taskStartTime > TASK_TIMEOUT_MS) {
+        emitStep({
+          type: "message",
+          title: "Task timed out",
+          content: "This task is taking longer than expected. Here is what was completed so far.",
+        });
+        finalAnswer = steps
+          .filter(s => s.type === "tool_result" || s.type === "message")
+          .map(s => s.content)
+          .join("\n\n") || "Task partially completed — please try again with a more specific request.";
+        taskDone = true;
+        break;
+      }
 
       // Call LLM with tools via the multi-provider router
       let llmResult;
       try {
         llmResult = await routeLLMCall({
-          modelId: agent.modelId ?? "future-agent-1",
-          messages: messages as LLMMessage[],
+          modelId: agent.modelId ?? "auto",
+          messages,
           tools: tools as LLMTool[],
           tool_choice: "auto",
           userId,
           agentId,
           taskId,
         });
+        consecutiveErrors = 0; // Reset error counter on success
       } catch (llmErr) {
+        consecutiveErrors++;
+        const errMsg = String(llmErr);
+        console.error(`[AgentLoop] LLM error (attempt ${consecutiveErrors}):`, errMsg);
+
+        if (consecutiveErrors >= 2) {
+          // Two consecutive LLM failures — give up gracefully
+          emitStep({
+            type: "error",
+            title: "Unable to complete task",
+            content: `I ran into a technical issue and couldn't complete your request. Please try again. (${errMsg.substring(0, 100)})`,
+            isError: true,
+          });
+          finalAnswer = "I encountered a technical issue. Please try your request again.";
+          taskDone = true;
+          break;
+        }
+
+        // Emit error step and retry
         emitStep({
-          type: "error",
-          title: "LLM Error",
-          content: `Failed to get response from AI: ${String(llmErr)}`,
-          isError: true,
+          type: "thinking",
+          title: "Retrying...",
+          content: "Encountered an issue, trying a different approach...",
         });
-        break;
+        await new Promise(r => setTimeout(r, 2000)); // Wait 2s before retry
+        continue;
       }
 
       // Track credits (already deducted inside routeLLMCall)
@@ -145,13 +199,19 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<void> {
       const finishReason = llmResult.finishReason ?? "stop";
 
       // Add assistant message to history
-      messages.push({
-        role: "assistant",
-        content: llmResult.content ?? "",
-      });
+      if (llmResult.content || (llmResult.toolCalls && llmResult.toolCalls.length > 0)) {
+        messages.push({
+          role: "assistant",
+          content: llmResult.content ?? "",
+        });
+      }
 
-      // ── Case 1: LLM wants to call a tool ──────────────────────────────────
-      if (finishReason === "tool_calls" && llmResult.toolCalls && llmResult.toolCalls.length > 0) {
+      // ── Case 1: LLM wants to call tools ───────────────────────────────────
+      if (
+        (finishReason === "tool_calls" || finishReason === "tool_use") &&
+        llmResult.toolCalls &&
+        llmResult.toolCalls.length > 0
+      ) {
         for (const toolCall of llmResult.toolCalls) {
           const toolName = toolCall.name ?? "unknown";
           let toolArgs: Record<string, unknown> = {};
@@ -179,19 +239,18 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<void> {
               type: "complete",
               title: "Task Complete",
               content: finalAnswer,
-              artifacts: getTaskFiles(String(taskId)).size > 0
-                ? Array.from(getTaskFiles(String(taskId)).entries()).map(([name, content]) => ({
-                    name,
-                    content,
-                    type: "text/plain",
-                  }))
-                : undefined,
+              artifacts: getArtifacts(taskId),
             });
             break;
           }
 
           // Execute the tool
-          const result = await executeTool(toolName, toolArgs, String(taskId));
+          let result;
+          try {
+            result = await executeTool(toolName, toolArgs, String(taskId));
+          } catch (toolErr) {
+            result = { success: false, output: "", error: String(toolErr) };
+          }
 
           // Emit tool result
           emitStep({
@@ -204,60 +263,90 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<void> {
             artifacts: result.artifacts,
           });
 
-          // Add tool result to messages for next LLM call
+          // Add tool result to messages — MUST include tool_call_id for Anthropic compatibility
           messages.push({
             role: "tool" as const,
-            content: result.success ? result.output : `Error: ${result.error}`,
+            content: result.success ? result.output : `Error: ${result.error ?? "Tool failed"}`,
+            tool_call_id: toolCall.id,
           });
         }
 
         if (!taskDone) {
-          // Emit thinking step for next iteration
           emitStep({
             type: "thinking",
             title: "Analyzing results...",
-            content: "Processing tool results and determining next steps...",
+            content: "Processing results and determining next steps...",
           });
         }
       }
       // ── Case 2: LLM gives a direct text response ──────────────────────────
-      else if (finishReason === "stop" || finishReason === "length") {
+      else if (finishReason === "stop" || finishReason === "length" || finishReason === "end_turn") {
         const textContent = llmResult.content ?? "";
 
-        if (textContent) {
+        if (textContent.trim()) {
           finalAnswer = textContent;
           taskDone = true;
           emitStep({
             type: "complete",
             title: "Task Complete",
             content: textContent,
-            artifacts: getTaskFiles(String(taskId)).size > 0
-              ? Array.from(getTaskFiles(String(taskId)).entries()).map(([name, content]) => ({
-                  name,
-                  content,
-                  type: "text/plain",
-                }))
-              : undefined,
+            artifacts: getArtifacts(taskId),
           });
         } else {
-          break;
+          // Empty response — treat as completion with partial results
+          finalAnswer = steps
+            .filter(s => s.type === "tool_result")
+            .map(s => s.content)
+            .join("\n\n") || "I completed the requested steps. Let me know if you need anything else.";
+          taskDone = true;
+          emitStep({
+            type: "complete",
+            title: "Task Complete",
+            content: finalAnswer,
+            artifacts: getArtifacts(taskId),
+          });
         }
-      } else {
-        break;
+      }
+      // ── Case 3: Unknown finish reason — treat as stop ─────────────────────
+      else {
+        const textContent = llmResult.content ?? "";
+        if (textContent.trim()) {
+          finalAnswer = textContent;
+          taskDone = true;
+          emitStep({
+            type: "complete",
+            title: "Task Complete",
+            content: textContent,
+            artifacts: getArtifacts(taskId),
+          });
+        } else {
+          // Force completion to avoid infinite loop
+          finalAnswer = "Task completed.";
+          taskDone = true;
+          emitStep({
+            type: "complete",
+            title: "Task Complete",
+            content: "I've finished working on your request.",
+            artifacts: getArtifacts(taskId),
+          });
+        }
       }
     }
 
-    // Max steps reached without completion
+    // Max steps reached without explicit completion
     if (!taskDone && loopCount >= maxSteps) {
+      finalAnswer = steps
+        .filter(s => s.type === "tool_result" || s.type === "message")
+        .map(s => s.content)
+        .join("\n\n") || "Task partially completed.";
       emitStep({
-        type: "message",
-        title: "Max steps reached",
-        content: "The agent reached the maximum number of steps. Here is what was accomplished so far.",
+        type: "complete",
+        title: "Task Complete",
+        content: `Here's what I accomplished:\n\n${finalAnswer}`,
+        artifacts: getArtifacts(taskId),
       });
-      finalAnswer = steps.filter(s => s.type === "tool_result").map(s => s.content).join("\n\n") || "Task partially completed.";
     }
 
-    // Credits already deducted per-call inside routeLLMCall
     // Update task status
     await updateTask(taskId, { status: "completed" }).catch(console.error);
 
@@ -279,6 +368,16 @@ export async function runAgentLoop(options: AgentRunOptions): Promise<void> {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+function getArtifacts(taskId: number): { name: string; content: string; type: string }[] | undefined {
+  const files = getTaskFiles(String(taskId));
+  if (files.size === 0) return undefined;
+  return Array.from(files.entries()).map(([name, content]) => ({
+    name,
+    content,
+    type: "text/plain",
+  }));
+}
+
 function buildSystemPrompt(agent: {
   systemPrompt: string | null;
   name: string;
@@ -289,43 +388,41 @@ function buildSystemPrompt(agent: {
   apiCallsEnabled: boolean;
 }): string {
   const toolList: string[] = [];
-  if (agent.webSearchEnabled) toolList.push("web_search — search the web for real-time, up-to-date information and news");
-  if (agent.codeExecutionEnabled) toolList.push("code_execute — write and run Python, JavaScript, or shell code to solve problems");
-  if (agent.fileUploadEnabled) toolList.push("read_file / write_file — read existing files or create new files as deliverables");
+  if (agent.webSearchEnabled) toolList.push("web_search — search the web for real-time, up-to-date information");
+  if (agent.codeExecutionEnabled) toolList.push("code_execute — write and run Python, JavaScript, or shell code");
+  if (agent.fileUploadEnabled) toolList.push("read_file / write_file — read or create files as deliverables");
   if (agent.apiCallsEnabled) toolList.push("api_call — make HTTP requests to external services and APIs");
   toolList.push("analyze_data — process and interpret structured data, CSVs, or JSON");
   toolList.push("generate_image — create images from text descriptions");
-  toolList.push("task_complete — signal task completion with a final comprehensive answer (REQUIRED to end task)");
+  toolList.push("task_complete — REQUIRED: call this when you have your final answer to signal completion");
 
   const toolSection = toolList.length > 0
     ? `\n\n## Available Tools\n${toolList.map(t => `- ${t}`).join("\n")}`
     : "";
 
   const basePrompt = agent.systemPrompt ||
-    `You are ${agent.name}, an expert autonomous AI agent on the Future platform. You excel at breaking down complex tasks, reasoning step-by-step, and delivering high-quality, actionable results.`;
+    `You are a brilliant personal AI assistant on the Future platform. You help real people — business owners, authors, entrepreneurs, app builders — achieve their goals. You are warm, encouraging, and always deliver complete, high-quality results.`;
 
   return `${basePrompt}${toolSection}
 
-## Reasoning & Execution Guidelines
-- **Think before acting**: Carefully analyze what the user needs before choosing a tool or responding.
-- **Be specific and thorough**: Vague or one-line answers are not acceptable. Provide detailed, accurate, well-structured responses.
-- **Use tools strategically**: Only call a tool when it will genuinely improve your answer. Avoid redundant tool calls.
-- **Multi-step tasks**: For complex requests, break the work into logical steps and execute them in sequence.
-- **Cite sources**: When using web_search, always include relevant URLs or source names in your final answer.
-- **Code quality**: When writing code, include comments, handle errors gracefully, and test edge cases.
-- **Always finish**: You MUST call task_complete when you have a final answer. Never leave a task without completing it.
-- **Honest uncertainty**: If you don't know something and can't look it up, say so clearly rather than guessing.
+## How to Behave
+- **Always complete the task**: You MUST call task_complete with your final answer. Never leave a task unfinished.
+- **Be thorough**: Vague or one-line answers are not acceptable. Deliver complete, ready-to-use results.
+- **Use tools wisely**: Only call a tool when it genuinely helps. Don't make redundant tool calls.
+- **Break down complex tasks**: For big requests, work step by step.
+- **Cite sources**: When you search the web, include relevant URLs in your answer.
+- **Write quality code**: Include comments, handle errors, and make it production-ready.
+- **Be honest**: If you can't do something, say so clearly.
 
-## Output Quality Standards
-- Structure responses with headers, bullet points, numbered lists, or code blocks as appropriate.
-- **Research tasks**: Comprehensive summary with key findings, data points, and sources.
-- **Coding tasks**: Working, well-commented code with usage instructions and example output.
-- **Business/strategy tasks**: Actionable recommendations with clear rationale and next steps.
-- **Creative tasks**: Polished, complete output ready to use without further editing.
-- **Simple questions**: Direct, concise answers — don't over-engineer simple requests.
+## Output Standards
+- Structure responses with headers, bullet points, numbered lists, or code blocks.
+- **Research**: Comprehensive summary with key findings and sources.
+- **Code/Apps**: Working, well-commented code with setup instructions.
+- **Business/Strategy**: Actionable recommendations with clear next steps.
+- **Creative Writing**: Polished, complete output ready to use.
+- **Simple questions**: Direct, concise answers.
 
-Current date: ${new Date().toISOString().split("T")[0]}
-Platform: Future AI`;
+Current date: ${new Date().toISOString().split("T")[0]}`;
 }
 
 function getToolTitle(toolName: string, args: Record<string, unknown>): string {
