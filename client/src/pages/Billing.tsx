@@ -33,11 +33,11 @@ function formatCredits(n: number) {
 
 // ─── Fallback data (shown while DB loads) ────────────────────────────────────
 const FALLBACK_PLANS = [
-  { id: 1, slug: "free",       name: "Free",       priceUsd: 0,   monthlyCredits: 500,    features: ["3 agents", "500 credits/month", "Community support", "Basic analytics"] },
-  { id: 2, slug: "starter",    name: "Starter",    priceUsd: 19,  monthlyCredits: 2000,   features: ["10 agents", "2,000 credits/month", "Email support", "Full analytics", "API access"] },
-  { id: 3, slug: "pro",        name: "Pro",         priceUsd: 49,  monthlyCredits: 8000,   features: ["Unlimited agents", "8,000 credits/month", "Priority support", "Advanced analytics", "API access", "Team collaboration"] },
-  { id: 4, slug: "business",   name: "Business",   priceUsd: 99,  monthlyCredits: 100000, features: ["Everything in Pro", "100,000 credits/month", "Advanced analytics", "Custom models", "Dedicated support", "SLA guarantee"] },
-  { id: 5, slug: "enterprise", name: "Enterprise",  priceUsd: 199, monthlyCredits: 50000,  features: ["Unlimited everything", "50,000 credits/month", "Dedicated support", "Custom SLA", "On-premise option"] },
+  { id: 1, slug: "free",       name: "Free Trial", priceUsd: 0,   monthlyCredits: 500,    features: ["7-day full-feature trial", "500 credits/month", "Community support", "Basic analytics"] },
+  { id: 2, slug: "starter",    name: "Starter",    priceUsd: 49,  monthlyCredits: 2000,   features: ["2,000 credits/month", "Unlimited projects", "Email support", "Mobile app access"] },
+  { id: 3, slug: "pro",        name: "Pro",         priceUsd: 100, monthlyCredits: 8000,   features: ["8,000 credits/month", "Unlimited projects", "Priority support", "API access", "Advanced analytics"] },
+  { id: 4, slug: "business",   name: "Business",   priceUsd: 199, monthlyCredits: 100000, features: ["100,000 credits/month", "Everything in Pro", "Up to 10 team members", "Dedicated support", "SLA guarantee"] },
+  { id: 5, slug: "enterprise", name: "Enterprise",  priceUsd: 500, monthlyCredits: 50000,  features: ["50,000 credits/month", "Unlimited team members", "White-label options", "Dedicated account manager", "99.9% uptime SLA"] },
 ];
 
 const FALLBACK_PACKS = [

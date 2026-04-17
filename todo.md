@@ -603,3 +603,7 @@
 ## Billing Page Price Fix (Apr 17, 2026)
 
 - [x] Fix wrong prices on billing page: corrected DB values (Starter $19, Pro $49, Business $99, Enterprise $199) and updated FALLBACK_PLANS in Billing.tsx to match
+
+## Pricing Strategy Restore (Apr 17, 2026)
+
+- [x] Restore original pricing: Free $0, Starter $49, Pro $100, Business $199, Enterprise $500 (from Pricing.tsx strategy) — corrected in DB and Billing.tsx fallback
