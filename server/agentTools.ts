@@ -230,7 +230,7 @@ export const AGENT_TOOLS = [
     type: "function" as const,
     function: {
       name: "create_presentation",
-      description: "Create a downloadable HTML slide deck / presentation from an outline. Use for pitch decks, presentations, reports, or any slide-based content.",
+      description: "Create a downloadable HTML slide deck / presentation from an outline. ONLY use this when the user explicitly asks for a presentation, pitch deck, slide deck, or slideshow. NEVER use this for: building apps, building websites, writing code, creating documents, or any task where the user wants a functional deliverable. If the user asks to build an app or website, use write_file to produce actual code instead.",
       parameters: {
         type: "object",
         properties: {

@@ -441,7 +441,7 @@ function buildSystemPrompt(agent: {
   }
   toolList.push("analyze_data — analyze data, find patterns, compute statistics, generate insights");
   toolList.push("generate_image — create images from text descriptions using AI");
-  toolList.push("create_presentation — build a full interactive HTML slide deck / pitch deck");
+  toolList.push("create_presentation — build a slide deck / pitch deck / slideshow. ONLY use when user explicitly asks for a presentation or slides. NEVER use for building apps, websites, or code.");
   if (agent.webSearchEnabled) {
     toolList.push("github_repo — read any public GitHub repository: list files, read code, view README");
   }
@@ -543,6 +543,38 @@ For complex tasks, think step by step:
 - **Research**: Thorough, multi-source, with citations
 - **Images**: Detailed prompts for best results
 - **Data**: Accurate, well-formatted, with insights
+
+## CRITICAL TOOL SELECTION RULES — READ BEFORE EVERY TASK
+
+### NEVER misuse create_presentation
+The 'create_presentation' tool creates slide decks. It MUST NOT be used for:
+- Building apps (iOS, Android, web, desktop)
+- Building websites or landing pages
+- Writing code of any kind
+- Creating documents, reports, or plans (use write_file + export_document instead)
+
+If the user asks to "build an app" or "create a website", you MUST write actual code using 'write_file'. A slide deck is NOT an app. A slide deck is NOT a website. Producing a slide deck when the user asked for an app is a critical failure.
+
+### HONEST CAPABILITY DISCLOSURE
+You can produce real, working code files. You CANNOT:
+- Actually publish an app to the Apple App Store or Google Play (you can write the complete source code)
+- Actually deploy a website to a live domain (you can write the complete HTML/CSS/JS)
+- Actually run a mobile app on a device (you can write all the code)
+
+When a user asks to "build an app that can be downloaded from the App Store", you MUST:
+1. Write the complete React Native / Swift / Flutter source code using 'write_file'
+2. Clearly tell the user: "Here is the complete source code. To publish to the App Store, you will need to submit it through Xcode / App Store Connect."
+3. NEVER claim the app "has been successfully built and can be downloaded from the Apple Store" — that is false.
+
+### CORRECT TOOL FOR EACH DELIVERABLE
+| User asks for | Correct tool | WRONG tool |
+|---|---|---|
+| Website / landing page | write_file (HTML/CSS/JS) | create_presentation |
+| iOS / Android app | write_file (source code) | create_presentation |
+| Business plan document | write_file + export_document | create_presentation |
+| Pitch deck / slide deck | create_presentation | write_file |
+| Data report | export_document | create_presentation |
+| Research summary | export_document | create_presentation |
 
 ## ALWAYS FINISH
 You MUST call task_complete when done. Never leave a task hanging. If something fails, try an alternative approach. If truly stuck, call task_complete with what you were able to accomplish and a clear explanation.
