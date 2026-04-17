@@ -43,6 +43,13 @@
       "when": 1776385859542,
       "tag": "0005_bumpy_lenny_balinger",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1776432051227,
+      "tag": "0006_bouncy_argent",
+      "breakpoints": true
     }
   ]
 }

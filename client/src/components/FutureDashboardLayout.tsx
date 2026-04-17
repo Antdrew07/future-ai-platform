@@ -5,7 +5,7 @@ import { trpc } from "@/lib/trpc";
 import { Link, useLocation } from "wouter";
 import {
   Bot, LayoutDashboard, BarChart3, CreditCard, Key, Users, Settings,
-  Sparkles, LogOut, Shield, Store, ChevronRight, Zap, Menu, X
+  Sparkles, LogOut, Shield, Store, ChevronRight, Zap, Menu, X, Globe
 } from "lucide-react";
 import { useState } from "react";
 
@@ -14,6 +14,7 @@ const LOGO_URL = "https://d2xsxph8kpxj0f.cloudfront.net/310419663029617589/m5Gbk
 const NAV_ITEMS = [
   { href: "/dashboard",           icon: LayoutDashboard, label: "Home",      exact: true },
   { href: "/dashboard/agents",    icon: Bot,             label: "Agents" },
+  { href: "/dashboard/domains",   icon: Globe,           label: "Domains" },
   { href: "/dashboard/billing",   icon: CreditCard,      label: "Billing" },
   { href: "/dashboard/settings",  icon: Settings,        label: "Settings" },
 ];

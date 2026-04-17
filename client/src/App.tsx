@@ -31,6 +31,9 @@ import ApiKeys from "./pages/ApiKeys";
 import Teams from "./pages/Teams";
 import Settings from "./pages/Settings";
 
+// Domain portal
+import Domains from "./pages/Domains";
+
 // Admin pages
 import AdminPanel from "./pages/AdminPanel";  // role-gated
 
@@ -65,6 +68,7 @@ function Router() {
       <Route path="/dashboard/api-keys" component={ApiKeys} />
       <Route path="/dashboard/teams" component={Teams} />
       <Route path="/dashboard/settings" component={Settings} />
+      <Route path="/dashboard/domains" component={Domains} />
 
       {/* Admin */}
       <Route path="/admin" component={AdminPanel} />

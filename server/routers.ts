@@ -23,6 +23,8 @@ import { routeLLMCall } from "./llmRouter";
 import { sendEmail, buildPasswordResetEmail } from "./email";
 import { invokeLLM } from "./_core/llm";
 import { createCheckoutSession } from "./stripeWebhook";
+import { domainRouter } from "./domainRouter";
+import { browserRouter } from "./browserRouter";
 import bcrypt from "bcryptjs";
 import { sdk } from "./_core/sdk";
 import { ONE_YEAR_MS } from "@shared/const";
@@ -35,6 +37,8 @@ const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
 
 export const appRouter = router({
   system: systemRouter,
+  domains: domainRouter,
+  browser: browserRouter,
 
   // ─── Auth ──────────────────────────────────────────────────────────────────
   auth: router({

@@ -339,6 +339,51 @@ export const usageAnalytics = mysqlTable("usage_analytics", {
 
 export type UsageAnalytics = typeof usageAnalytics.$inferSelect;
 
+// ─── Domain Purchases ───────────────────────────────────────────────────────
+export const domainPurchases = mysqlTable("domain_purchases", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  domain: varchar("domain", { length: 256 }).notNull(),
+  tld: varchar("tld", { length: 32 }).notNull(), // e.g. "com", "io", "ai"
+  registrar: mysqlEnum("registrar", ["namecheap", "godaddy"]).default("namecheap").notNull(),
+  registrarOrderId: varchar("registrarOrderId", { length: 256 }),
+  stripePaymentId: varchar("stripePaymentId", { length: 256 }),
+  priceCharged: float("priceCharged").notNull(), // what we charged the user (USD)
+  costToUs: float("costToUs").notNull(),          // what we paid the registrar (USD)
+  status: mysqlEnum("status", ["pending", "active", "expired", "failed"]).default("pending").notNull(),
+  expiresAt: timestamp("expiresAt"),
+  autoRenew: boolean("autoRenew").default(true).notNull(),
+  dnsConfigured: boolean("dnsConfigured").default(false).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  userIdx: index("domain_user_idx").on(table.userId),
+  domainIdx: index("domain_name_idx").on(table.domain),
+}));
+
+export type DomainPurchase = typeof domainPurchases.$inferSelect;
+export type InsertDomainPurchase = typeof domainPurchases.$inferInsert;
+
+// ─── Browser Sessions (Browserbase) ──────────────────────────────────────────
+export const browserSessions = mysqlTable("browser_sessions", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  taskId: int("taskId"),
+  browserbaseSessionId: varchar("browserbaseSessionId", { length: 256 }).notNull().unique(),
+  status: mysqlEnum("status", ["active", "completed", "failed", "timeout"]).default("active").notNull(),
+  startUrl: text("startUrl"),
+  creditsUsed: int("creditsUsed").default(0).notNull(),
+  durationSeconds: int("durationSeconds").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  completedAt: timestamp("completedAt"),
+}, (table) => ({
+  userIdx: index("browser_user_idx").on(table.userId),
+  taskIdx: index("browser_task_idx").on(table.taskId),
+}));
+
+export type BrowserSession = typeof browserSessions.$inferSelect;
+export type InsertBrowserSession = typeof browserSessions.$inferInsert;
+
 // ─── Password Reset Tokens ────────────────────────────────────────────────────
 export const passwordResetTokens = mysqlTable("password_reset_tokens", {
   id: int("id").autoincrement().primaryKey(),

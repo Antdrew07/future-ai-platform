@@ -440,3 +440,26 @@
 - [x] Update pricing tiers in Billing.tsx
 - [x] Update pricing tiers in Home.tsx pricing section
 - [x] Update Stripe product prices in server
+
+## Browserbase Cloud Browser Agent Integration
+
+- [x] Validate Browserbase API key and Project ID with a test session
+- [x] Build browserbaseRouter.ts: createSession, getSessionStatus, terminateSession endpoints
+- [x] Add Browserbase session creation to agentTools.ts (browse_web tool)
+- [ ] Build live browser view component in AgentWorkspace (iframe showing live session) *(in progress)*
+- [x] Add session cost tracking (deduct credits per browser session)
+- [x] Write Vitest tests for Browserbase router
+
+## Namecheap Domain Portal Integration (GoDaddy deferred — API requires special approval)
+
+- [x] Validate Namecheap API key and whitelist IP (37.77.53.49)
+- [x] Build domainRouter.ts: searchDomains, purchaseDomain, listUserDomains, getDomainDetails, connectDns
+- [x] Add domain purchase to Stripe checkout flow (charge user, then buy via Namecheap API)
+- [x] Build Domains page in dashboard: search bar, results, purchase button, owned domains list
+- [x] Add domain upsell to agent: after website build, suggest 3-5 domain names with prices
+- [x] Write Vitest tests for domain router
+- [x] Add Domains link to FutureDashboardLayout sidebar navigation
+
+## GoDaddy Domain Portal Integration (Deferred)
+
+- [ ] GoDaddy API returns ACCESS_DENIED — user must contact apisupport@godaddy.com for production API approval *(blocked: requires GoDaddy manual approval)*

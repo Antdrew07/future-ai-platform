@@ -21,8 +21,9 @@ import {
   CheckCircle2, XCircle, ChevronDown, ChevronRight, Copy,
   Download, ArrowLeft, Sparkles, Terminal, Image, Database,
   AlertCircle, Cpu, Clock, Coins, Plus, MessageSquare, Activity,
-  Eye, ExternalLink, Monitor
+  Eye, ExternalLink, Monitor, ShoppingCart
 } from "lucide-react";
+import { useLocation as useWouterLocation } from "wouter";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -48,6 +49,71 @@ interface ChatMessage {
   timestamp: number;
   steps?: AgentStep[];
   status?: "running" | "complete" | "error";
+}
+
+// ─── Domain Upsell Component ─────────────────────────────────────────────────
+
+/**
+ * Shown after a website build completes. Searches for domain suggestions
+ * based on the user's prompt and lets them buy with one click.
+ */
+function DomainUpsell({ prompt }: { prompt: string }) {
+  const [, navigate] = useWouterLocation();
+  // Extract a short keyword from the prompt for domain search
+  const keyword = prompt
+    .toLowerCase()
+    .replace(/build|create|make|website|site|for|me|a|an|the|my|\.|,|!/g, "")
+    .trim()
+    .split(/\s+/)
+    .filter(w => w.length > 2)
+    .slice(0, 2)
+    .join("");
+
+  const searchQuery = keyword || "mybusiness";
+  const { data, isLoading } = trpc.domains.search.useQuery(
+    { query: searchQuery },
+    { enabled: !!searchQuery }
+  );
+
+  const available = data?.results.filter(r => r.available).slice(0, 3) ?? [];
+
+  if (isLoading) return null;
+  if (available.length === 0) return null;
+
+  return (
+    <div className="mt-3 rounded-xl border border-primary/20 bg-primary/5 p-3">
+      <div className="flex items-center gap-2 mb-2">
+        <Globe className="w-3.5 h-3.5 text-primary" />
+        <span className="text-xs font-semibold text-primary">Your website needs a domain!</span>
+      </div>
+      <p className="text-xs text-muted-foreground mb-2.5">
+        Purchase a domain and we'll connect the DNS automatically.
+      </p>
+      <div className="space-y-1.5">
+        {available.map(d => (
+          <div key={d.domain} className="flex items-center justify-between rounded-lg bg-white border border-border px-3 py-2">
+            <span className="text-sm font-medium text-foreground">{d.domain}</span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">${d.price}/yr</span>
+              <button
+                onClick={() => navigate(`/dashboard/domains?search=${encodeURIComponent(searchQuery)}`)}
+                className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors"
+              >
+                <ShoppingCart className="w-3 h-3" />
+                Buy
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+      <button
+        onClick={() => navigate("/dashboard/domains")}
+        className="mt-2 text-xs text-primary hover:underline w-full text-center"
+      >
+        Search more domains →
+      </button>
+    </div>
+  );
 }
 
 // ─── HTML Detection Helpers ──────────────────────────────────────────────────
@@ -489,32 +555,44 @@ function ChatPanelContent({
         )}
 
         <div className="space-y-5">
-          {messages.map((msg) => (
-            <div key={msg.id} className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-              {msg.role === "assistant" && (
-                <div className="w-7 h-7 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 mt-0.5">
-                  <Bot className="w-3.5 h-3.5 text-primary" />
+          {messages.map((msg, idx) => {
+            // Detect if the previous user message was a website build request
+            const prevUser = messages.slice(0, idx).reverse().find(m => m.role === "user");
+            const isWebsiteBuild = msg.role === "assistant" && msg.status === "complete" &&
+              prevUser && /build|create|make|website|landing page|web app|homepage/i.test(prevUser.content);
+            return (
+              <div key={msg.id}>
+                <div className={`flex gap-3 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                  {msg.role === "assistant" && (
+                    <div className="w-7 h-7 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 mt-0.5">
+                      <Bot className="w-3.5 h-3.5 text-primary" />
+                    </div>
+                  )}
+                  <div className={`max-w-[85%] ${
+                    msg.role === "user"
+                      ? "bg-primary text-primary-foreground rounded-2xl rounded-tr-sm px-4 py-3"
+                      : "bg-gray-50 border border-border rounded-2xl rounded-tl-sm px-4 py-3"
+                  }`}>
+                    {msg.role === "assistant" ? (
+                      <AssistantMessageContent content={msg.content} />
+                    ) : (
+                      <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                    )}
+                    {msg.role === "assistant" && msg.creditsUsed && msg.creditsUsed > 0 ? (
+                      <p className="text-[10px] text-muted-foreground mt-2 flex items-center gap-1">
+                        <Coins className="w-2.5 h-2.5" />
+                        {msg.creditsUsed} credits · {new Date(msg.timestamp).toLocaleTimeString()}
+                      </p>
+                    ) : null}
+                    {/* Domain upsell after website builds */}
+                    {isWebsiteBuild && prevUser && (
+                      <DomainUpsell prompt={prevUser.content} />
+                    )}
+                  </div>
                 </div>
-              )}
-              <div className={`max-w-[85%] ${
-                msg.role === "user"
-                  ? "bg-primary text-primary-foreground rounded-2xl rounded-tr-sm px-4 py-3"
-                  : "bg-gray-50 border border-border rounded-2xl rounded-tl-sm px-4 py-3"
-              }`}>
-                {msg.role === "assistant" ? (
-                  <AssistantMessageContent content={msg.content} />
-                ) : (
-                  <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-                )}
-                {msg.role === "assistant" && msg.creditsUsed && msg.creditsUsed > 0 ? (
-                  <p className="text-[10px] text-muted-foreground mt-2 flex items-center gap-1">
-                    <Coins className="w-2.5 h-2.5" />
-                    {msg.creditsUsed} credits · {new Date(msg.timestamp).toLocaleTimeString()}
-                  </p>
-                ) : null}
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           {/* Typing indicator while running */}
           {isRunning && (
