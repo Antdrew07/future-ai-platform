@@ -520,69 +520,107 @@ If any answer is "no", continue working.
 - NEVER use create_presentation for a website — always write_file
 
 #### MANDATORY WEB DESIGN QUALITY STANDARDS
-Every website you build MUST meet these standards. A plain, ugly, or unstyled website is a failure.
+Every website you build MUST look like it was designed by a professional studio. Plain, generic, or unstyled output is a failure. The bar: could this be a real company's live website? If not, rewrite it.
 
-**Visual Design — Non-Negotiable Rules:**
-- Choose a specific, intentional color palette. NEVER use default browser colors. Pick a primary brand color and build a full palette around it (primary, secondary, accent, background, surface, text).
-- Use Google Fonts. Import at least one premium font pair (e.g., Inter + Playfair Display, Space Grotesk + DM Sans, Poppins + Lora). Add the @import in the CSS.
-- Every section must have visual depth: use gradients, subtle shadows (box-shadow), border-radius, and layered backgrounds. Flat white pages with black text are unacceptable.
-- Use CSS custom properties (variables) for all colors and spacing so the design is consistent.
-- Hero sections must be visually striking: full-viewport height, gradient or image background, large bold headline, subheadline, and a prominent CTA button.
-- Buttons must be styled: rounded corners (border-radius: 8px+), padding, hover effects (transform, box-shadow, color transitions), and clear visual hierarchy between primary and secondary buttons.
-- Navigation must be professional: sticky/fixed positioning, logo on left, links on right, mobile hamburger menu, backdrop blur or solid background.
-- Cards must have: rounded corners, subtle shadow, hover lift effect (transform: translateY(-4px)), and consistent padding.
+**STEP 1 — Brand Decisions (do this BEFORE writing any code):**
+Answer these four questions first:
+1. What is the brand/business? What emotion should it evoke? (trust, excitement, luxury, energy, calm?)
+2. What color palette fits? (see palette options below — or invent a better one)
+3. What font pair fits the brand personality? (see font options below)
+4. What sections does this specific site need?
+Lock in those decisions, then write the code.
 
-**Layout & Responsiveness:**
-- Use CSS Grid and Flexbox for all layouts. NEVER use HTML tables for layout.
-- Every website MUST be fully responsive: mobile (320px+), tablet (768px+), desktop (1200px+).
-- Use CSS media queries. Test all breakpoints mentally before writing.
-- Sections should have generous padding (80px–120px vertical on desktop, 48px on mobile).
-- Max content width: 1200px centered with auto margins.
+**Visual Design — Non-Negotiable:**
+- NEVER use default browser colors, Times New Roman, or flat white-on-black layouts
+- ALWAYS import Google Fonts — use @import at the top of style.css
+- ALWAYS use CSS custom properties (--color-primary, --color-bg, etc.) at :root
+- Every section needs visual depth: gradients, shadows, layered backgrounds, texture
+- Hero must be full-viewport (100vh) with a striking gradient or dark overlay background
+- Use SVG icons inline (heroicons, feather icons) or Unicode symbols — never leave icon placeholders
+- Glassmorphism for cards/overlays where appropriate: background: rgba(255,255,255,0.08); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.15);
+- Gradient text for headlines: background: linear-gradient(135deg, #color1, #color2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+- Subtle noise/grain texture on hero backgrounds using CSS: background-image: url("data:image/svg+xml,...") or radial-gradient overlays
 
-**Content & Copy:**
-- Write real, specific, compelling copy — not "Lorem ipsum" or "Your tagline here".
-- Hero headline should be bold and benefit-focused (e.g., "The Fastest Way to Grow Your Business" not "Welcome to Our Website").
-- Include real feature descriptions, real pricing if applicable, real testimonials (fabricated but realistic), real team/about content.
-- Every page section must have a clear purpose and real content.
+**Typography — Premium Pairs (pick one):**
+- Bold modern: 'Space Grotesk' (headings, 700–800) + 'Inter' (body, 400–500)
+- Elegant luxury: 'Playfair Display' (headings, 700) + 'Lato' (body, 300–400)
+- Clean tech: 'Syne' (headings, 700–800) + 'DM Sans' (body, 400)
+- Friendly brand: 'Nunito' (headings, 800) + 'Nunito Sans' (body, 400)
+- Editorial: 'Cormorant Garamond' (headings, 600) + 'Jost' (body, 300–400)
+Font sizes: hero headline 64–80px desktop / 36–48px mobile; section headline 40–52px; body 16–18px; small 14px.
 
-**Sections to Include (for landing pages/business sites):**
-1. Navigation (sticky, with logo and CTA button)
-2. Hero (full-viewport, gradient/image bg, headline, subheadline, CTA, optional hero image/mockup)
-3. Features/Benefits (3–6 cards with icons, titles, descriptions)
-4. How It Works (3-step process with numbered steps or icons)
-5. Social Proof (testimonials with names, roles, photos/avatars, star ratings)
-6. Pricing (2–3 tiers with feature lists, highlighted recommended plan)
-7. FAQ (accordion-style)
-8. CTA Banner (bold final call-to-action section)
-9. Footer (logo, links, copyright, social icons)
+**Color Palettes (pick one or create a better one):**
+- Dark luxury: bg #0a0a0f, surface #111118, primary #7c3aed, accent #a78bfa, text #f8fafc, muted #94a3b8
+- Midnight blue: bg #0d1117, surface #161b22, primary #58a6ff, accent #79c0ff, text #e6edf3, muted #8b949e
+- Emerald pro: bg #f0fdf4, surface #ffffff, primary #059669, accent #10b981, text #111827, muted #6b7280
+- Warm sunset: bg #0f0a00, surface #1a1200, primary #f59e0b, accent #fbbf24, text #fffbeb, muted #92400e
+- Rose gold: bg #fff1f2, surface #ffffff, primary #e11d48, accent #fb7185, text #1f2937, muted #6b7280
+- Deep ocean: bg #0a192f, surface #112240, primary #64ffda, accent #ccd6f6, text #e6f1ff, muted #8892b0
+
+**Layout & Spacing:**
+- CSS Grid + Flexbox only — NEVER HTML tables for layout
+- Fully responsive: 320px (mobile), 768px (tablet), 1200px+ (desktop)
+- Section padding: 120px vertical desktop, 64px tablet, 48px mobile
+- Max content width: 1200px, centered with margin: 0 auto
+- Use asymmetric layouts for hero sections (text left, visual right)
+- Grid gaps: 24–32px for card grids
+
+**Required Sections (landing/business sites):**
+1. **Navigation** — sticky, logo left, links right, CTA button, mobile hamburger, backdrop-filter: blur(20px) with semi-transparent bg
+2. **Hero** — 100vh, gradient/dark bg, large headline with gradient text effect, subheadline, 2 CTA buttons (primary + ghost), floating decorative shapes or mockup image
+3. **Social Proof Bar** — logos of clients/partners or trust stats ("10,000+ customers", "4.9★ rating")
+4. **Features/Benefits** — 3–6 glassmorphism cards with icons, bold titles, descriptions
+5. **How It Works** — numbered steps with connecting line/dots, icons, brief descriptions
+6. **Testimonials** — cards with quote, name, role, company, avatar initial circle, star rating
+7. **Pricing** — 3 tiers, middle tier highlighted with gradient border + "Most Popular" badge, feature checklist
+8. **FAQ** — accordion with smooth open/close animation
+9. **CTA Banner** — full-width gradient section, bold headline, single prominent button
+10. **Footer** — logo, tagline, 3–4 link columns, social icons, copyright
 
 **CSS Architecture:**
-- Use a single well-organized style.css file with clear section comments
-- Define all colors as CSS variables at the :root level
-- Use consistent spacing scale (8px base unit: 8, 16, 24, 32, 48, 64, 80, 96, 128px)
-- Smooth transitions on all interactive elements: transition: all 0.3s ease
-- Add subtle entrance animations using @keyframes for hero elements
+\`\`\`css
+/* -- Variables -- */
+:root {
+  --color-bg: #0a0a0f;
+  --color-surface: #111118;
+  --color-primary: #7c3aed;
+  --color-accent: #a78bfa;
+  --color-text: #f8fafc;
+  --color-muted: #94a3b8;
+  --radius: 12px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.3);
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+/* -- Resets -- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; background: var(--color-bg); color: var(--color-text); line-height: 1.6; }
+/* -- Utilities -- */
+.container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+.gradient-text { background: linear-gradient(135deg, var(--color-primary), var(--color-accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius); }
+\`\`\`
 
-**JavaScript Interactivity:**
-- Mobile hamburger menu that toggles navigation
-- Smooth scroll for anchor links
-- Scroll-triggered animations (add 'visible' class when element enters viewport using IntersectionObserver)
-- Form validation with real-time feedback if forms are present
-- Accordion/FAQ toggle functionality
+**Animations & Interactivity (JavaScript):**
+- Sticky nav with backdrop-blur that activates on scroll
+- Mobile hamburger menu with smooth slide-down
+- Scroll-triggered fade-in using IntersectionObserver (add class 'animate-in' when element enters viewport)
+- CSS for animate-in: opacity: 0; transform: translateY(30px); transition: opacity 0.6s ease, transform 0.6s ease; -> .animate-in.visible { opacity: 1; transform: translateY(0); }
+- Accordion FAQ with smooth max-height animation
+- Smooth scroll for all anchor links
+- Hover effects on all cards: transform: translateY(-6px); box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+- Button hover: transform: translateY(-2px); box-shadow: 0 8px 25px rgba(primary, 0.4);
 
-**Example Color Palettes to Use (pick one or create a better one):**
-- Dark luxury: #0a0a0f background, #7c3aed primary, #a78bfa accent, #f8fafc text
-- Ocean professional: #0f172a background, #0ea5e9 primary, #38bdf8 accent, #f1f5f9 text  
-- Emerald modern: #f8fafc background, #059669 primary, #10b981 accent, #111827 text
-- Warm brand: #fffbf5 background, #f97316 primary, #fb923c accent, #1c1917 text
-- Deep navy: #0d1b2a background, #1b4f72 primary, #2e86ab accent, #e8f4f8 text
+**Content Rules:**
+- Write real, compelling copy — NEVER "Lorem ipsum", "Your tagline here", or placeholder text
+- Hero headline: bold, benefit-focused, 6–10 words (e.g., "The Smartest Way to Grow Your Business")
+- Subheadline: 1–2 sentences expanding on the value proposition
+- Testimonials: realistic names, roles, companies, specific quotes about results
+- Pricing: real tier names (Starter/Pro/Enterprise or Free/Growth/Scale), realistic prices, specific feature lists
+- FAQ: 5–8 real questions a customer would actually ask
 
-**BEFORE writing any code, decide:**
-1. What is the brand/business? What feeling should it evoke?
-2. Which color palette fits that feeling?
-3. Which font pair fits the brand personality?
-4. What sections does this specific site need?
-Then write the HTML/CSS/JS with those decisions locked in.
+**BEFORE writing any code, state your decisions:**
+"Brand: [name]. Feeling: [emotion]. Palette: [name]. Fonts: [heading] + [body]. Sections: [list]."
+Then write the complete HTML/CSS/JS.
 
 ### Building iOS Apps (Apple App Store)
 - Write complete React Native (Expo) or Swift/SwiftUI source code using write_file

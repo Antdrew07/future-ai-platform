@@ -649,3 +649,6 @@
 
 ## Single Preview Fix (Apr 18, 2026)
 - [x] Fix Output Files panel to show only ONE HTML preview (the main index.html), list all other files as plain entries
+
+## Premium Website Design Upgrade (Apr 18, 2026)
+- [x] Rewrite agent system prompt web design section with premium CSS standards (gradients, glassmorphism, animations, premium fonts, polished layouts)
