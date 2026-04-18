@@ -93,9 +93,12 @@ interface RoutingDecision {
  * Maps a task category to the best available provider + model.
  * Priority order reflects capability fit for each workload.
  */
-function categoryToModel(category: TaskCategory, needsWebSearch: boolean): { modelId: string; provider: Provider } {
-  // Web search always goes to Perplexity when available — it has live internet access
-  if (needsWebSearch && process.env.PERPLEXITY_API_KEY) {
+function categoryToModel(category: TaskCategory, needsWebSearch: boolean, hasTools = true): { modelId: string; provider: Provider } {
+  // CRITICAL: Perplexity does NOT support tool calling.
+  // Only use Perplexity for pure research_web tasks where the agent just needs
+  // a text answer (no write_file, no code_execute, no tool calls needed).
+  // For all other tasks that need tools, use Claude or GPT-4o instead.
+  if (needsWebSearch && !hasTools && category === "research_web" && process.env.PERPLEXITY_API_KEY) {
     return { modelId: "sonar-pro", provider: "perplexity" };
   }
 
@@ -234,7 +237,10 @@ Respond with JSON only.`;
       throw new Error(`Invalid category: ${decision.category}`);
     }
 
-    const selected = categoryToModel(decision.category, decision.needs_web_search ?? false);
+    // Always pass hasTools=true because the agent loop always uses tools.
+    // This prevents Perplexity (which doesn't support tool calling) from being
+    // selected for any agentic task.
+    const selected = categoryToModel(decision.category, decision.needs_web_search ?? false, true);
     console.log(
       `[LLMRouter] Meta-router → category="${decision.category}" web=${decision.needs_web_search} → ${selected.provider}/${selected.modelId}` +
       (decision.reasoning ? ` (${decision.reasoning.substring(0, 80)})` : "")
