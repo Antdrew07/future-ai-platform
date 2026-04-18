@@ -75,8 +75,8 @@ export const appRouter = router({
         codeExecutionEnabled: true,
         fileUploadEnabled: true,
         apiCallsEnabled: true,
-        memoryEnabled: false,
-        maxSteps: 15,
+        memoryEnabled: true,
+        maxSteps: 30,
         temperature: 0.7,
       });
 
@@ -193,12 +193,12 @@ export const appRouter = router({
       systemPrompt: z.string().min(1),
       modelId: z.string().default("gpt-4o"),
       memoryEnabled: z.boolean().default(false),
-      webSearchEnabled: z.boolean().default(false),
-      codeExecutionEnabled: z.boolean().default(false),
-      fileUploadEnabled: z.boolean().default(false),
-      apiCallsEnabled: z.boolean().default(false),
+      webSearchEnabled: z.boolean().default(true),
+      codeExecutionEnabled: z.boolean().default(true),
+      fileUploadEnabled: z.boolean().default(true),
+      apiCallsEnabled: z.boolean().default(true),
       temperature: z.number().min(0).max(2).default(0.7),
-      maxSteps: z.number().min(1).max(50).default(10),
+      maxSteps: z.number().min(1).max(50).default(30),
     })).mutation(async ({ ctx, input }) => {
       const slug = `${input.name.toLowerCase().replace(/[^a-z0-9]/g, "-")}-${nanoid(6)}`;
       await createAgent({ ...input, userId: ctx.user.id, slug });

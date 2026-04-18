@@ -152,7 +152,7 @@ export const AGENT_TOOLS = [
         properties: {
           filename: { type: "string", description: "File name (e.g. 'budget.csv', 'report.csv')" },
           headers: { type: "array", items: { type: "string" }, description: "Column headers" },
-          rows: { type: "array", items: { type: "array" }, description: "Data rows (array of arrays)" },
+          rows: { type: "array", items: { type: "array", items: { type: "string" } }, description: "Data rows (array of arrays, each cell as a string)" },
           description: { type: "string", description: "What this spreadsheet contains" },
         },
         required: ["filename", "headers", "rows", "description"],

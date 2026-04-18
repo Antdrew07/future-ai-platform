@@ -593,19 +593,40 @@ async function callGemini(opts: LLMRouterOptions & { modelId: string }): Promise
 
 // ─── Groq (Ultra-fast) ────────────────────────────────────────────────────────
 
+/** Trim messages for Groq to stay within TPM limits. Keep system + last N non-system messages. */
+function trimMessagesForGroq(messages: LLMMessage[], maxNonSystem = 8): LLMMessage[] {
+  const system = messages.filter(m => m.role === 'system');
+  const nonSystem = messages.filter(m => m.role !== 'system');
+  // Always keep the first user message (the original task) and the last N messages
+  const firstUser = nonSystem.find(m => m.role === 'user');
+  const rest = nonSystem.slice(-maxNonSystem);
+  const combined = firstUser && !rest.includes(firstUser) ? [firstUser, ...rest] : rest;
+  return [...system, ...combined];
+}
+
 async function callGroq(opts: LLMRouterOptions & { modelId: string }): Promise<ProviderResult> {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) throw new Error("Groq is not configured.");
 
+  // Trim messages to stay within Groq's TPM limits
+  const trimmedMessages = trimMessagesForGroq(opts.messages);
+
   const body: Record<string, unknown> = {
     model: opts.modelId,
-    messages: opts.messages,
+    messages: trimmedMessages,
     temperature: opts.temperature ?? 0.7,
     max_tokens: opts.maxTokens ?? 8192,
   };
 
   if (opts.tools && opts.tools.length > 0) {
-    body.tools = opts.tools;
+    // Groq has strict TPM limits — trim tool descriptions to avoid 413 errors
+    body.tools = opts.tools.map(t => ({
+      ...t,
+      function: {
+        ...t.function,
+        description: t.function.description.split('.')[0].substring(0, 120), // First sentence, max 120 chars
+      }
+    }));
     body.tool_choice = opts.tool_choice ?? "auto";
   }
 

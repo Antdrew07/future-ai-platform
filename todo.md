@@ -609,8 +609,30 @@
 - [x] Restore original pricing: Free $0, Starter $49, Pro $100, Business $199, Enterprise $500 (from Pricing.tsx strategy) — corrected in DB and Billing.tsx fallback
 
 ## Infinite Loop Bug Fix
-- [ ] Add max-iteration limit (30 iterations) to agentLoop.ts
-- [ ] Add per-task timeout (5 minutes) to agentLoop.ts
-- [ ] Graceful termination: return partial result with explanation when limit hit
-- [ ] Add Stop Task button in Dashboard.tsx and AgentWorkspace.tsx
-- [ ] Add step counter in execution log (Step N/30)
+- [x] Add max-iteration limit (30 iterations) to agentLoop.ts
+- [x] Add per-task timeout (5 minutes) to agentLoop.ts
+- [x] Graceful termination: return partial result with explanation when limit hit
+- [x] Add Stop Task button in Dashboard.tsx and AgentWorkspace.tsx
+- [x] Add step counter in execution log (Step N/30)
+
+## Agent Tool Routing Audit (Apr 17, 2026)
+- [x] Tighten create_presentation tool description to prevent misuse for app/website requests
+- [x] Add CRITICAL TOOL SELECTION RULES section to system prompt
+- [x] Add HONEST CAPABILITY DISCLOSURE section to system prompt
+- [x] Expand CORRECT TOOL reference table to 16 rows covering all task types
+- [x] Fix write_file, export_document, shell_execute, code_execute tool descriptions
+- [x] Add mobile app sections (iOS Swift, Android Kotlin, Expo) to system prompt
+- [x] Add browse_url-first rule for URL-based build requests
+- [x] ROOT CAUSE FIX: Perplexity does not support tool calling — blocked from all agentic tasks
+- [x] intelligentAutoSelect always passes hasTools=true to prevent Perplexity routing
+- [x] 53 tests passing, 0 TypeScript errors
+
+## Live End-to-End Agent Tests (Apr 17, 2026)
+- [ ] Test: "Build me a landing page for a vitamin brand" → must use write_file, produce HTML/CSS/JS
+- [ ] Test: "Build me a React Native app for booking dog walkers" → must use write_file, produce .tsx/.json files
+- [ ] Test: "Write a 3-page business plan for a coffee shop" → must use export_document, produce PDF
+- [ ] Test: "Generate an image of a futuristic city at sunset" → must use generate_image
+- [ ] Test: "Search the web for the latest AI news" → must use web_search, NOT Perplexity as agent model
+- [ ] Test: "Analyze this data: [1,2,3,4,5] and find the mean" → must use analyze_data or code_execute
+- [ ] Fix every failure found in live tests
+- [ ] Re-run all tests after fixes to confirm 100% pass rate
