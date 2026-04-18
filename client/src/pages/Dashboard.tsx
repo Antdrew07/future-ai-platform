@@ -227,6 +227,79 @@ function HtmlPreview({ html, artifacts = [] }: { html: string; artifacts?: Artif
   );
 }
 
+// ─── Markdown Document Preview ───────────────────────────────────────────────
+
+function MarkdownPreview({ content, name }: { content: string; name: string }) {
+  const [view, setView] = useState<"preview" | "code">("preview");
+  const openTab = () => {
+    const blob = new Blob([content], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    window.open(url, "_blank");
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  };
+  return (
+    <div className="rounded-xl border border-border overflow-hidden shadow-sm mt-2">
+      <div className="flex items-center justify-between px-3 py-2 bg-amber-50 border-b border-border">
+        <div className="flex items-center gap-1.5">
+          <FileText className="w-3.5 h-3.5 text-amber-600" />
+          <span className="text-xs font-semibold text-amber-800">Document Preview</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="flex rounded-lg border border-border overflow-hidden">
+            <button onClick={() => setView("preview")} className={`px-2.5 py-1 text-xs font-medium transition-colors ${view === "preview" ? "bg-amber-600 text-white" : "bg-white text-muted-foreground hover:bg-gray-50"}`}>
+              <Eye className="w-3 h-3 inline mr-1" />Preview
+            </button>
+            <button onClick={() => setView("code")} className={`px-2.5 py-1 text-xs font-medium border-l border-border transition-colors ${view === "code" ? "bg-amber-600 text-white" : "bg-white text-muted-foreground hover:bg-gray-50"}`}>
+              <Code2 className="w-3 h-3 inline mr-1" />Raw
+            </button>
+          </div>
+          <button onClick={openTab} className="p-1.5 rounded-lg hover:bg-amber-100 text-amber-600 transition-colors"><ExternalLink className="w-3.5 h-3.5" /></button>
+          <button onClick={() => { navigator.clipboard.writeText(content); toast.success("Copied!"); }} className="p-1.5 rounded-lg hover:bg-amber-100 text-amber-600 transition-colors"><Copy className="w-3.5 h-3.5" /></button>
+        </div>
+      </div>
+      {view === "preview" ? (
+        <div className="p-5 max-h-[500px] overflow-y-auto bg-white">
+          <div className="prose prose-sm max-w-none">
+            <Streamdown>{content}</Streamdown>
+          </div>
+        </div>
+      ) : (
+        <pre className="text-xs text-gray-700 bg-gray-50 p-4 overflow-auto max-h-[500px] font-mono whitespace-pre-wrap">{content}</pre>
+      )}
+      <div className="px-3 py-2 bg-amber-50 border-t border-border flex items-center justify-between">
+        <span className="text-[10px] text-muted-foreground">{name}</span>
+        <button onClick={openTab} className="flex items-center gap-1 text-xs text-amber-700 hover:text-amber-600 font-medium"><ExternalLink className="w-3 h-3" />Open full screen</button>
+      </div>
+    </div>
+  );
+}
+
+// ─── PDF Preview ──────────────────────────────────────────────────────────────
+
+function PdfPreview({ url, name }: { url: string; name: string }) {
+  return (
+    <div className="rounded-xl border border-border overflow-hidden shadow-sm mt-2">
+      <div className="flex items-center justify-between px-3 py-2 bg-red-50 border-b border-border">
+        <div className="flex items-center gap-1.5">
+          <FileText className="w-3.5 h-3.5 text-red-600" />
+          <span className="text-xs font-semibold text-red-800">PDF Preview</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <a href={url} download={name} className="p-1.5 rounded-lg hover:bg-red-100 text-red-600 transition-colors"><Download className="w-3.5 h-3.5" /></a>
+          <a href={url} target="_blank" rel="noopener noreferrer" className="p-1.5 rounded-lg hover:bg-red-100 text-red-600 transition-colors"><ExternalLink className="w-3.5 h-3.5" /></a>
+        </div>
+      </div>
+      <div style={{ height: 500 }}>
+        <iframe src={`${url}#toolbar=0`} className="w-full h-full border-0" title={name} />
+      </div>
+      <div className="px-3 py-2 bg-red-50 border-t border-border flex items-center justify-between">
+        <span className="text-[10px] text-muted-foreground">{name}</span>
+        <a href={url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-red-700 hover:text-red-600 font-medium"><ExternalLink className="w-3 h-3" />Open full screen</a>
+      </div>
+    </div>
+  );
+}
+
 function AssistantContent({ content }: { content: string }) {
   const html = extractHtml(content);
   if (html) {
@@ -898,21 +971,39 @@ export default function Dashboard() {
                   <Download className="w-3.5 h-3.5 text-emerald-600" />
                   <span className="text-xs font-semibold">Output Files ({allArtifacts.length})</span>
                 </div>
-                {/* Show ONE HTML preview: prefer index.html, otherwise the first HTML file */}
+                {/* Smart preview: HTML → website preview, PDF → PDF viewer, MD → markdown reader, others → download buttons */}
                 {(() => {
                   const htmlFiles = allArtifacts.filter(a => a.name.endsWith(".html") || a.name.endsWith(".htm"));
                   const mainHtml = htmlFiles.find(a => a.name === "index.html") ?? htmlFiles[0];
-                  const otherFiles = allArtifacts.filter(a => a !== mainHtml);
+                  const pdfFiles = allArtifacts.filter(a => a.name.endsWith(".pdf") && a.url);
+                  const mdFiles = allArtifacts.filter(a => (a.name.endsWith(".md") || a.name.endsWith(".markdown")) && a.content && a.content !== "[PDF document]" && a.content !== "[binary file]");
+                  const otherFiles = allArtifacts.filter(a => a !== mainHtml && !pdfFiles.includes(a) && !mdFiles.includes(a));
                   return (
-                    <>
+                    <div className="space-y-3">
+                      {/* HTML website preview */}
                       {mainHtml && (
-                        <div className="mb-3">
+                        <div>
                           <p className="text-xs text-muted-foreground mb-1 font-mono">{mainHtml.name}</p>
                           <HtmlPreview html={mainHtml.content} artifacts={allArtifacts} />
                         </div>
                       )}
+                      {/* PDF previews */}
+                      {pdfFiles.map((a, i) => (
+                        <div key={`pdf-${i}`}>
+                          <p className="text-xs text-muted-foreground mb-1 font-mono">{a.name}</p>
+                          <PdfPreview url={a.url!} name={a.name} />
+                        </div>
+                      ))}
+                      {/* Markdown document previews */}
+                      {mdFiles.map((a, i) => (
+                        <div key={`md-${i}`}>
+                          <p className="text-xs text-muted-foreground mb-1 font-mono">{a.name}</p>
+                          <MarkdownPreview content={a.content} name={a.name} />
+                        </div>
+                      ))}
+                      {/* Other files as download buttons */}
                       {otherFiles.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mt-2">
+                        <div className="flex flex-wrap gap-2">
                           {otherFiles.map((a, i) => (
                             <button key={i} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-700 hover:bg-emerald-100 transition-all"
                               onClick={() => {
@@ -928,7 +1019,7 @@ export default function Dashboard() {
                           ))}
                         </div>
                       )}
-                    </>
+                    </div>
                   );
                 })()}
               </div>

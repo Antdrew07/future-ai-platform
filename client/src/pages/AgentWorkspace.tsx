@@ -1035,6 +1035,95 @@ function ArtifactPreview({ artifact, allArtifacts = [] }: { artifact: Artifact; 
     return <HtmlArtifactPreview artifact={artifact} allArtifacts={allArtifacts} />;
   }
 
+  // Markdown: render as styled readable document
+  const isMarkdown = artifact.name.endsWith(".md") || artifact.name.endsWith(".markdown") || artifact.type === "text/markdown";
+  if (isMarkdown) {
+    return (
+      <div className="flex flex-col h-full">
+        <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-muted/30">
+          <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+            <FileText className="w-3.5 h-3.5" />{artifact.name}
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
+              onClick={() => navigator.clipboard.writeText(artifact.content)}
+            >
+              <Copy className="w-3 h-3" /> Copy
+            </button>
+            <button
+              className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
+              onClick={() => {
+                const blob = new Blob([artifact.content], { type: "text/markdown" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url; a.download = artifact.name; a.click();
+                URL.revokeObjectURL(url);
+              }}
+            >
+              <Download className="w-3 h-3" /> Download
+            </button>
+          </div>
+        </div>
+        <div className="flex-1 overflow-auto p-6 bg-white">
+          <div
+            className="prose prose-sm max-w-none"
+            style={{ fontFamily: "Georgia, 'Times New Roman', serif", lineHeight: 1.8, color: "#1a1a1a" }}
+            dangerouslySetInnerHTML={{
+              __html: artifact.content
+                // Headers
+                .replace(/^#{6}\s+(.+)$/gm, "<h6 style='font-size:0.85em;font-weight:700;margin:1em 0 0.3em'>$1</h6>")
+                .replace(/^#{5}\s+(.+)$/gm, "<h5 style='font-size:0.95em;font-weight:700;margin:1em 0 0.3em'>$1</h5>")
+                .replace(/^#{4}\s+(.+)$/gm, "<h4 style='font-size:1.05em;font-weight:700;margin:1.2em 0 0.4em'>$1</h4>")
+                .replace(/^#{3}\s+(.+)$/gm, "<h3 style='font-size:1.2em;font-weight:700;margin:1.4em 0 0.5em;color:#2d2d2d'>$1</h3>")
+                .replace(/^#{2}\s+(.+)$/gm, "<h2 style='font-size:1.5em;font-weight:700;margin:1.8em 0 0.6em;border-bottom:2px solid #e5e7eb;padding-bottom:0.3em;color:#1a1a1a'>$1</h2>")
+                .replace(/^#{1}\s+(.+)$/gm, "<h1 style='font-size:2em;font-weight:800;margin:0 0 0.8em;color:#111'>$1</h1>")
+                // Bold/italic
+                .replace(/\*\*\*(.+?)\*\*\*/g, "<strong><em>$1</em></strong>")
+                .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+                .replace(/\*(.+?)\*/g, "<em>$1</em>")
+                // Blockquotes
+                .replace(/^>\s+(.+)$/gm, "<blockquote style='border-left:4px solid #6366f1;padding:0.5em 1em;margin:1em 0;background:#f8f7ff;color:#4b4b6b;font-style:italic'>$1</blockquote>")
+                // Horizontal rules
+                .replace(/^---+$/gm, "<hr style='border:none;border-top:2px solid #e5e7eb;margin:2em 0'>")
+                // Paragraphs (double newlines)
+                .replace(/\n\n/g, "</p><p style='margin:0.8em 0'>")
+                .replace(/^/, "<p style='margin:0.8em 0'>")
+                .replace(/$/, "</p>")
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // PDF: embed in object tag
+  const isPdf = artifact.name.endsWith(".pdf") || artifact.type === "application/pdf";
+  if (isPdf && artifact.url) {
+    return (
+      <div className="flex flex-col h-full">
+        <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-muted/30">
+          <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
+            <FileText className="w-3.5 h-3.5" />{artifact.name}
+          </span>
+          <a
+            href={artifact.url}
+            target="_blank"
+            rel="noreferrer"
+            className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
+          >
+            <ExternalLink className="w-3 h-3" /> Open full
+          </a>
+        </div>
+        <iframe
+          src={artifact.url}
+          className="flex-1 w-full border-0"
+          title={artifact.name}
+        />
+      </div>
+    );
+  }
+
   // Code / text fallback
   return (
     <div className="p-4">
@@ -1089,7 +1178,13 @@ function LogPanelContent({
       a.type === "text/html" || a.name.endsWith(".html") ||
       (a.type === "text/plain" && /<html[\s>]/i.test(a.content))
     );
-    const previewable = imageArtifacts.length + htmlArtifacts.length;
+    const mdArtifacts2 = allArtifacts.filter(a =>
+      a.name.endsWith(".md") || a.name.endsWith(".markdown") || a.type === "text/markdown"
+    );
+    const pdfArtifacts2 = allArtifacts.filter(a =>
+      a.name.endsWith(".pdf") || a.type === "application/pdf"
+    );
+    const previewable = imageArtifacts.length + htmlArtifacts.length + mdArtifacts2.length + pdfArtifacts2.length;
     if (previewable > prevArtifactCount.current) {
       setActiveTab("preview");
     }
@@ -1110,9 +1205,17 @@ function LogPanelContent({
     a.type === "text/html" || a.name.endsWith(".html") ||
     (a.type === "text/plain" && /<html[\s>]/i.test(a.content))
   );
+  const mdArtifacts = allArtifacts.filter(a =>
+    a.name.endsWith(".md") || a.name.endsWith(".markdown") || a.type === "text/markdown"
+  );
+  const pdfArtifacts = allArtifacts.filter(a =>
+    a.name.endsWith(".pdf") || a.type === "application/pdf"
+  );
   const previewArtifact =
     htmlArtifactsForPreview.find(a => a.name === "index.html") ??
     htmlArtifactsForPreview[0] ??
+    pdfArtifacts[0] ??
+    mdArtifacts[0] ??
     [...allArtifacts].reverse().find(a => a.type.startsWith("image/")) ??
     (allArtifacts.length > 0 ? allArtifacts[allArtifacts.length - 1] : null);
 
