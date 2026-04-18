@@ -177,6 +177,15 @@ function inlineHtml(html: string, artifacts: Artifact[]): string {
 function HtmlPreview({ html, artifacts = [] }: { html: string; artifacts?: Artifact[] }) {
   const inlined = artifacts.length > 0 ? inlineHtml(html, artifacts) : html;
   const [view, setView] = useState<"preview" | "code">("preview");
+  // Use a blob URL so the iframe gets its own origin — this prevents the
+  // parent app's CSS variables (Tailwind/shadcn) from bleeding into the preview.
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+  useEffect(() => {
+    const blob = new Blob([inlined], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    setBlobUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [inlined]);
   const openTab = () => {
     const blob = new Blob([inlined], { type: "text/html" });
     const url = URL.createObjectURL(blob);
@@ -204,7 +213,9 @@ function HtmlPreview({ html, artifacts = [] }: { html: string; artifacts?: Artif
         </div>
       </div>
       {view === "preview" ? (
-        <div style={{ height: 380 }}><iframe srcDoc={inlined} sandbox="allow-scripts allow-same-origin" className="w-full h-full border-0" title="Preview" /></div>
+        <div style={{ height: 380 }}>
+          {blobUrl && <iframe src={blobUrl} sandbox="allow-scripts" className="w-full h-full border-0" title="Preview" />}
+        </div>
       ) : (
         <pre className="text-xs text-green-300 bg-gray-950 p-4 overflow-auto max-h-[380px] font-mono whitespace-pre-wrap">{html}</pre>
       )}

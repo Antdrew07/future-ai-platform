@@ -208,6 +208,15 @@ function HtmlPreviewMessage({
 }) {
   const inlined = artifacts.length > 0 ? inlineHtml(html, artifacts) : html;
   const [view, setView] = useState<"preview" | "code">("preview");
+  // Blob URL gives the iframe its own origin, preventing the parent app's
+  // CSS variables (Tailwind/shadcn) from bleeding into the preview.
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+  useEffect(() => {
+    const blob = new Blob([inlined], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    setBlobUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [inlined]);
 
   const openInTab = () => {
     const blob = new Blob([inlined], { type: "text/html" });
@@ -276,12 +285,14 @@ function HtmlPreviewMessage({
       {/* Preview pane */}
       {view === "preview" && (
         <div className="relative bg-white" style={{ height: "420px" }}>
-          <iframe
-            srcDoc={inlined}
-            sandbox="allow-scripts allow-same-origin"
-            className="w-full h-full border-0"
-            title="Website preview"
-          />
+          {blobUrl && (
+            <iframe
+              src={blobUrl}
+              sandbox="allow-scripts"
+              className="w-full h-full border-0"
+              title="Website preview"
+            />
+          )}
         </div>
       )}
 
@@ -898,6 +909,51 @@ function ChatPanelContent({
 
 // ─── Preview Panel ────────────────────────────────────────────────────────────
 
+/** Isolated HTML preview — uses a blob URL so the iframe gets its own origin,
+ *  preventing the parent app's CSS variables from bleeding into the preview. */
+function HtmlArtifactPreview({ artifact, allArtifacts }: { artifact: Artifact; allArtifacts: Artifact[] }) {
+  const inlinedHtml = allArtifacts.length > 0 ? inlineHtml(artifact.content, allArtifacts) : artifact.content;
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
+  useEffect(() => {
+    const blob = new Blob([inlinedHtml], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    setBlobUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [inlinedHtml]);
+  const openInTab = () => {
+    const blob = new Blob([inlinedHtml], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    window.open(url, "_blank");
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  };
+  return (
+    <div className="flex flex-col h-full">
+      <div className="flex items-center justify-between px-3 py-2 bg-gray-50 border-b border-border shrink-0">
+        <div className="flex items-center gap-1.5">
+          <Monitor className="w-3.5 h-3.5 text-primary" />
+          <span className="text-xs font-semibold text-foreground">{artifact.name}</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <button onClick={openInTab} className="flex items-center gap-1 px-2 py-1 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors">
+            <ExternalLink className="w-3 h-3" />
+            Open full screen
+          </button>
+        </div>
+      </div>
+      <div className="flex-1 bg-white">
+        {blobUrl && (
+          <iframe
+            src={blobUrl}
+            sandbox="allow-scripts"
+            className="w-full h-full border-0"
+            title={artifact.name}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
 /**
  * Renders the latest artifact visually:
  * - image/png → full <img> preview
@@ -976,37 +1032,7 @@ function ArtifactPreview({ artifact, allArtifacts = [] }: { artifact: Artifact; 
     (artifact.type === "text/plain" && /<html[\s>]/i.test(artifact.content));
 
   if (isHtml) {
-    const inlinedHtml = allArtifacts.length > 0 ? inlineHtml(artifact.content, allArtifacts) : artifact.content;
-    const openInTab = () => {
-      const blob = new Blob([inlinedHtml], { type: "text/html" });
-      const url = URL.createObjectURL(blob);
-      window.open(url, "_blank");
-      setTimeout(() => URL.revokeObjectURL(url), 5000);
-    };
-    return (
-      <div className="flex flex-col h-full">
-        <div className="flex items-center justify-between px-3 py-2 bg-gray-50 border-b border-border shrink-0">
-          <div className="flex items-center gap-1.5">
-            <Monitor className="w-3.5 h-3.5 text-primary" />
-            <span className="text-xs font-semibold text-foreground">{artifact.name}</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <button onClick={openInTab} className="flex items-center gap-1 px-2 py-1 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors">
-              <ExternalLink className="w-3 h-3" />
-              Open full screen
-            </button>
-          </div>
-        </div>
-        <div className="flex-1 bg-white">
-          <iframe
-            srcDoc={inlinedHtml}
-            sandbox="allow-scripts allow-same-origin"
-            className="w-full h-full border-0"
-            title={artifact.name}
-          />
-        </div>
-      </div>
-    );
+    return <HtmlArtifactPreview artifact={artifact} allArtifacts={allArtifacts} />;
   }
 
   // Code / text fallback
