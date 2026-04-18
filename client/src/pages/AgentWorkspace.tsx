@@ -1101,13 +1101,20 @@ function LogPanelContent({
     if (activeBrowserSession) setActiveTab("browser");
   }, [activeBrowserSession]);
 
-  // Determine the best artifact to preview (latest image or HTML)
-  const previewArtifact = [...allArtifacts].reverse().find(a =>
-    a.type.startsWith("image/") ||
-    a.type === "text/html" ||
-    a.name.endsWith(".html") ||
+  // Determine the best artifact to preview:
+  // 1. Prefer index.html for websites
+  // 2. Fall back to first HTML file
+  // 3. Fall back to latest image
+  // 4. Fall back to last artifact
+  const htmlArtifactsForPreview = allArtifacts.filter(a =>
+    a.type === "text/html" || a.name.endsWith(".html") ||
     (a.type === "text/plain" && /<html[\s>]/i.test(a.content))
-  ) ?? (allArtifacts.length > 0 ? allArtifacts[allArtifacts.length - 1] : null);
+  );
+  const previewArtifact =
+    htmlArtifactsForPreview.find(a => a.name === "index.html") ??
+    htmlArtifactsForPreview[0] ??
+    [...allArtifacts].reverse().find(a => a.type.startsWith("image/")) ??
+    (allArtifacts.length > 0 ? allArtifacts[allArtifacts.length - 1] : null);
 
   const imageArtifacts = allArtifacts.filter(a => a.type.startsWith("image/"));
   const hasPreview = !!previewArtifact;

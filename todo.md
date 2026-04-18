@@ -646,3 +646,6 @@
 
 ## Website Quality Upgrade (Apr 18, 2026)
 - [x] Upgrade agent system prompt with comprehensive web design quality standards (modern CSS, typography, responsive layout, no placeholders)
+
+## Single Preview Fix (Apr 18, 2026)
+- [x] Fix Output Files panel to show only ONE HTML preview (the main index.html), list all other files as plain entries

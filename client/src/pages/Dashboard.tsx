@@ -898,27 +898,39 @@ export default function Dashboard() {
                   <Download className="w-3.5 h-3.5 text-emerald-600" />
                   <span className="text-xs font-semibold">Output Files ({allArtifacts.length})</span>
                 </div>
-                {/* HTML artifacts: show inline preview with CSS/JS inlined */}
-                {allArtifacts.filter(a => a.name.endsWith(".html") || a.name.endsWith(".htm")).map((a, i) => (
-                  <div key={`html-${i}`} className="mb-3">
-                    <p className="text-xs text-muted-foreground mb-1 font-mono">{a.name}</p>
-                    <HtmlPreview html={a.content} artifacts={allArtifacts} />
-                  </div>
-                ))}
-                {/* Non-HTML artifacts: download buttons */}
-                {allArtifacts.filter(a => !a.name.endsWith(".html") && !a.name.endsWith(".htm")).length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {allArtifacts.filter(a => !a.name.endsWith(".html") && !a.name.endsWith(".htm")).map((a, i) => (
-                      <button key={i} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-700 hover:bg-emerald-100 transition-all"
-                        onClick={() => {
-                          if (a.url) { const el = document.createElement("a"); el.href = a.url; el.download = a.name; el.target = "_blank"; el.click(); return; }
-                          const blob = new Blob([a.content], { type: a.type }); const url = URL.createObjectURL(blob); const el = document.createElement("a"); el.href = url; el.download = a.name; el.click(); URL.revokeObjectURL(url);
-                        }}>
-                        <FileText className="w-3 h-3" />{a.name}
-                      </button>
-                    ))}
-                  </div>
-                )}
+                {/* Show ONE HTML preview: prefer index.html, otherwise the first HTML file */}
+                {(() => {
+                  const htmlFiles = allArtifacts.filter(a => a.name.endsWith(".html") || a.name.endsWith(".htm"));
+                  const mainHtml = htmlFiles.find(a => a.name === "index.html") ?? htmlFiles[0];
+                  const otherFiles = allArtifacts.filter(a => a !== mainHtml);
+                  return (
+                    <>
+                      {mainHtml && (
+                        <div className="mb-3">
+                          <p className="text-xs text-muted-foreground mb-1 font-mono">{mainHtml.name}</p>
+                          <HtmlPreview html={mainHtml.content} artifacts={allArtifacts} />
+                        </div>
+                      )}
+                      {otherFiles.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {otherFiles.map((a, i) => (
+                            <button key={i} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-700 hover:bg-emerald-100 transition-all"
+                              onClick={() => {
+                                if (a.url) { const el = document.createElement("a"); el.href = a.url; el.download = a.name; el.target = "_blank"; el.click(); return; }
+                                if (a.name.endsWith(".html") || a.name.endsWith(".htm")) {
+                                  const inlined = allArtifacts.length > 0 ? inlineHtml(a.content, allArtifacts) : a.content;
+                                  const blob = new Blob([inlined], { type: "text/html" }); const url = URL.createObjectURL(blob); window.open(url, "_blank"); setTimeout(() => URL.revokeObjectURL(url), 5000); return;
+                                }
+                                const blob = new Blob([a.content], { type: a.type }); const url = URL.createObjectURL(blob); const el = document.createElement("a"); el.href = url; el.download = a.name; el.click(); URL.revokeObjectURL(url);
+                              }}>
+                              {(a.name.endsWith(".html") || a.name.endsWith(".htm")) ? <Eye className="w-3 h-3" /> : <FileText className="w-3 h-3" />}{a.name}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
               </div>
             )}
           </div>
