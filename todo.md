@@ -643,3 +643,6 @@
 
 ## Duplicate Preview Fix (Apr 18, 2026)
 - [x] Fix Output Files panel showing duplicate HTML preview cards for the same filename (index.html appearing twice)
+
+## Website Quality Upgrade (Apr 18, 2026)
+- [x] Upgrade agent system prompt with comprehensive web design quality standards (modern CSS, typography, responsive layout, no placeholders)
