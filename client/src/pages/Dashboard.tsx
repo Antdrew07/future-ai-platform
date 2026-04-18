@@ -592,7 +592,16 @@ export default function Dashboard() {
     return "Good evening";
   };
   const firstName = user?.name?.split(" ")[0] ?? "there";
-  const allArtifacts = liveSteps.flatMap(s => s.artifacts ?? []);
+  // Deduplicate artifacts by filename — keep the last version written for each file
+  const allArtifacts = (() => {
+    const map = new Map<string, Artifact>();
+    for (const step of liveSteps) {
+      for (const a of step.artifacts ?? []) {
+        map.set(a.name, a); // later entries overwrite earlier ones
+      }
+    }
+    return Array.from(map.values());
+  })();
 
   // ── Input Box — rendered as JSX directly (NOT a nested component) to preserve focus ──
   const inputBoxJSX = (

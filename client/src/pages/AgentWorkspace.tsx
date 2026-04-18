@@ -1609,7 +1609,16 @@ export default function AgentWorkspace() {
     );
   }
 
-  const allArtifacts = liveSteps.flatMap(s => s.artifacts ?? []);
+  // Deduplicate artifacts by filename — keep the last version written for each file
+  const allArtifacts = (() => {
+    const map = new Map<string, Artifact>();
+    for (const step of liveSteps) {
+      for (const a of step.artifacts ?? []) {
+        map.set(a.name, a);
+      }
+    }
+    return Array.from(map.values());
+  })();
 
   return (
     <div className="h-[100dvh] flex flex-col bg-background overflow-hidden">

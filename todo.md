@@ -640,3 +640,6 @@
 ## UI Fixes (Apr 17, 2026)
 - [x] Fix "Analyzing results..." step card stuck spinning after task completes
 - [x] Add live HTML preview iframe in output files section so users can see built websites
+
+## Duplicate Preview Fix (Apr 18, 2026)
+- [x] Fix Output Files panel showing duplicate HTML preview cards for the same filename (index.html appearing twice)
