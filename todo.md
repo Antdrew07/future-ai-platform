@@ -628,11 +628,15 @@
 - [x] 53 tests passing, 0 TypeScript errors
 
 ## Live End-to-End Agent Tests (Apr 17, 2026)
-- [ ] Test: "Build me a landing page for a vitamin brand" → must use write_file, produce HTML/CSS/JS
-- [ ] Test: "Build me a React Native app for booking dog walkers" → must use write_file, produce .tsx/.json files
-- [ ] Test: "Write a 3-page business plan for a coffee shop" → must use export_document, produce PDF
-- [ ] Test: "Generate an image of a futuristic city at sunset" → must use generate_image
-- [ ] Test: "Search the web for the latest AI news" → must use web_search, NOT Perplexity as agent model
-- [ ] Test: "Analyze this data: [1,2,3,4,5] and find the mean" → must use analyze_data or code_execute
-- [ ] Fix every failure found in live tests
-- [ ] Re-run all tests after fixes to confirm 100% pass rate
+- [x] Test: "Build me a landing page for a vitamin brand" → PASS (write_file → index.html)
+- [x] Test: "Build me a React Native app for booking dog walkers" → PASS (write_file → App.tsx, package.json, TodoList.tsx)
+- [x] Test: "Write a 3-page business plan for a coffee shop" → PASS (export_document → PDF)
+- [x] Test: "Generate an image of a futuristic city at sunset" → PASS (generate_image)
+- [x] Test: "Search the web for the latest AI news" → PASS (web_search)
+- [x] Test: "Analyze this data: [1,2,3,4,5] and find the mean" → PASS (analyze_data)
+- [x] Fix every failure found in live tests (create_spreadsheet schema, Groq 413, Perplexity tool-calling, agent capabilities disabled)
+- [x] Re-run all tests after fixes → 10/10 PASS
+
+## UI Fixes (Apr 17, 2026)
+- [ ] Fix "Analyzing results..." step card stuck spinning after task completes
+- [ ] Add live HTML preview iframe in output files section so users can see built websites

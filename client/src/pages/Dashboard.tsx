@@ -193,10 +193,10 @@ function AssistantContent({ content }: { content: string }) {
 
 // ─── Execution step helpers ───────────────────────────────────────────────────
 
-function getStepIcon(step: AgentStep) {
+function getStepIcon(step: AgentStep, isActive = false) {
   if (step.isError) return <XCircle className="w-3.5 h-3.5 text-red-500" />;
   switch (step.type) {
-    case "thinking": return <Cpu className="w-3.5 h-3.5 text-indigo-500 animate-pulse" />;
+    case "thinking": return <Cpu className={`w-3.5 h-3.5 text-indigo-500${isActive ? " animate-pulse" : ""}`} />;
     case "tool_call":
       if (step.toolName === "web_search") return <Search className="w-3.5 h-3.5 text-blue-500" />;
       if (step.toolName === "code_execute") return <Code2 className="w-3.5 h-3.5 text-emerald-500" />;
@@ -225,14 +225,15 @@ function getStepColors(step: AgentStep) {
   }
 }
 
-function StepCard({ step, isLast, onShowBrowser }: { step: AgentStep; isLast?: boolean; onShowBrowser?: (id: string, url: string) => void }) {
+function StepCard({ step, isLast, isRunning, onShowBrowser }: { step: AgentStep; isLast?: boolean; isRunning?: boolean; onShowBrowser?: (id: string, url: string) => void }) {
   const [expanded, setExpanded] = useState(step.type === "complete" || step.type === "error" || (isLast === true && step.type !== "thinking"));
   const colors = getStepColors(step);
+  const isActive = !!(isLast && isRunning);
   useEffect(() => { if (step.type === "complete" || step.type === "error") setExpanded(true); }, [step.type]);
   return (
     <div className={`rounded-xl border ${colors.border} ${colors.bg} overflow-hidden transition-all`}>
       <button className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-black/[0.02] transition-colors" onClick={() => setExpanded(e => !e)}>
-        <div className="shrink-0 w-7 h-7 rounded-lg bg-white flex items-center justify-center border border-border shadow-sm">{getStepIcon(step)}</div>
+        <div className="shrink-0 w-7 h-7 rounded-lg bg-white flex items-center justify-center border border-border shadow-sm">{getStepIcon(step, isActive)}</div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-foreground truncate">{step.title}</p>
           <p className="text-[10px] text-muted-foreground mt-0.5 font-mono">{new Date(step.timestamp).toLocaleTimeString()}</p>
@@ -243,7 +244,7 @@ function StepCard({ step, isLast, onShowBrowser }: { step: AgentStep; isLast?: b
             <MonitorPlay className="w-3 h-3" />Watch Live
           </button>
         )}
-        {step.type === "thinking" ? (
+        {step.type === "thinking" && isActive ? (
           <div className="flex gap-1 items-center px-2 py-1 rounded-full bg-indigo-100 border border-indigo-200">
             {[0, 150, 300].map(d => <span key={d} className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-bounce" style={{ animationDelay: `${d}ms` }} />)}
           </div>
@@ -817,7 +818,7 @@ export default function Dashboard() {
               ) : (
                 <div className="space-y-2">
                   {liveSteps.map((step, idx) => (
-                    <StepCard key={step.id} step={step} isLast={idx === liveSteps.length - 1}
+                    <StepCard key={step.id} step={step} isLast={idx === liveSteps.length - 1} isRunning={isRunning}
                       onShowBrowser={(id, url) => setActiveBrowser({ sessionId: id, liveViewUrl: url })} />
                   ))}
                   {isRunning && (
@@ -838,14 +839,27 @@ export default function Dashboard() {
                   <Download className="w-3.5 h-3.5 text-emerald-600" />
                   <span className="text-xs font-semibold">Output Files ({allArtifacts.length})</span>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {allArtifacts.map((a, i) => (
-                    <button key={i} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-700 hover:bg-emerald-100 transition-all"
-                      onClick={() => { const blob = new Blob([a.content], { type: a.type }); const url = URL.createObjectURL(blob); const el = document.createElement("a"); el.href = url; el.download = a.name; el.click(); URL.revokeObjectURL(url); }}>
-                      <FileText className="w-3 h-3" />{a.name}
-                    </button>
-                  ))}
-                </div>
+                {/* HTML artifacts: show inline preview */}
+                {allArtifacts.filter(a => a.name.endsWith(".html") || a.name.endsWith(".htm")).map((a, i) => (
+                  <div key={`html-${i}`} className="mb-3">
+                    <p className="text-xs text-muted-foreground mb-1 font-mono">{a.name}</p>
+                    <HtmlPreview html={a.content} />
+                  </div>
+                ))}
+                {/* Non-HTML artifacts: download buttons */}
+                {allArtifacts.filter(a => !a.name.endsWith(".html") && !a.name.endsWith(".htm")).length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {allArtifacts.filter(a => !a.name.endsWith(".html") && !a.name.endsWith(".htm")).map((a, i) => (
+                      <button key={i} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-700 hover:bg-emerald-100 transition-all"
+                        onClick={() => {
+                          if (a.url) { const el = document.createElement("a"); el.href = a.url; el.download = a.name; el.target = "_blank"; el.click(); return; }
+                          const blob = new Blob([a.content], { type: a.type }); const url = URL.createObjectURL(blob); const el = document.createElement("a"); el.href = url; el.download = a.name; el.click(); URL.revokeObjectURL(url);
+                        }}>
+                        <FileText className="w-3 h-3" />{a.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>

@@ -319,10 +319,10 @@ function getToolIcon(toolName?: string) {
   }
 }
 
-function getStepIcon(step: AgentStep) {
+function getStepIcon(step: AgentStep, isActive = false) {
   if (step.isError) return <XCircle className="w-3.5 h-3.5 text-red-500" />;
   switch (step.type) {
-    case "thinking": return <Cpu className="w-3.5 h-3.5 text-indigo-500 animate-pulse" />;
+    case "thinking": return <Cpu className={`w-3.5 h-3.5 text-indigo-500${isActive ? " animate-pulse" : ""}`} />;
     case "tool_call": return getToolIcon(step.toolName);
     case "tool_result": return step.isError ? <XCircle className="w-3.5 h-3.5 text-red-500" /> : <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />;
     case "complete": return <Sparkles className="w-3.5 h-3.5 text-amber-500" />;
@@ -433,16 +433,19 @@ function StepContentRenderer({ step }: { step: AgentStep }) {
 function StepCard({
   step,
   isLast,
+  isRunning,
   onShowBrowser,
 }: {
   step: AgentStep;
   isLast?: boolean;
+  isRunning?: boolean;
   onShowBrowser?: (sessionId: string, liveViewUrl: string) => void;
 }) {
   const [expanded, setExpanded] = useState(
     step.type === "complete" || step.type === "error" || (isLast === true && step.type !== "thinking")
   );
   const colors = getStepColors(step);
+  const isActive = !!(isLast && isRunning);
   const hasBrowserSession = !!(step.browserSessionId && step.browserLiveViewUrl);
 
   useEffect(() => {
@@ -456,7 +459,7 @@ function StepCard({
         onClick={() => setExpanded(e => !e)}
       >
         <div className="shrink-0 w-7 h-7 rounded-lg bg-white flex items-center justify-center border border-border shadow-sm">
-          {getStepIcon(step)}
+          {getStepIcon(step, isActive)}
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-foreground truncate">{step.title}</p>
@@ -477,7 +480,7 @@ function StepCard({
             Watch Live
           </button>
         )}
-        {step.type === "thinking" ? (
+        {step.type === "thinking" && isActive ? (
           <div className="flex gap-1 items-center px-2 py-1 rounded-full bg-indigo-100 border border-indigo-200">
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-bounce" style={{ animationDelay: "0ms" }} />
             <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-bounce" style={{ animationDelay: "150ms" }} />
@@ -1120,6 +1123,7 @@ function LogPanelContent({
                       key={step.id}
                       step={step}
                       isLast={idx === liveSteps.length - 1}
+                      isRunning={isRunning}
                       onShowBrowser={(sid, url) => {
                         onShowBrowser(sid, url);
                         setActiveTab("browser");
