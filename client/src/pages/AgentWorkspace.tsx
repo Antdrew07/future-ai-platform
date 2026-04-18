@@ -160,17 +160,57 @@ function extractHtml(content: string): string | null {
 
 // ─── HTML Preview Component ───────────────────────────────────────────────────
 
+type Artifact = { name: string; content: string; type: string; url?: string };
+
+/**
+ * Inline all linked CSS and JS files from the artifact store into the HTML
+ * so the iframe preview is fully self-contained (no relative-path fetches).
+ */
+function inlineHtml(html: string, artifacts: Artifact[]): string {
+  let result = html;
+  // Inline <link rel="stylesheet" href="..."> → <style>...</style>
+  result = result.replace(
+    /<link[^>]+rel=["']stylesheet["'][^>]+href=["']([^"']+)["'][^>]*\/?>/gi,
+    (_match, href) => {
+      const filename = href.split("/").pop() ?? href;
+      const css = artifacts.find(a => a.name === filename || a.name.endsWith(`/${filename}`));
+      return css ? `<style>/* ${filename} */\n${css.content}\n</style>` : _match;
+    }
+  );
+  result = result.replace(
+    /<link[^>]+href=["']([^"']+)["'][^>]+rel=["']stylesheet["'][^>]*\/?>/gi,
+    (_match, href) => {
+      const filename = href.split("/").pop() ?? href;
+      const css = artifacts.find(a => a.name === filename || a.name.endsWith(`/${filename}`));
+      return css ? `<style>/* ${filename} */\n${css.content}\n</style>` : _match;
+    }
+  );
+  // Inline <script src="..."> → <script>...</script>
+  result = result.replace(
+    /<script[^>]+src=["']([^"']+)["'][^>]*><\/script>/gi,
+    (_match, src) => {
+      const filename = src.split("/").pop() ?? src;
+      const js = artifacts.find(a => a.name === filename || a.name.endsWith(`/${filename}`));
+      return js ? `<script>/* ${filename} */\n${js.content}\n</script>` : _match;
+    }
+  );
+  return result;
+}
+
 function HtmlPreviewMessage({
   html,
   fullContent,
+  artifacts = [],
 }: {
   html: string;
   fullContent: string;
+  artifacts?: Artifact[];
 }) {
+  const inlined = artifacts.length > 0 ? inlineHtml(html, artifacts) : html;
   const [view, setView] = useState<"preview" | "code">("preview");
 
   const openInTab = () => {
-    const blob = new Blob([html], { type: "text/html" });
+    const blob = new Blob([inlined], { type: "text/html" });
     const url = URL.createObjectURL(blob);
     window.open(url, "_blank");
     // revoke after a short delay so the tab has time to load
@@ -237,7 +277,7 @@ function HtmlPreviewMessage({
       {view === "preview" && (
         <div className="relative bg-white" style={{ height: "420px" }}>
           <iframe
-            srcDoc={html}
+            srcDoc={inlined}
             sandbox="allow-scripts allow-same-origin"
             className="w-full h-full border-0"
             title="Website preview"
@@ -865,7 +905,7 @@ function ChatPanelContent({
  * - text/plain with HTML content → iframe preview
  * - everything else → code block
  */
-function ArtifactPreview({ artifact }: { artifact: { name: string; content: string; type: string } }) {
+function ArtifactPreview({ artifact, allArtifacts = [] }: { artifact: Artifact; allArtifacts?: Artifact[] }) {
   const [lightbox, setLightbox] = useState(false);
 
   // Image: content is a URL
@@ -936,8 +976,9 @@ function ArtifactPreview({ artifact }: { artifact: { name: string; content: stri
     (artifact.type === "text/plain" && /<html[\s>]/i.test(artifact.content));
 
   if (isHtml) {
+    const inlinedHtml = allArtifacts.length > 0 ? inlineHtml(artifact.content, allArtifacts) : artifact.content;
     const openInTab = () => {
-      const blob = new Blob([artifact.content], { type: "text/html" });
+      const blob = new Blob([inlinedHtml], { type: "text/html" });
       const url = URL.createObjectURL(blob);
       window.open(url, "_blank");
       setTimeout(() => URL.revokeObjectURL(url), 5000);
@@ -958,7 +999,7 @@ function ArtifactPreview({ artifact }: { artifact: { name: string; content: stri
         </div>
         <div className="flex-1 bg-white">
           <iframe
-            srcDoc={artifact.content}
+            srcDoc={inlinedHtml}
             sandbox="allow-scripts allow-same-origin"
             className="w-full h-full border-0"
             title={artifact.name}
@@ -1213,7 +1254,7 @@ function LogPanelContent({
                 </div>
               )}
               <div className="flex-1 overflow-auto">
-                <ArtifactPreview artifact={previewArtifact!} />
+                <ArtifactPreview artifact={previewArtifact!} allArtifacts={allArtifacts} />
               </div>
               {/* All files strip */}
               {allArtifacts.length > 1 && (

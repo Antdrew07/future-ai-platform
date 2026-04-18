@@ -136,10 +136,49 @@ function extractHtml(content: string): string | null {
   return null;
 }
 
-function HtmlPreview({ html }: { html: string }) {
+type Artifact = { name: string; content: string; type: string; url?: string };
+
+/**
+ * Inline all linked CSS and JS files from the artifact store into the HTML
+ * so the iframe preview is fully self-contained (no relative-path fetches).
+ */
+function inlineHtml(html: string, artifacts: Artifact[]): string {
+  let result = html;
+  // Inline <link rel="stylesheet" href="..."> → <style>...</style>
+  result = result.replace(
+    /<link[^>]+rel=["']stylesheet["'][^>]+href=["']([^"']+)["'][^>]*\/?>/gi,
+    (_match, href) => {
+      const filename = href.split("/").pop() ?? href;
+      const css = artifacts.find(a => a.name === filename || a.name.endsWith(`/${filename}`));
+      return css ? `<style>/* ${filename} */\n${css.content}\n</style>` : _match;
+    }
+  );
+  // Also handle href before rel
+  result = result.replace(
+    /<link[^>]+href=["']([^"']+)["'][^>]+rel=["']stylesheet["'][^>]*\/?>/gi,
+    (_match, href) => {
+      const filename = href.split("/").pop() ?? href;
+      const css = artifacts.find(a => a.name === filename || a.name.endsWith(`/${filename}`));
+      return css ? `<style>/* ${filename} */\n${css.content}\n</style>` : _match;
+    }
+  );
+  // Inline <script src="..."> → <script>...</script>
+  result = result.replace(
+    /<script[^>]+src=["']([^"']+)["'][^>]*><\/script>/gi,
+    (_match, src) => {
+      const filename = src.split("/").pop() ?? src;
+      const js = artifacts.find(a => a.name === filename || a.name.endsWith(`/${filename}`));
+      return js ? `<script>/* ${filename} */\n${js.content}\n</script>` : _match;
+    }
+  );
+  return result;
+}
+
+function HtmlPreview({ html, artifacts = [] }: { html: string; artifacts?: Artifact[] }) {
+  const inlined = artifacts.length > 0 ? inlineHtml(html, artifacts) : html;
   const [view, setView] = useState<"preview" | "code">("preview");
   const openTab = () => {
-    const blob = new Blob([html], { type: "text/html" });
+    const blob = new Blob([inlined], { type: "text/html" });
     const url = URL.createObjectURL(blob);
     window.open(url, "_blank");
     setTimeout(() => URL.revokeObjectURL(url), 5000);
@@ -165,7 +204,7 @@ function HtmlPreview({ html }: { html: string }) {
         </div>
       </div>
       {view === "preview" ? (
-        <div style={{ height: 380 }}><iframe srcDoc={html} sandbox="allow-scripts allow-same-origin" className="w-full h-full border-0" title="Preview" /></div>
+        <div style={{ height: 380 }}><iframe srcDoc={inlined} sandbox="allow-scripts allow-same-origin" className="w-full h-full border-0" title="Preview" /></div>
       ) : (
         <pre className="text-xs text-green-300 bg-gray-950 p-4 overflow-auto max-h-[380px] font-mono whitespace-pre-wrap">{html}</pre>
       )}
@@ -839,11 +878,11 @@ export default function Dashboard() {
                   <Download className="w-3.5 h-3.5 text-emerald-600" />
                   <span className="text-xs font-semibold">Output Files ({allArtifacts.length})</span>
                 </div>
-                {/* HTML artifacts: show inline preview */}
+                {/* HTML artifacts: show inline preview with CSS/JS inlined */}
                 {allArtifacts.filter(a => a.name.endsWith(".html") || a.name.endsWith(".htm")).map((a, i) => (
                   <div key={`html-${i}`} className="mb-3">
                     <p className="text-xs text-muted-foreground mb-1 font-mono">{a.name}</p>
-                    <HtmlPreview html={a.content} />
+                    <HtmlPreview html={a.content} artifacts={allArtifacts} />
                   </div>
                 ))}
                 {/* Non-HTML artifacts: download buttons */}

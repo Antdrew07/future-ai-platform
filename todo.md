@@ -638,5 +638,5 @@
 - [x] Re-run all tests after fixes → 10/10 PASS
 
 ## UI Fixes (Apr 17, 2026)
-- [ ] Fix "Analyzing results..." step card stuck spinning after task completes
-- [ ] Add live HTML preview iframe in output files section so users can see built websites
+- [x] Fix "Analyzing results..." step card stuck spinning after task completes
+- [x] Add live HTML preview iframe in output files section so users can see built websites
