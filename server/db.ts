@@ -265,12 +265,22 @@ export async function deductCredits(userId: number, amount: number, description:
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  const userResult = await db.select({ balance: users.creditBalance }).from(users).where(eq(users.id, userId)).limit(1);
-  const balance = userResult[0]?.balance ?? 0;
-  if (balance < amount) return false;
+  // ── Atomic deduction using conditional UPDATE ────────────────────────────────
+  // Instead of READ-then-WRITE (which has a race condition), we use a single
+  // UPDATE ... WHERE creditBalance >= amount. If the balance is insufficient,
+  // the UPDATE affects 0 rows and we return false. This is fully atomic.
+  const updateResult = await db.update(users)
+    .set({ creditBalance: sql`creditBalance - ${amount}` })
+    .where(and(eq(users.id, userId), sql`creditBalance >= ${amount}`));
 
-  const newBalance = balance - amount;
-  await db.update(users).set({ creditBalance: newBalance }).where(eq(users.id, userId));
+  // Check if any row was actually updated (0 rows = insufficient balance)
+  const rowsAffected = (updateResult as unknown as [{ affectedRows: number }])[0]?.affectedRows ?? 0;
+  if (rowsAffected === 0) return false;
+
+  // Fetch the new balance for the transaction log
+  const balanceResult = await db.select({ balance: users.creditBalance }).from(users).where(eq(users.id, userId)).limit(1);
+  const newBalance = balanceResult[0]?.balance ?? 0;
+
   await db.insert(creditTransactions).values({
     userId, type: "usage", amount: -amount, balanceAfter: newBalance, description, taskId,
   });
@@ -281,11 +291,16 @@ export async function addCredits(userId: number, amount: number, type: "purchase
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  const userResult = await db.select({ balance: users.creditBalance }).from(users).where(eq(users.id, userId)).limit(1);
-  const balance = userResult[0]?.balance ?? 0;
-  const newBalance = balance + amount;
+  // ── Atomic credit addition using SQL increment ────────────────────────────────
+  // Use SQL-level increment to avoid READ-then-WRITE race conditions.
+  await db.update(users)
+    .set({ creditBalance: sql`creditBalance + ${amount}` })
+    .where(eq(users.id, userId));
 
-  await db.update(users).set({ creditBalance: newBalance }).where(eq(users.id, userId));
+  // Fetch the authoritative new balance for the transaction log
+  const balanceResult = await db.select({ balance: users.creditBalance }).from(users).where(eq(users.id, userId)).limit(1);
+  const newBalance = balanceResult[0]?.balance ?? 0;
+
   await db.insert(creditTransactions).values({
     userId, type, amount, balanceAfter: newBalance, description, stripePaymentId,
   });

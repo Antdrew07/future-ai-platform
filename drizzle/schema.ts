@@ -12,6 +12,48 @@ import {
   index,
 } from "drizzle-orm/mysql-core";
 
+// ─── Workspaces (Multi-Tenancy Root) ─────────────────────────────────────────
+// Every resource (agents, tasks, conversations) belongs to a workspace.
+// A workspace is created automatically for every new user (personal workspace)
+// and can also be a shared team workspace.
+export const workspaces = mysqlTable("workspaces", {
+  id: int("id").autoincrement().primaryKey(),
+  ownerId: int("ownerId").notNull(),          // the user who created/owns it
+  teamId: int("teamId"),                       // null = personal workspace
+  name: varchar("name", { length: 256 }).notNull(),
+  slug: varchar("slug", { length: 128 }).notNull().unique(),
+  plan: mysqlEnum("plan", ["free", "starter", "pro", "enterprise"]).default("free").notNull(),
+  creditBalance: bigint("creditBalance", { mode: "number" }).default(0).notNull(),
+  maxAgents: int("maxAgents").default(5).notNull(),
+  maxMembersPerTeam: int("maxMembersPerTeam").default(1).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, (table) => ({
+  ownerIdx: index("ws_owner_idx").on(table.ownerId),
+  slugIdx: index("ws_slug_idx").on(table.slug),
+}));
+
+export type Workspace = typeof workspaces.$inferSelect;
+export type InsertWorkspace = typeof workspaces.$inferInsert;
+
+// ─── Workspace Members ────────────────────────────────────────────────────────
+export const workspaceMembers = mysqlTable("workspace_members", {
+  id: int("id").autoincrement().primaryKey(),
+  workspaceId: int("workspaceId").notNull(),
+  userId: int("userId").notNull(),
+  role: mysqlEnum("role", ["owner", "admin", "member", "viewer"]).default("member").notNull(),
+  inviteEmail: varchar("inviteEmail", { length: 320 }),
+  inviteToken: varchar("inviteToken", { length: 128 }),
+  status: mysqlEnum("status", ["active", "invited", "removed"]).default("invited").notNull(),
+  joinedAt: timestamp("joinedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, (table) => ({
+  wsIdx: index("wsmember_ws_idx").on(table.workspaceId),
+  userIdx: index("wsmember_user_idx").on(table.userId),
+}));
+
+export type WorkspaceMember = typeof workspaceMembers.$inferSelect;
+
 // ─── Users ────────────────────────────────────────────────────────────────────
 export const users = mysqlTable("users", {
   id: int("id").autoincrement().primaryKey(),
@@ -53,8 +95,9 @@ export type ModelPricing = typeof modelPricing.$inferSelect;
 // ─── Agents ───────────────────────────────────────────────────────────────────
 export const agents = mysqlTable("agents", {
   id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
-  teamId: int("teamId"),
+  userId: int("userId").notNull(),          // creator
+  workspaceId: int("workspaceId").notNull(), // workspace this agent belongs to
+  teamId: int("teamId"),                     // legacy: kept for backwards compat
   slug: varchar("slug", { length: 128 }).notNull().unique(),
   name: varchar("name", { length: 256 }).notNull(),
   description: text("description"),
@@ -80,6 +123,7 @@ export const agents = mysqlTable("agents", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 }, (table) => ({
   userIdx: index("agent_user_idx").on(table.userId),
+  wsIdx: index("agent_ws_idx").on(table.workspaceId),
   slugIdx: index("agent_slug_idx").on(table.slug),
 }));
 
@@ -91,6 +135,7 @@ export const tasks = mysqlTable("tasks", {
   id: int("id").autoincrement().primaryKey(),
   agentId: int("agentId").notNull(),
   userId: int("userId").notNull(),
+  workspaceId: int("workspaceId"),           // workspace context for team tasks
   title: varchar("title", { length: 512 }).notNull(),
   input: text("input").notNull(),
   output: text("output"),
@@ -108,6 +153,7 @@ export const tasks = mysqlTable("tasks", {
 }, (table) => ({
   agentIdx: index("task_agent_idx").on(table.agentId),
   userIdx: index("task_user_idx").on(table.userId),
+  wsIdx: index("task_ws_idx").on(table.workspaceId),
   statusIdx: index("task_status_idx").on(table.status),
 }));
 

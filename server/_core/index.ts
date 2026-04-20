@@ -9,6 +9,8 @@ import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { handleStripeWebhook } from "../stripeWebhook";
 import { registerAgentStreamRoutes } from "../agentStream";
+import { registerPublicAgentRoutes } from "../publicAgentRouter";
+import { startAgentWorker, stopAgentWorker } from "../taskQueue";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -41,6 +43,8 @@ async function startServer() {
   registerOAuthRoutes(app);
   // Agent streaming endpoints (SSE)
   registerAgentStreamRoutes(app);
+  // Public agent endpoints (no auth required, rate-limited)
+  registerPublicAgentRoutes(app);
   // tRPC API
   app.use(
     "/api/trpc",
@@ -66,6 +70,19 @@ async function startServer() {
   server.listen(port, () => {
     console.log(`Server running on http://localhost:${port}/`);
   });
+
+  // Start the durable BullMQ worker for agent task execution
+  // Falls back gracefully if Redis is not available
+  startAgentWorker();
+
+  // Graceful shutdown
+  const shutdown = async () => {
+    console.log("\n[Server] Shutting down gracefully...");
+    await stopAgentWorker();
+    server.close(() => process.exit(0));
+  };
+  process.on("SIGTERM", shutdown);
+  process.on("SIGINT", shutdown);
 }
 
 startServer().catch(console.error);

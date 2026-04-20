@@ -25,6 +25,7 @@ import { invokeLLM } from "./_core/llm";
 import { createCheckoutSession } from "./stripeWebhook";
 import { domainRouter } from "./domainRouter";
 import { browserRouter } from "./browserRouter";
+import { createPersonalWorkspace, canUserAccessAgent, canUserAccessTask } from "./workspace";
 import bcrypt from "bcryptjs";
 import { sdk } from "./_core/sdk";
 import { ONE_YEAR_MS } from "@shared/const";
@@ -63,9 +64,13 @@ export const appRouter = router({
       // Grant 100 free starter credits
       await addCredits(user.id, 100, "bonus", "Welcome gift — 100 free credits to get you started");
 
+      // Create a personal workspace for the new user (multi-tenancy root)
+      const workspace = await createPersonalWorkspace(user.id, input.name).catch(() => null);
+
       // Create a default fully-capable agent for the new user
       await createAgent({
         userId: user.id,
+        workspaceId: workspace?.id ?? 0,
         name: "Future AI",
         description: "Your personal AI assistant — ready to build, research, write, and create anything you need.",
         slug: `future-ai-${nanoid(8)}`,
@@ -176,7 +181,9 @@ export const appRouter = router({
     get: protectedProcedure.input(z.object({ id: z.number() })).query(async ({ ctx, input }) => {
       const agent = await getAgentById(input.id);
       if (!agent) throw new TRPCError({ code: "NOT_FOUND" });
-      if (agent.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN" });
+      // Workspace-aware authorization: allows team members to access shared agents
+      const hasAccess = await canUserAccessAgent(ctx.user.id, input.id);
+      if (!hasAccess) throw new TRPCError({ code: "FORBIDDEN" });
       return agent;
     }),
 
@@ -199,9 +206,18 @@ export const appRouter = router({
       apiCallsEnabled: z.boolean().default(true),
       temperature: z.number().min(0).max(2).default(0.7),
       maxSteps: z.number().min(1).max(50).default(30),
+      workspaceId: z.number().optional(), // If omitted, uses user's personal workspace
     })).mutation(async ({ ctx, input }) => {
+      const { workspaceId: inputWsId, ...agentData } = input;
       const slug = `${input.name.toLowerCase().replace(/[^a-z0-9]/g, "-")}-${nanoid(6)}`;
-      await createAgent({ ...input, userId: ctx.user.id, slug });
+      // Resolve workspace: use provided workspaceId (if user is a member) or personal workspace
+      const { getOrCreatePersonalWorkspace } = await import("./workspace");
+      let resolvedWsId = inputWsId;
+      if (!resolvedWsId) {
+        const ws = await getOrCreatePersonalWorkspace(ctx.user.id, ctx.user.name ?? "User");
+        resolvedWsId = ws.id;
+      }
+      await createAgent({ ...agentData, userId: ctx.user.id, workspaceId: resolvedWsId, slug });
       const agent = await getAgentBySlug(slug);
       return agent!;
     }),
@@ -225,7 +241,11 @@ export const appRouter = router({
       const { id, ...data } = input;
       const agent = await getAgentById(id);
       if (!agent) throw new TRPCError({ code: "NOT_FOUND" });
-      if (agent.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN" });
+      // Only the creator or an admin workspace member can update
+      const hasAccess = await canUserAccessAgent(ctx.user.id, id);
+      if (!hasAccess || (agent.userId !== ctx.user.id && ctx.user.role !== "admin")) {
+        throw new TRPCError({ code: "FORBIDDEN" });
+      }
       await updateAgent(id, data);
       return getAgentById(id);
     }),
@@ -233,6 +253,7 @@ export const appRouter = router({
     delete: protectedProcedure.input(z.object({ id: z.number() })).mutation(async ({ ctx, input }) => {
       const agent = await getAgentById(input.id);
       if (!agent) throw new TRPCError({ code: "NOT_FOUND" });
+      // Only the creator can delete an agent
       if (agent.userId !== ctx.user.id) throw new TRPCError({ code: "FORBIDDEN" });
       await deleteAgent(input.id);
       return { success: true };

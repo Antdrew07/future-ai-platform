@@ -18,6 +18,7 @@
  */
 
 import { invokeLLM } from "./_core/llm";
+import { executeCode, formatSandboxResult } from "./codeSandbox";
 import { execSync, exec } from "child_process";
 import { writeFileSync, readFileSync, existsSync, statSync, unlinkSync } from "fs";
 import { join } from "path";
@@ -464,93 +465,41 @@ async function executeCodeExecution(
   args: { language: string; code: string; description: string },
   taskId: string
 ): Promise<ToolResult> {
-  const tmpFile = tmpPath(args.language === "python" ? ".py" : args.language === "javascript" ? ".js" : ".sh");
-  try {
-    writeFileSync(tmpFile, args.code, "utf8");
+  // ── Secure Docker Sandbox ────────────────────────────────────────────────
+  // Code runs in an isolated container with no network, limited CPU/memory,
+  // and a read-only filesystem. Falls back to restricted child_process if
+  // Docker is unavailable.
+  const result = await executeCode(args.code, args.language, 30000);
+  const formatted = formatSandboxResult(result);
 
-    let cmd: string;
-    if (args.language === "python") {
-      cmd = `python3 "${tmpFile}"`;
-    } else if (args.language === "javascript") {
-      cmd = `node "${tmpFile}"`;
-    } else {
-      cmd = `bash "${tmpFile}"`;
-    }
-
-    const output = execSync(cmd, {
-      timeout: 30000,
-      maxBuffer: 1024 * 1024, // 1MB output limit
-      env: { ...process.env, PYTHONPATH: "/usr/lib/python3/dist-packages" },
-    }).toString();
-
-    // Check if code wrote any files and store them
-    const files = getTaskFiles(taskId);
-    const artifacts: { name: string; content: string; type: string; url?: string }[] = [];
-
-    // Look for file write patterns in the code
-    const fileWriteMatches = args.code.match(/(?:open|to_csv|to_json|to_excel|savefig|write)\s*\(\s*['"]([^'"]+)['"]/g) ?? [];
-    for (const match of fileWriteMatches) {
-      const nameMatch = match.match(/['"]([^'"]+)['"]/);
-      if (nameMatch) {
-        const fname = nameMatch[1];
-        const fpath = existsSync(fname) ? fname : existsSync(`/tmp/${fname}`) ? `/tmp/${fname}` : null;
-        if (fpath) {
-          const content = readFileSync(fpath).toString("base64");
-          const url = uploadFile(fpath);
-          files.set(fname, { content: `[binary file]`, url });
-          artifacts.push({ name: fname, content, type: "application/octet-stream", url });
-        }
-      }
-    }
-
-    const truncatedOutput = output.length > 4000 ? output.substring(0, 4000) + "\n... (output truncated)" : output;
-
-    return {
-      success: true,
-      output: `**Code executed successfully** (${args.description}):\n\`\`\`\n${truncatedOutput || "(no output)"}\n\`\`\``,
-      artifacts,
-    };
-  } catch (err: unknown) {
-    const execErr = err as { stdout?: Buffer; stderr?: Buffer; message?: string };
-    const stderr = execErr.stderr?.toString() ?? execErr.message ?? String(err);
-    const stdout = execErr.stdout?.toString() ?? "";
-    return {
-      success: false,
-      output: `**Code execution failed:**\n\`\`\`\n${stderr}\n\`\`\`${stdout ? `\n\n**Partial output:**\n\`\`\`\n${stdout}\n\`\`\`` : ""}`,
-      error: stderr,
-    };
-  } finally {
-    try { unlinkSync(tmpFile); } catch { /* ignore */ }
+  if (result.timedOut) {
+    return { success: false, output: formatted, error: "Execution timed out after 30 seconds" };
   }
+
+  return {
+    success: result.exitCode === 0,
+    output: `**Code executed** (${args.description}) [${result.sandboxed ? "🔒 sandboxed" : "⚠️ restricted"}]:\n${formatted}`,
+  };
 }
 
 async function executeShellCommand(
   args: { command: string; description: string; workdir?: string }
 ): Promise<ToolResult> {
-  // Blocklist dangerous commands
-  const blocked = ["rm -rf /", "dd if=", "mkfs", "format", "> /dev/", "shutdown", "reboot", "passwd"];
-  if (blocked.some(b => args.command.includes(b))) {
-    return { success: false, output: "", error: "Command blocked for safety reasons." };
+  // ── Secure Docker Sandbox for Shell Commands ──────────────────────────────
+  // Shell commands run inside an Alpine container with no network access,
+  // limited resources, and a read-only filesystem. This prevents host
+  // compromise even if the agent is tricked into running malicious commands.
+  const result = await executeCode(args.command, "bash", 60000);
+  const formatted = formatSandboxResult(result);
+
+  if (result.timedOut) {
+    return { success: false, output: formatted, error: "Command timed out after 60 seconds" };
   }
 
-  try {
-    const output = execSync(args.command, {
-      timeout: 60000,
-      maxBuffer: 1024 * 512,
-      cwd: args.workdir ?? "/tmp",
-      env: { ...process.env },
-    }).toString();
-
-    const truncated = output.length > 3000 ? output.substring(0, 3000) + "\n... (truncated)" : output;
-    return {
-      success: true,
-      output: `**Command:** \`${args.command}\`\n**Output:**\n\`\`\`\n${truncated || "(no output)"}\n\`\`\``,
-    };
-  } catch (err: unknown) {
-    const execErr = err as { stdout?: Buffer; stderr?: Buffer; message?: string };
-    const stderr = execErr.stderr?.toString() ?? execErr.message ?? String(err);
-    return { success: false, output: `**Command failed:** \`${args.command}\`\n\`\`\`\n${stderr}\n\`\`\``, error: stderr };
-  }
+  return {
+    success: result.exitCode === 0,
+    output: `**Command:** \`${args.command}\` [${result.sandboxed ? "🔒 sandboxed" : "⚠️ restricted"}]:\n${formatted}`,
+  };
 }
 
 async function executeReadFile(args: { filename: string }, taskId: string): Promise<ToolResult> {
