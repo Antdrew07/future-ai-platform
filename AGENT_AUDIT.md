@@ -59,10 +59,15 @@
 
 ## Priority Fixes Needed
 
-1. **write_file description** — make it the explicit primary tool for all code/app/website deliverables
-2. **System prompt: Building Apps** — add iOS (Swift), Android (Kotlin), React Native, Flutter, Expo sections with honest deployment disclosure
-3. **System prompt: Building Websites** — add instruction to browse source URLs, handle frameworks
-4. **System prompt: Missing sections** — add Python scripts, CLI tools, Chrome extensions, automations
-5. **CORRECT TOOL table** — expand to cover all task types
-6. **export_document vs write_file** — clarify the distinction
-7. **shell_execute vs code_execute** — add clear usage rule
+1. ✅ **write_file description** — made it the explicit primary tool for all code/app/website deliverables
+2. ✅ **System prompt: Building Apps** — added iOS (Swift), Android (Kotlin), React Native, Flutter, Expo sections with honest deployment disclosure
+3. ✅ **System prompt: Building Websites** — added instruction to browse source URLs, handle frameworks
+4. ✅ **System prompt: Missing sections** — added Python scripts, CLI tools, Chrome extensions, automations
+5. ✅ **CORRECT TOOL table** — expanded to cover all task types
+6. ✅ **export_document vs write_file** — clarified the distinction
+7. ✅ **shell_execute vs code_execute** — added clear usage rule
+
+## Audit Status
+
+All 7 priority fixes resolved as of April 18, 2026. Verified via 53/53 tests passing.
+GitHub connector integration confirmed working — April 20, 2026.
