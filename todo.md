@@ -654,12 +654,12 @@
 - [x] Rewrite agent system prompt web design section with premium CSS standards (gradients, glassmorphism, animations, premium fonts, polished layouts)
 
 ## Book Writing Fix (Apr 18, 2026)
-- [ ] Fix agent to write complete books (all chapters, not just intro + 1 chapter) when given a transcript or topic
-- [ ] Fix agent to output books as PDF (via export_document), not raw .md files
-- [ ] Add book-writing specific instructions to system prompt: chapter-by-chapter planning, full content, professional formatting
+- [x] Fix agent to write complete books (all chapters, not just intro + 1 chapter) when given a transcript or topic
+- [x] Fix agent to output books as PDF (via export_document), not raw .md files
+- [x] Add book-writing specific instructions to system prompt: chapter-by-chapter planning, full content, professional formatting
 
 ## Book Writing & Preview Fix (Apr 18, 2026)
-- [ ] Fix agent system prompt: write complete books (all chapters) when given transcript/topic, not just intro + 1 chapter
-- [ ] Fix agent system prompt: output books as PDF via export_document, not raw .md files
-- [ ] Add Markdown book preview to Output Files panel (render .md files as formatted readable text)
-- [ ] Add PDF preview to Output Files panel (show PDF inline in preview pane)
+- [x] Fix agent system prompt: write complete books (all chapters) when given transcript/topic, not just intro + 1 chapter
+- [x] Fix agent system prompt: output books as PDF via export_document, not raw .md files
+- [x] Add Markdown book preview to Output Files panel (render .md files as formatted readable text)
+- [x] Add PDF preview to Output Files panel (show PDF inline in preview pane)
