@@ -252,10 +252,10 @@ def peptide_page(c, p, page_num):
 
     # dosing table
     headers = ["Vial Size", "BAC Water", "Concentration", "Units to Draw", "Frequency", "Dose / Injection"]
-    col_w = [78, 104, 76, 74, 92, 108]   # = 532 = CW
+    col_w = [74, 96, 86, 76, 92, 108]   # = 532 = CW
     cell = ParagraphStyle("cell", fontName="Helvetica", fontSize=10.5, leading=12.5,
                           textColor=INK, alignment=1)
-    head = ParagraphStyle("head", fontName="Helvetica-Bold", fontSize=10.5, leading=12.5,
+    head = ParagraphStyle("head", fontName="Helvetica-Bold", fontSize=9.6, leading=11.5,
                           textColor=WHITE, alignment=1)
     vpad = 15                              # taller rows
     data = [[Paragraph(h, head) for h in headers]]
@@ -380,63 +380,130 @@ def peptide_page(c, p, page_num):
 # ----------------------------------------------------------------------------
 # cover + contents
 # ----------------------------------------------------------------------------
-def cover_page(c, total_peptides, total_cats):
-    c.setFillColor(NAVY_DEEP)
-    c.rect(0, 0, PAGE_W, PAGE_H, stroke=0, fill=1)
+def _vgradient(c, x, y, w, h, top_hex, bottom_hex, steps=140):
+    """Fake a vertical gradient with thin bands (top_hex at top)."""
+    tr, tg, tb = (int(top_hex[i:i + 2], 16) for i in (1, 3, 5))
+    br, bg, bb = (int(bottom_hex[i:i + 2], 16) for i in (1, 3, 5))
+    bh = h / steps
+    for i in range(steps):
+        t = i / (steps - 1)
+        r = (tr + (br - tr) * t) / 255.0
+        g = (tg + (bg - tg) * t) / 255.0
+        b = (tb + (bb - tb) * t) / 255.0
+        c.setFillColorRGB(r, g, b)
+        c.rect(x, y + h - (i + 1) * bh, w, bh + 0.6, stroke=0, fill=1)
+
+
+def cover_page(c, total_peptides, total_cats, cats):
+    # gradient backdrop (deep navy -> slightly lighter toward top)
+    _vgradient(c, 0, 0, PAGE_W, PAGE_H, "#0A2238", "#050E18")
+
+    # decorative molecular dot motif (faint)
+    import math
+    c.saveState()
+    c.setFillColor(ACCENT)
+    for (ox, oy, rad, n) in [(120, PAGE_H - 120, 34, 6), (PAGE_W - 110, 150, 28, 6)]:
+        c.setFillAlpha(0.10)
+        for k in range(n):
+            a = 2 * math.pi * k / n
+            c.circle(ox + rad * math.cos(a), oy + rad * math.sin(a), 4, stroke=0, fill=1)
+            c.setLineWidth(0.8)
+            c.setStrokeColor(ACCENT)
+            c.setStrokeAlpha(0.10)
+            c.line(ox, oy, ox + rad * math.cos(a), oy + rad * math.sin(a))
+        c.circle(ox, oy, 4.5, stroke=0, fill=1)
+    c.restoreState()
+
     # top + bottom accent bars
     c.setFillColor(ACCENT)
-    c.rect(0, PAGE_H - 6, PAGE_W, 6, stroke=0, fill=1)
-    c.rect(0, 0, PAGE_W, 6, stroke=0, fill=1)
-    # logo centered
+    c.rect(0, PAGE_H - 7, PAGE_W, 7, stroke=0, fill=1)
+    c.rect(0, 0, PAGE_W, 7, stroke=0, fill=1)
+    c.setFillColor(ACCENT_DK)
+    c.rect(0, PAGE_H - 11, PAGE_W, 4, stroke=0, fill=1)
+    c.rect(0, 7, PAGE_W, 4, stroke=0, fill=1)
+
+    # soft radial glow behind the logo (brand look)
+    c.saveState()
+    glow_cx, glow_cy = PAGE_W / 2, PAGE_H - 205
+    for i in range(22, 0, -1):
+        c.setFillColor(ACCENT)
+        c.setFillAlpha(0.020)
+        c.circle(glow_cx, glow_cy, i * 9, stroke=0, fill=1)
+    c.restoreState()
+
+    # logo
     try:
         lw, lh = 1200, 480
-        tw = 360
+        tw = 400
         th = tw * lh / lw
-        c.drawImage(LOGO, (PAGE_W - tw) / 2, PAGE_H - 250, width=tw, height=th,
+        c.drawImage(LOGO, (PAGE_W - tw) / 2, PAGE_H - 260, width=tw, height=th,
                     mask="auto", preserveAspectRatio=True)
     except Exception:
         pass
-    c.setFillColor(HexColor("#9FC7E6"))
-    c.setFont("Helvetica", 12)
-    c.drawCentredString(PAGE_W / 2, PAGE_H - 300, "Performance  ·  Science  ·  Power")
 
+    c.setFillColor(HexColor("#8FBFE6"))
+    c.setFont("Helvetica-Bold", 12.5)
+    c.drawCentredString(PAGE_W / 2, PAGE_H - 300, "P E R F O R M A N C E    ·    S C I E N C E    ·    P O W E R")
+
+    # thin rule above title
+    c.setStrokeColor(ACCENT_DK)
+    c.setLineWidth(1)
+    c.line(PAGE_W / 2 - 150, PAGE_H - 320, PAGE_W / 2 + 150, PAGE_H - 320)
+
+    # title
     c.setFillColor(WHITE)
-    c.setFont("Helvetica-Bold", 34)
-    c.drawCentredString(PAGE_W / 2, PAGE_H - 360, "PEPTIDE RECONSTITUTION")
+    c.setFont("Helvetica-Bold", 40)
+    c.drawCentredString(PAGE_W / 2, PAGE_H - 372, "THE PEPTIDE")
+    c.setFont("Helvetica-Bold", 40)
+    c.drawCentredString(PAGE_W / 2, PAGE_H - 414, "RECONSTITUTION")
     c.setFillColor(ACCENT)
-    c.setFont("Helvetica-Bold", 34)
-    c.drawCentredString(PAGE_W / 2, PAGE_H - 398, "& DOSING GUIDE")
+    c.setFont("Helvetica-Bold", 40)
+    c.drawCentredString(PAGE_W / 2, PAGE_H - 456, "& DOSING GUIDE")
 
     c.setFillColor(HexColor("#C9DCEC"))
-    c.setFont("Helvetica", 12)
-    c.drawCentredString(PAGE_W / 2, PAGE_H - 432,
+    c.setFont("Helvetica", 12.5)
+    c.drawCentredString(PAGE_W / 2, PAGE_H - 486,
                         "Mixing ratios  ·  BAC water  ·  Syringe draw  ·  Frequency  ·  Cycle")
 
     # stat pill
     c.setFillColor(ACCENT_DK)
-    pill_w, pill_h = 300, 34
-    c.roundRect((PAGE_W - pill_w) / 2, PAGE_H - 490, pill_w, pill_h, 17, stroke=0, fill=1)
+    pill_w, pill_h = 330, 36
+    c.roundRect((PAGE_W - pill_w) / 2, PAGE_H - 540, pill_w, pill_h, 18, stroke=0, fill=1)
     c.setFillColor(WHITE)
-    c.setFont("Helvetica-Bold", 12)
-    c.drawCentredString(PAGE_W / 2, PAGE_H - 479,
-                        f"{total_peptides} Peptides  ·  {total_cats} Categories  ·  One Page Each")
+    c.setFont("Helvetica-Bold", 12.5)
+    c.drawCentredString(PAGE_W / 2, PAGE_H - 528,
+                        f"{total_peptides} PEPTIDES  ·  {total_cats} CATEGORIES  ·  ONE PAGE EACH")
+
+    # category ribbon
+    c.setFont("Helvetica-Bold", 8.6)
+    ribbon = "   ·   ".join(cats.keys())
+    yy = PAGE_H - 566
+    for ln in wrap_lines(ribbon, "Helvetica-Bold", 8.6, CW - 40):
+        c.setFillColor(HexColor("#7C97AD"))
+        c.drawCentredString(PAGE_W / 2, yy, ln)
+        yy -= 13
 
     # disclaimer box
-    c.setFillColor(HexColor("#10243A"))
+    c.setFillColor(HexColor("#0C1E32"))
     c.setStrokeColor(ACCENT_DK)
-    c.roundRect(MARGIN + 30, 70, CW - 60, 96, 8, stroke=1, fill=1)
-    msg = ("This guide is for RESEARCH USE ONLY and is NOT intended for human consumption. "
-           "All dosing information is provided for reference only. Peptides 4 Power makes no "
-           "medical claims. Always consult a qualified healthcare professional and follow all "
-           "applicable laws before handling research compounds.")
+    c.setLineWidth(1)
+    c.roundRect(MARGIN + 24, 64, CW - 48, 104, 8, stroke=1, fill=1)
+    c.setFillColor(ACCENT)
+    c.setFont("Helvetica-Bold", 9.5)
+    c.drawCentredString(PAGE_W / 2, 150, "RESEARCH USE ONLY")
+    msg = ("This guide is NOT intended for human consumption. All dosing information is "
+           "provided for reference only. Peptides 4 Power makes no medical claims. Always "
+           "consult a qualified healthcare professional and follow all applicable laws "
+           "before handling research compounds.")
     c.setFillColor(HexColor("#B9CEDF"))
-    yy = 150
-    for ln in wrap_lines(msg, "Helvetica", 9, CW - 110):
+    c.setFont("Helvetica", 9)
+    yy = 134
+    for ln in wrap_lines(msg, "Helvetica", 9, CW - 100):
         c.drawCentredString(PAGE_W / 2, yy, ln)
         yy -= 13
     c.setFillColor(HexColor("#6E8597"))
     c.setFont("Helvetica", 8)
-    c.drawCentredString(PAGE_W / 2, 30, "© 2026 Peptides 4 Power  ·  peptides4power.us")
+    c.drawCentredString(PAGE_W / 2, 34, "© 2026 Peptides 4 Power  ·  peptides4power.us  ·  First Edition")
     c.showPage()
 
 
@@ -503,7 +570,7 @@ def build():
     c.setTitle("Peptides 4 Power - Reconstitution & Dosing Guide")
     c.setAuthor("Peptides 4 Power")
 
-    cover_page(c, len(PEPTIDES), len(cats))
+    cover_page(c, len(PEPTIDES), len(cats), cats)
     contents_page(c, cats, page_index)
 
     pn = 3
