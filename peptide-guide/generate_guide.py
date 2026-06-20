@@ -210,11 +210,11 @@ def footer(c, page_num):
     c.drawRightString(PAGE_W - MARGIN, 30, f"Page {page_num}")
 
 
-def section_label(c, text, x, y, accent):
+def section_label(c, text, x, y, accent, size=12):
     c.setFillColor(accent)
-    c.rect(x, y - 1, 4, 13, stroke=0, fill=1)
+    c.rect(x, y - 1, 4, size + 1, stroke=0, fill=1)
     c.setFillColor(NAVY)
-    c.setFont("Helvetica-Bold", 12)
+    c.setFont("Helvetica-Bold", size)
     c.drawString(x + 10, y, text)
     return y
 
@@ -223,103 +223,128 @@ def section_label(c, text, x, y, accent):
 # peptide page
 # ----------------------------------------------------------------------------
 def peptide_page(c, p, page_num):
+    """Larger-type layout that vertically fills the page.
+
+    Block heights are measured first, then the leftover vertical space is
+    shared out as breathing room between sections so the content reaches the
+    bottom of the page instead of leaving a blank lower half.
+    """
     cat_col = CAT_COLORS.get(p["category"], ACCENT)
     header_band(c, p["category"], "Reconstitution Guide")
 
-    y = PAGE_H - 58 - 30
-    # title
-    c.setFillColor(NAVY)
-    c.setFont("Helvetica-Bold", 26)
-    c.drawString(MARGIN, y, p["name"])
-    y -= 18
-    # tagline
-    tagline = "  ·  ".join(benefits_from_purpose(p["purpose"]))
-    c.setFillColor(cat_col)
-    c.setFont("Helvetica-Bold", 10.5)
-    c.drawString(MARGIN, y, tagline)
-    y -= 14
-    c.setStrokeColor(RULE)
-    c.setLineWidth(0.8)
-    c.line(MARGIN, y, PAGE_W - MARGIN, y)
-    y -= 22
+    # ---- type scale ----
+    BODY, BODY_LEAD = 12, 16.5
+    LABEL_FS = 14
+    benefits = benefits_from_purpose(p["purpose"])
 
-    # ---- two columns: About / Key Benefits ----
-    col_gap = 24
-    left_w = CW * 0.56
+    # ---- pre-measure variable blocks ----
+    col_gap = 26
+    left_w = CW * 0.55
     right_x = MARGIN + left_w + col_gap
     right_w = CW - left_w - col_gap
-    top = y
 
-    section_label(c, "About This Peptide", MARGIN, top, cat_col)
-    ya = draw_wrapped(c, about_text(p), MARGIN, top - 18, "Helvetica", 9.3,
-                      left_w, 12.6, INK)
+    about_lines = wrap_lines(about_text(p), "Helvetica", BODY, left_w)
+    about_h = 22 + len(about_lines) * BODY_LEAD
+    ben_h = 22
+    for b in benefits:
+        ben_h += max(1, len(wrap_lines(b, "Helvetica", BODY, right_w - 16))) * BODY_LEAD + 3
+    col_block_h = max(about_h, ben_h)
 
-    section_label(c, "Key Benefits", right_x, top, cat_col)
-    yb = top - 18
-    c.setFont("Helvetica", 9.3)
-    for b in benefits_from_purpose(p["purpose"]):
-        c.setFillColor(cat_col)
-        c.setFont("Helvetica-Bold", 9.3)
-        c.drawString(right_x, yb, "✓")
-        c.setFillColor(INK)
-        c.setFont("Helvetica", 9.3)
-        for i, ln in enumerate(wrap_lines(b, "Helvetica", 9.3, right_w - 14)):
-            c.drawString(right_x + 13, yb, ln)
-            yb -= 12.6
-        yb -= 1.5
-
-    y = min(ya, yb) - 16
-
-    # ---- dosing table ----
-    section_label(c, "Reconstitution & Dosing Guide", MARGIN, y, cat_col)
-    y -= 14
-
+    # dosing table
     headers = ["Vial Size", "BAC Water", "Concentration", "Units to Draw", "Frequency", "Dose / Injection"]
     col_w = [78, 104, 76, 74, 92, 108]   # = 532 = CW
-    cell = ParagraphStyle("cell", fontName="Helvetica", fontSize=8.4, leading=10,
+    cell = ParagraphStyle("cell", fontName="Helvetica", fontSize=10.5, leading=12.5,
                           textColor=INK, alignment=1)
-    head = ParagraphStyle("head", fontName="Helvetica-Bold", fontSize=8.6, leading=10,
+    head = ParagraphStyle("head", fontName="Helvetica-Bold", fontSize=10.5, leading=12.5,
                           textColor=WHITE, alignment=1)
+    vpad = 15                              # taller rows
     data = [[Paragraph(h, head) for h in headers]]
     for (vial, bac, units) in p["rows"]:
-        data.append([
-            Paragraph(vial, cell),
-            Paragraph(bac, cell),
-            Paragraph(concentration(vial, bac), cell),
-            Paragraph(units, cell),
-            Paragraph(p["freq"], cell),
-            Paragraph(p["dose"], cell),
-        ])
+        data.append([Paragraph(vial, cell), Paragraph(bac, cell),
+                     Paragraph(concentration(vial, bac), cell), Paragraph(units, cell),
+                     Paragraph(p["freq"], cell), Paragraph(p["dose"], cell)])
     tbl = Table(data, colWidths=col_w)
     style = [
         ("BACKGROUND", (0, 0), (-1, 0), ACCENT_DK),
         ("LINEBELOW", (0, 0), (-1, 0), 1.4, ACCENT),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("TOPPADDING", (0, 0), (-1, -1), 6),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
-        ("LEFTPADDING", (0, 0), (-1, -1), 4),
-        ("RIGHTPADDING", (0, 0), (-1, -1), 4),
+        ("TOPPADDING", (0, 0), (-1, -1), vpad), ("BOTTOMPADDING", (0, 0), (-1, -1), vpad),
+        ("LEFTPADDING", (0, 0), (-1, -1), 4), ("RIGHTPADDING", (0, 0), (-1, -1), 4),
         ("LINEBELOW", (0, 1), (-1, -1), 0.5, RULE),
         ("BOX", (0, 0), (-1, -1), 0.6, RULE),
     ]
     for r in range(1, len(data)):
-        if r % 2 == 1:
-            style.append(("BACKGROUND", (0, r), (-1, r), TINT2))
-        else:
-            style.append(("BACKGROUND", (0, r), (-1, r), TINT))
+        style.append(("BACKGROUND", (0, r), (-1, r), TINT2 if r % 2 else TINT))
     tbl.setStyle(TableStyle(style))
-    tw, th = tbl.wrap(CW, 300)
-    tbl.drawOn(c, MARGIN, y - th)
-    y = y - th - 20
+    _, th = tbl.wrap(CW, 600)
+    table_block_h = 24 + th
 
-    # ---- info cards ----
+    # info cards
     cards = [("CYCLE", p["cycle"]),
              ("ADMINISTRATION", p.get("admin", "Subcutaneous injection")),
              ("STORAGE", storage_for(p)),
              ("PURPOSE", p["purpose"].replace(" . ", ", "))]
-    gap = 12
-    card_w = (CW - 3 * gap) / 4.0
-    card_h = 86
+    card_gap = 12
+    card_w = (CW - 3 * card_gap) / 4.0
+    card_val_lead = 13.5
+    max_card_lines = max(len(wrap_lines(v, "Helvetica", 10, card_w - 18)) for _, v in cards)
+    card_h = max(108, 34 + max_card_lines * card_val_lead)
+
+    # notes
+    note_lines = wrap_lines("Notes:  " + p["note"], "Helvetica-Oblique", 11, CW - 24)
+    notes_h = 18 + len(note_lines) * 14
+
+    # ---- vertical justification ----
+    # fixed top: title + tagline + rule
+    title_top = PAGE_H - 58 - 34
+    rule_y = title_top - 22 - 18           # after title and tagline
+    region_top = rule_y - 10
+    region_bottom = 58                      # just above footer line
+    available = region_top - region_bottom
+    blocks_h = col_block_h + table_block_h + card_h + notes_h
+    bottom_cushion = 20
+    # share the leftover space across the 3 gaps between the 4 blocks so the
+    # notes box settles just above the footer instead of leaving a blank lower half
+    distributable = available - blocks_h - bottom_cushion
+    gap = max(16, min(120, distributable / 3.0)) if distributable > 0 else 16
+
+    # ---- draw: title / tagline / rule ----
+    c.setFillColor(NAVY)
+    c.setFont("Helvetica-Bold", 32)
+    c.drawString(MARGIN, title_top, p["name"])
+    c.setFillColor(cat_col)
+    c.setFont("Helvetica-Bold", 13)
+    c.drawString(MARGIN, title_top - 22, "  ·  ".join(benefits))
+    c.setStrokeColor(RULE)
+    c.setLineWidth(0.8)
+    c.line(MARGIN, rule_y, PAGE_W - MARGIN, rule_y)
+
+    # ---- two columns ----
+    top = region_top
+    section_label(c, "About This Peptide", MARGIN, top, cat_col, LABEL_FS)
+    draw_wrapped(c, about_text(p), MARGIN, top - 22, "Helvetica", BODY, left_w, BODY_LEAD, INK)
+
+    section_label(c, "Key Benefits", right_x, top, cat_col, LABEL_FS)
+    yb = top - 22
+    for b in benefits:
+        c.setFillColor(cat_col)
+        c.setFont("Helvetica-Bold", BODY)
+        c.drawString(right_x, yb, "✓")
+        c.setFillColor(INK)
+        c.setFont("Helvetica", BODY)
+        for ln in wrap_lines(b, "Helvetica", BODY, right_w - 16):
+            c.drawString(right_x + 16, yb, ln)
+            yb -= BODY_LEAD
+        yb -= 3
+
+    y = top - col_block_h - gap
+
+    # ---- dosing table ----
+    section_label(c, "Reconstitution & Dosing Guide", MARGIN, y, cat_col, LABEL_FS)
+    tbl.drawOn(c, MARGIN, y - 22 - th)
+    y = y - table_block_h - gap
+
+    # ---- info cards ----
     cx = MARGIN
     for label, value in cards:
         c.setFillColor(TINT2)
@@ -329,26 +354,24 @@ def peptide_page(c, p, page_num):
         c.setFillColor(cat_col)
         c.rect(cx, y - 4, card_w, 4, stroke=0, fill=1)
         c.setFillColor(ACCENT_DK)
-        c.setFont("Helvetica-Bold", 7.6)
-        c.drawString(cx + 8, y - 17, label)
-        draw_wrapped(c, value, cx + 8, y - 30, "Helvetica", 8, card_w - 16, 10.4,
-                     INK, max_lines=6)
-        cx += card_w + gap
-    y -= card_h + 16
+        c.setFont("Helvetica-Bold", 9)
+        c.drawString(cx + 9, y - 20, label)
+        draw_wrapped(c, value, cx + 9, y - 36, "Helvetica", 10, card_w - 18,
+                     card_val_lead, INK, max_lines=8)
+        cx += card_w + card_gap
+    y = y - card_h - gap
 
     # ---- notes ----
-    note_lines = wrap_lines("Notes:  " + p["note"], "Helvetica-Oblique", 8.6, CW - 20)
-    nh = 14 + len(note_lines) * 11
     c.setFillColor(HexColor("#FFF8E8"))
     c.setStrokeColor(HexColor("#E9D8A6"))
     c.setLineWidth(0.8)
-    c.roundRect(MARGIN, y - nh, CW, nh, 5, stroke=1, fill=1)
+    c.roundRect(MARGIN, y - notes_h, CW, notes_h, 5, stroke=1, fill=1)
     c.setFillColor(HexColor("#7A5B12"))
-    ny = y - 14
-    c.setFont("Helvetica-Oblique", 8.6)
+    ny = y - 17
+    c.setFont("Helvetica-Oblique", 11)
     for ln in note_lines:
-        c.drawString(MARGIN + 10, ny, ln)
-        ny -= 11
+        c.drawString(MARGIN + 12, ny, ln)
+        ny -= 14
 
     footer(c, page_num)
     c.showPage()
@@ -495,5 +518,19 @@ def build():
     print(f"Wrote {OUT}  ({pn - 1} pages total, {len(PEPTIDES)} peptide sheets)")
 
 
+def generate_one(name, path):
+    """Render a single peptide page to its own PDF (for layout previews)."""
+    p = next(pp for pp in PEPTIDES if pp["name"] == name)
+    c = canvas.Canvas(path, pagesize=letter)
+    c.setTitle(f"{name} - preview")
+    peptide_page(c, p, 4)
+    c.save()
+    print(f"Wrote preview {path}")
+
+
 if __name__ == "__main__":
-    build()
+    import sys
+    if len(sys.argv) > 2 and sys.argv[1] == "--one":
+        generate_one(sys.argv[2], sys.argv[3])
+    else:
+        build()
