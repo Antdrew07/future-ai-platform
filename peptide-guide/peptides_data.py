@@ -267,6 +267,11 @@ PEPTIDES = [
          freq="Daily", dose="100-300mcg",
          note="May cause transient flushing. Often used in CIRS / mold-recovery protocols.",
          cycle="8 weeks on, 8 off", purpose="Memory . Autoimmune . Blood flow"),
+    dict(category="Cognitive & Mood", name="DSIP",
+         rows=[("5mg", "2ml", "10u"), ("10mg", "2ml", "5-10u")],
+         freq="Daily PM", dose="250-500mcg",
+         note="Delta Sleep-Inducing Peptide - inject 1-3 hours before bed.",
+         cycle="8 weeks on, 8 off", purpose="Sleep . Recovery"),
 
     # ===================== IMMUNITY & INFLAMMATION =====================
     dict(category="Immunity & Inflammation", name="Thymalin",
@@ -458,6 +463,11 @@ PEPTIDES = [
          note="Inject on an empty stomach and avoid alcohol. Onset can take a few hours; "
               "use ahead of time, not immediately before.",
          cycle="As needed", purpose="Libido . Arousal . Sexual function"),
+    dict(category="Sexual Health", name="Kisspeptin-10",
+         rows=[("5mg", "2ml", "7-10u"), ("10mg", "2ml", "5-6u")],
+         freq="Daily, evening", dose="150-200mcg",
+         note="Stimulates LH/FSH and natural testosterone. Dose in the evening.",
+         cycle="As needed", purpose="Testosterone . Libido . Reproductive hormones"),
 ]
 
 
