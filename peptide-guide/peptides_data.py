@@ -84,6 +84,11 @@ PEPTIDES = [
          freq="2x daily M-F, fasted", dose="200-250mcg",
          note="Take fasted. Strong GH release - may transiently raise appetite, cortisol and prolactin.",
          cycle="8-12 weeks", purpose="GH . Fat loss . Muscle . Sleep . Skin"),
+    dict(category="GH & Muscle Support", name="Hexarelin",
+         rows=[("3mg", "2ml", "~17u"), ("5mg", "2ml", "10u"), ("10mg", "2ml", "5u")],
+         freq="2x daily", dose="250mcg",
+         note="A potent GHRP; take fasted. Similar use to GHRP-2 for a strong GH pulse.",
+         cycle="8-12 weeks on", purpose="GH . Muscle . Recovery . Fat loss"),
     dict(category="GH & Muscle Support", name="ACE-031",
          rows=[("1mg", "2ml", "20u")],
          freq="Every other day", dose="1mg",
@@ -126,6 +131,11 @@ PEPTIDES = [
          freq="M-F", dose="500mcg - 1mg",
          note="Avoid NSAIDs while running it; reconstitute with acetic acid if the peptide gels.",
          cycle="8 weeks on, 8 off", purpose="Anti-inflammatory . Gut health"),
+    dict(category="Healing & Recovery", name="Tri-Heal Max",
+         rows=[("45mg", "3ml", "15u")],
+         freq="Daily", dose="15 units (~2.25mg blend)",
+         note="P4P maximum-strength multi-peptide healing blend (45mg total). Dose per the label; do not exceed.",
+         cycle="8 weeks on", purpose="Tissue repair . Recovery . Inflammation"),
 
     # ===================== FAT LOSS & METABOLISM =====================
     dict(category="Fat Loss & Metabolism", name="Retatrutide",
@@ -323,6 +333,11 @@ PEPTIDES = [
          cycle="30 days", purpose="Tan . Libido . Appetite suppression"),
 
     # ===================== AMINO BLENDS =====================
+    dict(category="Amino Blends", name="B12",
+         rows=[("10mg", "Premixed", "50u")],
+         freq="Every other day or as needed", dose="50 units",
+         note="Ready-to-draw B12 shot for energy and metabolic support.",
+         cycle="Ongoing", purpose="Energy . Metabolism . B-vitamin support"),
     dict(category="Amino Blends", name="L-Carnitine",
          rows=[("500-600mg/ml", "Premixed", "50-100u")],
          freq="Daily as needed", dose="250-600mg",
