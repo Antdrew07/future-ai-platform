@@ -55,6 +55,7 @@ CAT_COLORS = {
     "Hair, Skin & Cosmetic":     HexColor("#D5599E"),
     "Amino Blends":              HexColor("#E08A2E"),
     "Bioregulators":             HexColor("#2BA6C4"),
+    "Sexual Health":             HexColor("#C0436B"),
 }
 
 DISCLAIMER = ("Peptides 4 Power  |  peptides4power.us  |  For Research Use Only  -  "
