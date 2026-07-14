@@ -47,6 +47,20 @@ export function checkPasscode(input: string): boolean {
   return timingSafeEqual(a, b);
 }
 
+/** Case-insensitive check of the submitted username against APP_USERNAME. */
+export function checkUsername(input: string): boolean {
+  const expected = (process.env.APP_USERNAME || 'carol').trim().toLowerCase();
+  return String(input).trim().toLowerCase() === expected;
+}
+
+/** Validate both username and passcode together. */
+export function checkCredentials(username: string, passcode: string): boolean {
+  // Evaluate both sides regardless of the username result to keep timing stable.
+  const passOk = checkPasscode(passcode);
+  const userOk = checkUsername(username);
+  return userOk && passOk;
+}
+
 export function sessionCookieOptions() {
   return {
     httpOnly: true,
