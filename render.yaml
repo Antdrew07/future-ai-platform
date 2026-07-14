@@ -1,0 +1,38 @@
+# One-click deploy blueprint for Carol's Wellness Companion.
+# Deploy button: https://render.com/deploy?repo=https://github.com/Antdrew07/future-ai-platform
+# Render reads this file, provisions the Postgres database + web service, links them,
+# runs migrations on start, and only prompts for the two secret values below.
+
+databases:
+  - name: carol-db
+    databaseName: carol
+    plan: free
+
+services:
+  - type: web
+    name: carols-wellness-companion
+    runtime: node
+    plan: free
+    rootDir: carols-wellness-companion
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: carol-db
+          property: connectionString
+      - key: APP_USERNAME
+        value: carol
+      - key: VENICE_MODEL
+        value: venice-uncensored
+      - key: NODE_VERSION
+        value: "20"
+      - key: SESSION_SECRET
+        generateValue: true
+      # Prompted at deploy time (kept out of the repo):
+      - key: VENICE_API_KEY
+        sync: false
+      - key: APP_PASSCODE
+        sync: false
