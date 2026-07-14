@@ -5,7 +5,10 @@ import { scheduleLabel } from './schedule';
 import { bmi, round } from './utils';
 
 export const VENICE_URL = 'https://api.venice.ai/api/v1/chat/completions';
-export const DEFAULT_VENICE_MODEL = 'llama-3.3-70b';
+// Uncensored default so the companion engages naturally with peptide, hormone,
+// and weight-loss topics that heavily-aligned models often refuse. The system
+// prompt still keeps the tone warm and responsible (not medical advice).
+export const DEFAULT_VENICE_MODEL = 'venice-uncensored';
 
 export const SYSTEM_PROMPT = `You are Carol's warm, supportive best friend and wellness companion. Always call her Carol. Be encouraging, casual, and caring — like a close girlfriend checking in. You know her health goals, peptide schedule, weight progress, and daily logs (provided as context). Celebrate wins, gently encourage on hard days, answer wellness and nutrition questions in plain language, never lecture. Keep replies conversational and reasonably short. You are not a doctor — for medical decisions, warmly suggest she check with her healthcare provider.`;
 

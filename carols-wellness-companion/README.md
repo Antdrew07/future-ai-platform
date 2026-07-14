@@ -36,7 +36,7 @@ Copy `.env.example` to `.env` and fill these in:
 | ----------------- | :------: | -------------------------------------------------------------------------------------------- |
 | `DATABASE_URL`    |    ✅    | PostgreSQL connection string. On Railway, reference the Postgres plugin's `DATABASE_URL`.    |
 | `VENICE_API_KEY`  |    ✅    | Server-side Venice AI key. **Never exposed to the browser.** Used only by `/api/chat`.        |
-| `VENICE_MODEL`    |          | Venice model id. Defaults to `llama-3.3-70b`. See your Venice dashboard for other options.    |
+| `VENICE_MODEL`    |          | Venice model id. Defaults to `venice-uncensored` (won't refuse peptide/wellness topics). Other options: `llama-3.3-70b`, `mistral-31-24b`. |
 | `APP_PASSCODE`    |    ✅    | The single passcode Carol uses to log in.                                                     |
 | `SESSION_SECRET`  |          | Long random string used to sign the session cookie. Falls back to `APP_PASSCODE` if unset.    |
 | `DEMO_MODE`       |          | Set to `true` to enable the Settings → Demo Mode seed/clear buttons.                           |
@@ -103,7 +103,9 @@ to the browser. To rotate it:
   redeploys automatically.
 - **Locally:** edit `VENICE_API_KEY` in your `.env` and restart `npm run dev`.
 
-To change the model, set `VENICE_MODEL` (e.g. `llama-3.3-70b`, `mistral-31-24b`, `venice-uncensored`).
+To change the model, set `VENICE_MODEL`. The default is `venice-uncensored` (so the companion
+engages with peptide/hormone/weight-loss questions instead of refusing); alternatives include
+`llama-3.3-70b` and `mistral-31-24b`.
 
 ---
 
