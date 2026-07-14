@@ -1,0 +1,130 @@
+// Carol's Wellness Companion — Prisma schema
+// PostgreSQL provided by Railway via DATABASE_URL.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// Single-user profile (Carol). One row is expected.
+model Profile {
+  id             String    @id @default(cuid())
+  name           String    @default("Carol")
+  heightIn       Float? // height in inches
+  startingWeight Float? // lbs
+  goalWeight     Float? // lbs
+  targetDate     DateTime?
+  goals          String[]  @default([]) // selected health goals
+  waterGoalOz    Int       @default(64)
+  onboarded      Boolean   @default(false)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+/// A peptide/medication Carol is tracking.
+model Peptide {
+  id           String    @id @default(cuid())
+  name         String
+  dose         String // e.g. "0.25 mg"
+  route        String    @default("injection") // "injection" | "oral"
+  scheduleType String    @default("daily") // "daily" | "weekdays" | "cycle"
+  weekdays     Int[]     @default([]) // 0=Sun..6=Sat, used when scheduleType = "weekdays"
+  cycleOnDays  Int? // used when scheduleType = "cycle"
+  cycleOffDays Int?
+  cycleAnchor  DateTime? // first day of the cycle
+  timeOfDay    String    @default("morning") // "morning" | "evening" | "HH:mm"
+  active       Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  doseLogs     DoseLog[]
+
+  @@index([active])
+}
+
+/// One logged dose of a peptide on a given day.
+model DoseLog {
+  id            String   @id @default(cuid())
+  peptideId     String
+  peptide       Peptide  @relation(fields: [peptideId], references: [id], onDelete: Cascade)
+  date          DateTime @db.Date
+  checkedAt     DateTime @default(now())
+  injectionSite String?
+
+  @@unique([peptideId, date])
+  @@index([date])
+}
+
+/// Weekly weigh-in with optional measurements and progress photo.
+model WeighIn {
+  id        String   @id @default(cuid())
+  date      DateTime @unique @db.Date
+  weight    Float // lbs
+  waist     Float? // inches
+  hips      Float? // inches
+  photoUrl  String? // data URL or hosted URL
+  createdAt DateTime @default(now())
+}
+
+/// Water intake increments (summed per day).
+model WaterLog {
+  id        String   @id @default(cuid())
+  date      DateTime @db.Date
+  amountOz  Int
+  createdAt DateTime @default(now())
+
+  @@index([date])
+}
+
+/// Meal log entries.
+model MealLog {
+  id          String   @id @default(cuid())
+  date        DateTime @db.Date
+  mealType    String // "breakfast" | "lunch" | "dinner" | "snack"
+  description String
+  createdAt   DateTime @default(now())
+
+  @@index([date])
+}
+
+/// Daily mood + energy check-in (1-5 scale).
+model MoodEnergyLog {
+  id        String   @id @default(cuid())
+  date      DateTime @unique @db.Date
+  mood      Int // 1-5
+  energy    Int // 1-5
+  note      String?
+  createdAt DateTime @default(now())
+}
+
+/// Daily sleep hours.
+model SleepLog {
+  id        String   @id @default(cuid())
+  date      DateTime @unique @db.Date
+  hours     Float
+  createdAt DateTime @default(now())
+}
+
+/// Free-form journal / notes entries.
+model JournalEntry {
+  id        String   @id @default(cuid())
+  date      DateTime @db.Date
+  title     String?
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([date])
+}
+
+/// Persisted AI companion chat history.
+model ChatMessage {
+  id        String   @id @default(cuid())
+  role      String // "user" | "assistant"
+  content   String
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
