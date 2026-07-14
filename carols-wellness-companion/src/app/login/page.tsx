@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Heart, Lock } from 'lucide-react';
+import { Heart, Lock, User } from 'lucide-react';
 import { apiPost } from '@/lib/http';
 
 export default function LoginPage() {
@@ -16,6 +16,7 @@ export default function LoginPage() {
 function LoginForm() {
   const router = useRouter();
   const params = useSearchParams();
+  const [username, setUsername] = useState('');
   const [passcode, setPasscode] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -25,7 +26,7 @@ function LoginForm() {
     setError(null);
     setLoading(true);
     try {
-      await apiPost('/api/auth/login', { passcode });
+      await apiPost('/api/auth/login', { username, passcode });
       const from = params.get('from');
       router.replace(from && from.startsWith('/') ? from : '/');
       router.refresh();
@@ -48,8 +49,29 @@ function LoginForm() {
 
         <form onSubmit={submit} className="card space-y-4">
           <div>
+            <label className="label" htmlFor="username">
+              Username
+            </label>
+            <div className="relative">
+              <User className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-blush-400" />
+              <input
+                id="username"
+                type="text"
+                autoComplete="username"
+                autoCapitalize="none"
+                autoCorrect="off"
+                autoFocus
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="input pl-11"
+                placeholder="carol"
+              />
+            </div>
+          </div>
+
+          <div>
             <label className="label" htmlFor="passcode">
-              Enter your passcode
+              Password
             </label>
             <div className="relative">
               <Lock className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-blush-400" />
@@ -58,11 +80,10 @@ function LoginForm() {
                 type="password"
                 inputMode="text"
                 autoComplete="current-password"
-                autoFocus
                 value={passcode}
                 onChange={(e) => setPasscode(e.target.value)}
                 className="input pl-11"
-                placeholder="••••••"
+                placeholder="••••••••"
               />
             </div>
           </div>
@@ -71,7 +92,11 @@ function LoginForm() {
             <p className="rounded-2xl bg-blush-50 px-4 py-3 text-sm text-blush-700">{error}</p>
           )}
 
-          <button type="submit" disabled={loading || !passcode} className="btn-primary w-full py-3.5">
+          <button
+            type="submit"
+            disabled={loading || !username || !passcode}
+            className="btn-primary w-full py-3.5"
+          >
             {loading ? 'Unlocking…' : 'Unlock'}
           </button>
         </form>

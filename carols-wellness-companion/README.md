@@ -37,7 +37,8 @@ Copy `.env.example` to `.env` and fill these in:
 | `DATABASE_URL`    |    ✅    | PostgreSQL connection string. On Railway, reference the Postgres plugin's `DATABASE_URL`.    |
 | `VENICE_API_KEY`  |    ✅    | Server-side Venice AI key. **Never exposed to the browser.** Used only by `/api/chat`.        |
 | `VENICE_MODEL`    |          | Venice model id. Defaults to `venice-uncensored` (won't refuse peptide/wellness topics). Other options: `llama-3.3-70b`, `mistral-31-24b`. |
-| `APP_PASSCODE`    |    ✅    | The single passcode Carol uses to log in.                                                     |
+| `APP_USERNAME`    |          | Login username (case-insensitive). Defaults to `carol` if unset.                              |
+| `APP_PASSCODE`    |    ✅    | The password Carol uses to log in (paired with the username).                                 |
 | `SESSION_SECRET`  |          | Long random string used to sign the session cookie. Falls back to `APP_PASSCODE` if unset.    |
 | `DEMO_MODE`       |          | Set to `true` to enable the Settings → Demo Mode seed/clear buttons.                           |
 
