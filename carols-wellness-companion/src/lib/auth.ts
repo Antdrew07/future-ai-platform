@@ -1,7 +1,8 @@
 import { createHmac, timingSafeEqual } from 'crypto';
 import { cookies } from 'next/headers';
+import { SESSION_COOKIE } from './auth-edge';
 
-export const SESSION_COOKIE = 'carol_session';
+export { SESSION_COOKIE };
 const SESSION_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
 
 function getSecret(): string {

@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { SESSION_COOKIE } from '@/lib/auth';
-import { verifySessionTokenEdge } from '@/lib/auth-edge';
+import { SESSION_COOKIE, verifySessionTokenEdge } from '@/lib/auth-edge';
 
 // Paths that never require authentication.
 const PUBLIC_PATHS = ['/login', '/api/auth/login', '/api/health'];

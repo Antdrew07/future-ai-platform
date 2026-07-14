@@ -2,6 +2,10 @@
 // Mirrors the HMAC scheme in lib/auth.ts (which uses Node's crypto) so tokens
 // issued by the login route validate in middleware.
 
+// Defined here (an edge-safe module) so middleware can import it without
+// pulling in Node's `crypto`.
+export const SESSION_COOKIE = 'carol_session';
+
 function getSecret(): string {
   return (
     process.env.SESSION_SECRET ||
