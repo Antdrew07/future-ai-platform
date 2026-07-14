@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-display: 'Playfair Display', Georgia, serif;
+}
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-cream text-charcoal antialiased;
+    background-image:
+      radial-gradient(120% 60% at 100% 0%, rgba(247, 168, 196, 0.18) 0%, rgba(255, 251, 253, 0) 55%),
+      radial-gradient(90% 50% at 0% 100%, rgba(183, 110, 121, 0.12) 0%, rgba(255, 251, 253, 0) 50%);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+  h1, h2, h3 {
+    @apply font-display;
+  }
+  /* Number inputs: hide spinners for a cleaner mobile feel */
+  input[type='number']::-webkit-outer-spin-button,
+  input[type='number']::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type='number'] {
+    -moz-appearance: textfield;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-3xl bg-white/85 backdrop-blur-sm shadow-card border border-blush-100 p-5;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full font-medium
+      transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:pointer-events-none;
+  }
+  .btn-primary {
+    @apply btn bg-gradient-to-br from-blush-400 to-blush-600 text-white px-5 py-3 shadow-soft
+      hover:from-blush-500 hover:to-blush-700;
+  }
+  .btn-ghost {
+    @apply btn bg-blush-50 text-blush-700 px-4 py-2.5 hover:bg-blush-100;
+  }
+  .btn-outline {
+    @apply btn border border-blush-200 text-charcoal px-4 py-2.5 hover:bg-blush-50;
+  }
+  .input {
+    @apply w-full rounded-2xl border border-blush-200 bg-white px-4 py-3 text-charcoal
+      placeholder:text-charcoal-muted outline-none focus:ring-4 focus:ring-blush-400/25
+      focus:border-blush-400 transition;
+  }
+  .label {
+    @apply block text-sm font-medium text-charcoal-soft mb-1.5;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition;
+  }
+  .section-title {
+    @apply text-lg font-semibold text-charcoal;
+  }
+}
+
+/* Hide scrollbars on horizontal scroll strips */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
