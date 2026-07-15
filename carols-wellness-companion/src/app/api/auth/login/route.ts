@@ -13,9 +13,6 @@ const schema = z.object({
 export async function POST(req: Request) {
   return handle(async () => {
     const { username, passcode } = await parseBody(req, schema);
-    if (!process.env.APP_PASSCODE) {
-      return fail('Server passcode is not configured. Set APP_PASSCODE.', 500);
-    }
     if (!checkCredentials(username, passcode)) {
       return fail('That username or password is incorrect. Try again.', 401);
     }
