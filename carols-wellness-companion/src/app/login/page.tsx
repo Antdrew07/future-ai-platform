@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Heart, Lock, User } from 'lucide-react';
+import { Heart, Lock, User, Eye, EyeOff } from 'lucide-react';
 import { apiPost } from '@/lib/http';
 
 export default function LoginPage() {
@@ -18,6 +18,7 @@ function LoginForm() {
   const params = useSearchParams();
   const [username, setUsername] = useState('');
   const [passcode, setPasscode] = useState('');
+  const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -77,14 +78,25 @@ function LoginForm() {
               <Lock className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-blush-400" />
               <input
                 id="passcode"
-                type="password"
+                type={showPw ? 'text' : 'password'}
                 inputMode="text"
                 autoComplete="current-password"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
                 value={passcode}
                 onChange={(e) => setPasscode(e.target.value)}
-                className="input pl-11"
+                className="input pl-11 pr-11"
                 placeholder="••••••••"
               />
+              <button
+                type="button"
+                onClick={() => setShowPw((s) => !s)}
+                aria-label={showPw ? 'Hide password' : 'Show password'}
+                className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1.5 text-blush-400 hover:bg-blush-50"
+              >
+                {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
             </div>
           </div>
 

@@ -37,11 +37,13 @@ export function verifySessionToken(token: string | undefined): boolean {
   return timingSafeEqual(a, b);
 }
 
-/** Constant-time comparison of the submitted passcode against APP_PASSCODE. */
+/** Constant-time comparison of the submitted passcode against APP_PASSCODE.
+ * Both sides are trimmed so a stray trailing space/newline in the env var (a
+ * very common paste error) doesn't silently lock the user out. */
 export function checkPasscode(input: string): boolean {
-  const expected = process.env.APP_PASSCODE || '';
+  const expected = (process.env.APP_PASSCODE || '').trim();
   if (!expected) return false;
-  const a = Buffer.from(String(input));
+  const a = Buffer.from(String(input).trim());
   const b = Buffer.from(expected);
   if (a.length !== b.length) return false;
   return timingSafeEqual(a, b);
