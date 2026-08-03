@@ -55,6 +55,12 @@ import {
   type Peptide,
 } from "@/lib/peptides";
 
+/**
+ * Display name for the app. Placeholder until a final brand is chosen —
+ * change this one constant to rebrand the calculator header.
+ */
+const APP_NAME = "Peptide Calculator";
+
 /* ------------------------------------------------------------------ */
 /*  Calculation helpers                                                */
 /* ------------------------------------------------------------------ */
@@ -707,7 +713,7 @@ export default function Calculator() {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <CalculatorIcon className="h-4 w-4" />
             </div>
-            <span className="font-semibold">Peptides 4 Power</span>
+            <span className="font-semibold">{APP_NAME}</span>
           </div>
         </div>
       </header>
@@ -719,7 +725,7 @@ export default function Calculator() {
           </h1>
           <p className="mt-2 max-w-2xl text-muted-foreground">
             Work out exactly how many insulin-syringe units to draw for any dose,
-            with vial sizes, solvent volumes and dosing pulled from the P4P
+            with vial sizes, solvent volumes and dosing pulled from the
             protocol cheat sheet.
           </p>
         </div>
@@ -766,8 +772,8 @@ export default function Calculator() {
             For research use only
           </AlertTitle>
           <AlertDescription>
-            This tool reproduces reference figures from the P4P protocol document
-            for informational and research purposes only. It is not medical
+            This tool reproduces reference figures from the source protocol
+            document for informational and research purposes only. It is not medical
             advice and nothing here is intended for human consumption. Always
             consult a qualified healthcare professional.
           </AlertDescription>
