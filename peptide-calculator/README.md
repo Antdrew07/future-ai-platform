@@ -1,8 +1,16 @@
 # Peptide Calculator (standalone)
 
-A self-contained peptide **reconstitution calculator** web app. It works out
-exactly how many insulin-syringe units to draw for any dose, backed by a
-searchable peptide library, popular stacks, and a reconstitution guide.
+A self-contained peptide **calculator and encyclopedia** web app:
+
+- **Calculator** — works out exactly how many insulin-syringe units to draw for
+  any dose, with a live syringe visual.
+- **Encyclopedia** — 74 peptides with dosing, half-life, benefits, side effects,
+  research notes, an evidence-level badge (FDA-approved → research-only), and
+  **live clinical-trial + published-research** lookups from ClinicalTrials.gov
+  (API v2) and PubMed (E-utilities), fetched in the browser with graceful
+  fallback links.
+- **Library / Stacks / Guide** — quick-reference dosing table, popular stacks,
+  and a reconstitution guide.
 
 > Placeholder name — set the final brand in one place: `APP_NAME` in
 > `src/pages/Calculator.tsx`.
