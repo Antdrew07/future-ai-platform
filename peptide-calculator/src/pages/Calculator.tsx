@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import {
   Beaker,
+  BookOpen,
   Calculator as CalculatorIcon,
   Droplets,
   FlaskConical,
@@ -42,6 +43,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import EncyclopediaSection from "@/components/EncyclopediaSection";
 import {
   CATEGORIES,
   PEPTIDES,
@@ -711,21 +713,26 @@ export default function Calculator() {
       <main className="mx-auto max-w-6xl px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight">
-            Peptide Reconstitution Calculator
+            Peptide Calculator &amp; Encyclopedia
           </h1>
           <p className="mt-2 max-w-2xl text-muted-foreground">
             Work out exactly how many insulin-syringe units to draw for any dose,
-            with vial sizes, solvent volumes and dosing pulled from the
-            protocol cheat sheet.
+            and explore a full encyclopedia of peptides — dosing, half-life,
+            benefits, side effects and stacking, all in one place.
           </p>
         </div>
 
         <Tabs defaultValue="calculator" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 sm:w-auto sm:grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3 sm:w-auto sm:grid-cols-5">
             <TabsTrigger value="calculator" className="gap-1.5">
               <Syringe className="h-4 w-4" />
               <span className="hidden sm:inline">Calculator</span>
               <span className="sm:hidden">Calc</span>
+            </TabsTrigger>
+            <TabsTrigger value="encyclopedia" className="gap-1.5">
+              <BookOpen className="h-4 w-4" />
+              <span className="hidden sm:inline">Encyclopedia</span>
+              <span className="sm:hidden">Wiki</span>
             </TabsTrigger>
             <TabsTrigger value="library" className="gap-1.5">
               <Search className="h-4 w-4" />
@@ -743,6 +750,9 @@ export default function Calculator() {
 
           <TabsContent value="calculator">
             <CalculatorTab />
+          </TabsContent>
+          <TabsContent value="encyclopedia">
+            <EncyclopediaSection />
           </TabsContent>
           <TabsContent value="library">
             <LibraryTab />
