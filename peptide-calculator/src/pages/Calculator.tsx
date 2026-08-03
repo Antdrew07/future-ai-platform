@@ -242,6 +242,22 @@ function CalculatorTab() {
             </Select>
           </div>
 
+          {/* Frequency + duration for the selected peptide */}
+          <div className="grid grid-cols-2 gap-2">
+            <div className="rounded-lg border bg-muted/30 p-2.5">
+              <p className="text-xs text-muted-foreground">How often</p>
+              <p className="text-sm font-medium">{selected.frequency}</p>
+            </div>
+            <div className="rounded-lg border bg-muted/30 p-2.5">
+              <p className="text-xs text-muted-foreground">How long</p>
+              <p className="text-sm font-medium">{selected.cycle}</p>
+            </div>
+            <div className="col-span-2 rounded-lg border bg-muted/30 p-2.5">
+              <p className="text-xs text-muted-foreground">Route</p>
+              <p className="text-sm font-medium">{selected.route}</p>
+            </div>
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="vial">Vial size ({strengthLabel})</Label>
             <div className="flex flex-wrap gap-1.5">
