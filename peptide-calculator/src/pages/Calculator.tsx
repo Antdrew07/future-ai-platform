@@ -8,6 +8,7 @@ import {
   Info,
   Layers,
   Search,
+  Stethoscope,
   Syringe,
   TriangleAlert,
 } from "lucide-react";
@@ -44,6 +45,7 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import EncyclopediaSection from "@/components/EncyclopediaSection";
+import ProtocolBuilder from "@/components/ProtocolBuilder";
 import {
   CATEGORIES,
   PEPTIDES,
@@ -729,17 +731,22 @@ export default function Calculator() {
       <main className="mx-auto max-w-6xl px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight">
-            Peptide Calculator &amp; Encyclopedia
+            Peptide Protocol Builder, Calculator &amp; Encyclopedia
           </h1>
           <p className="mt-2 max-w-2xl text-muted-foreground">
-            Work out exactly how many insulin-syringe units to draw for any dose,
-            and explore a full encyclopedia of peptides — dosing, half-life,
-            benefits, side effects and stacking, all in one place.
+            Build a personalized peptide protocol from your goals and health profile,
+            calculate exact reconstitution doses, and explore a full encyclopedia —
+            all in one place.
           </p>
         </div>
 
-        <Tabs defaultValue="calculator" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 sm:w-auto sm:grid-cols-5">
+        <Tabs defaultValue="protocol" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3 sm:w-auto sm:grid-cols-6">
+            <TabsTrigger value="protocol" className="gap-1.5">
+              <Stethoscope className="h-4 w-4" />
+              <span className="hidden sm:inline">Protocol</span>
+              <span className="sm:hidden">Build</span>
+            </TabsTrigger>
             <TabsTrigger value="calculator" className="gap-1.5">
               <Syringe className="h-4 w-4" />
               <span className="hidden sm:inline">Calculator</span>
@@ -764,6 +771,9 @@ export default function Calculator() {
             </TabsTrigger>
           </TabsList>
 
+          <TabsContent value="protocol">
+            <ProtocolBuilder />
+          </TabsContent>
           <TabsContent value="calculator">
             <CalculatorTab />
           </TabsContent>
