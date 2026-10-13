@@ -1,25 +1,19 @@
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Header from "@/components/Header";
-import Hero from "@/components/Hero";
-import FeaturedPeptide from "@/components/FeaturedPeptide";
-import VideoSection from "@/components/VideoSection";
-import DealsGrid from "@/components/DealsGrid";
-import Poetry from "@/components/Poetry";
-import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
+import Home from "@/pages/Home";
+import VendorPage from "@/pages/VendorPage";
 
 export default function App() {
   return (
-    <>
+    <BrowserRouter>
       <Header />
-      <main>
-        <Hero />
-        <FeaturedPeptide />
-        <VideoSection />
-        <DealsGrid />
-        <Poetry />
-        <Contact />
-      </main>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/vendor/:slug" element={<VendorPage />} />
+        <Route path="*" element={<Home />} />
+      </Routes>
       <Footer />
-    </>
+    </BrowserRouter>
   );
 }

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { NAV_LINKS, SITE } from "@/data/content";
 
 export default function Footer() {
@@ -18,9 +19,9 @@ export default function Footer() {
 
           <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
             {NAV_LINKS.map((l) => (
-              <a key={l.href} href={l.href} className="text-sm text-muted hover:text-ink">
+              <Link key={l.href} to={`/${l.href}`} className="text-sm text-muted hover:text-ink">
                 {l.label}
-              </a>
+              </Link>
             ))}
           </nav>
         </div>

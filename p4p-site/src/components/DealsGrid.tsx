@@ -1,16 +1,8 @@
 import { useCallback, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { PARTNERS, HOUSE_BRAND, type Partner } from "@/data/partners";
-
-/** Build a short brandmark from a partner name (e.g. "AIO Peptides" → "AIO"). */
-function initials(name: string): string {
-  const words = name.replace(/[^A-Za-z0-9 ]/g, "").trim().split(/\s+/);
-  if (words.length === 1) return words[0].slice(0, 3).toUpperCase();
-  return words
-    .slice(0, 3)
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase();
-}
+import { getVendor } from "@/data/catalog";
+import Logo from "./Logo";
 
 function useCopy() {
   const [copied, setCopied] = useState<string | null>(null);
@@ -73,13 +65,13 @@ function PartnerCard({
   copied: string | null;
   onCopy: (c: string) => void;
 }) {
+  const vendor = getVendor(p.slug);
+
   if (p.comingSoon) {
     return (
       <div className="flex flex-col gap-4 rounded-2xl border border-line bg-panel p-5 opacity-75">
         <div className="flex items-center gap-3">
-          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-gold to-gold-bright font-bold text-bg">
-            {initials(p.name)}
-          </div>
+          <Logo name={p.name} website={p.websiteUrl} size={44} />
           <h4 className="text-base font-bold leading-tight">{p.name}</h4>
           <span className="ml-auto whitespace-nowrap rounded-full border border-line px-2.5 py-1 text-[11px] font-semibold text-muted">
             Coming soon
@@ -95,9 +87,7 @@ function PartnerCard({
   return (
     <div className="flex flex-col gap-4 rounded-2xl border border-line bg-panel p-5 transition hover:-translate-y-0.5 hover:border-gold/40 hover:bg-panel-2">
       <div className="flex items-center gap-3">
-        <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-gold to-gold-bright font-bold text-bg">
-          {initials(p.name)}
-        </div>
+        <Logo name={p.name} website={p.websiteUrl} size={44} />
         <h4 className="text-base font-bold leading-tight">{p.name}</h4>
         <span className="ml-auto whitespace-nowrap rounded-full border border-gold/35 bg-gold/15 px-2.5 py-1 text-xs font-bold text-gold">
           {p.savings}
@@ -116,6 +106,16 @@ function PartnerCard({
       >
         Shop &amp; Save →
       </a>
+
+      {vendor && vendor.productCount > 0 && (
+        <Link
+          to={`/vendor/${p.slug}`}
+          className="-mt-1 inline-flex items-center justify-center gap-1 text-sm font-semibold text-gold hover:underline"
+        >
+          View {vendor.productCount} products
+          {vendor.onSaleCount > 0 ? ` · ${vendor.onSaleCount} on sale` : ""} →
+        </Link>
+      )}
     </div>
   );
 }
