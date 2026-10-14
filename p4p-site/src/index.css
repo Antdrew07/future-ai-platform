@@ -1,29 +1,71 @@
 @import "tailwindcss";
 
-/* ---- Peptides 4 Power design tokens (dark premium + gold) ---- */
+/* ------------------------------------------------------------------ *
+ * Peptides 4 Power — theme system
+ * Light by default; dark via [data-theme="dark"] (toggle in the header).
+ * Tailwind color utilities map to runtime CSS vars so they switch live.
+ * ------------------------------------------------------------------ */
 @theme {
-  --color-bg: #08080c;
-  --color-bg-2: #0d0d14;
-  --color-panel: #14141c;
-  --color-panel-2: #1b1b26;
-  --color-line: rgba(255, 255, 255, 0.08);
-  --color-ink: #f4f4f7;
-  --color-muted: #a6a6b5;
-  --color-gold: #e7b84b;
-  --color-gold-bright: #f0d07e;
-  --color-violet: #7c5cff;
+  --color-bg: var(--c-bg);
+  --color-bg-2: var(--c-bg-2);
+  --color-panel: var(--c-panel);
+  --color-panel-2: var(--c-panel-2);
+  --color-line: var(--c-line);
+  --color-ink: var(--c-ink);
+  --color-muted: var(--c-muted);
+
+  --color-gold: var(--c-gold); /* accent FILL (buttons, badges) */
+  --color-gold-bright: var(--c-gold-bright);
+  --color-accent: var(--c-accent); /* accent TEXT / links (contrast-safe per theme) */
+  --color-ongold: #1b1407; /* text on gold fills — always dark */
+  --color-feature: var(--c-feature); /* warm gradient start for feature panels */
+
+  --shadow-card: var(--p4p-shadow);
+  --shadow-cardlg: var(--p4p-shadow-lg);
 
   --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 }
 
+/* Light (default) */
 :root {
+  color-scheme: light;
+  --c-bg: #faf9f6;
+  --c-bg-2: #f1efe9;
+  --c-panel: #ffffff;
+  --c-panel-2: #f6f4ef;
+  --c-line: rgba(23, 21, 17, 0.1);
+  --c-ink: #171511;
+  --c-muted: #6b665e;
+  --c-gold: #e3a92b;
+  --c-gold-bright: #f3cf6e;
+  --c-accent: #9a6a08;
+  --c-feature: #fff6e0;
+  --p4p-shadow: 0 1px 2px rgba(23, 21, 17, 0.05), 0 10px 30px rgba(23, 21, 17, 0.07);
+  --p4p-shadow-lg: 0 2px 6px rgba(23, 21, 17, 0.06), 0 24px 60px rgba(23, 21, 17, 0.1);
+}
+
+/* Dark */
+:root[data-theme="dark"] {
   color-scheme: dark;
+  --c-bg: #08080c;
+  --c-bg-2: #0d0d14;
+  --c-panel: #14141c;
+  --c-panel-2: #1b1b26;
+  --c-line: rgba(255, 255, 255, 0.08);
+  --c-ink: #f4f4f7;
+  --c-muted: #a6a6b5;
+  --c-gold: #e7b84b;
+  --c-gold-bright: #f0d07e;
+  --c-accent: #ecc158;
+  --c-feature: #1c160a;
+  --p4p-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 30px rgba(0, 0, 0, 0.35);
+  --p4p-shadow-lg: 0 2px 8px rgba(0, 0, 0, 0.4), 0 24px 60px rgba(0, 0, 0, 0.5);
 }
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 76px; /* offset for sticky header on anchor jumps */
+  scroll-padding-top: 76px;
 }
 
 body {
@@ -33,6 +75,7 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 h1,
@@ -40,10 +83,9 @@ h2,
 h3,
 .font-display {
   font-family: var(--font-display);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
 }
 
-/* Reusable utilities */
 .container-p4p {
   width: 100%;
   max-width: 1160px;
@@ -52,7 +94,7 @@ h3,
 }
 
 .gold-text {
-  color: var(--color-gold);
+  color: var(--color-accent);
 }
 
 .section-eyebrow {
@@ -61,12 +103,11 @@ h3,
   letter-spacing: 0.18em;
   text-transform: uppercase;
   font-weight: 700;
-  color: var(--color-gold);
+  color: var(--color-accent);
 }
 
-/* Focus visibility for keyboard users */
 :focus-visible {
-  outline: 2px solid var(--color-gold);
+  outline: 2px solid var(--color-accent);
   outline-offset: 2px;
   border-radius: 4px;
 }

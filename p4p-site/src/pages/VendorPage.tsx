@@ -21,7 +21,7 @@ export default function VendorPage() {
     return (
       <div className="container-p4p pt-32 pb-24 text-center">
         <h1 className="font-display text-3xl font-bold">Vendor not found</h1>
-        <Link to="/#deals" className="mt-4 inline-block text-gold hover:underline">
+        <Link to="/#deals" className="mt-4 inline-block text-accent hover:underline">
           ← Back to all vendors
         </Link>
       </div>
@@ -49,13 +49,13 @@ export default function VendorPage() {
         </Link>
 
         {/* Vendor header */}
-        <div className="mt-5 overflow-hidden rounded-3xl border border-gold/30 bg-gradient-to-br from-[#14120c] to-panel p-6 md:p-8">
+        <div className="mt-5 overflow-hidden rounded-3xl border border-gold/30 bg-gradient-to-br from-feature to-panel shadow-cardlg p-6 md:p-8">
           <div className="flex flex-wrap items-center justify-between gap-6">
             <div className="flex items-center gap-4">
               <Logo name={vendor.name} website={vendor.website} size={64} />
               <div>
                 {vendor.houseBrand && (
-                  <span className="mb-1 inline-block rounded-full bg-gold px-2.5 py-0.5 text-[11px] font-extrabold uppercase tracking-wider text-bg">
+                  <span className="mb-1 inline-block rounded-full bg-gold px-2.5 py-0.5 text-[11px] font-extrabold uppercase tracking-wider text-ongold">
                     House Brand
                   </span>
                 )}
@@ -72,7 +72,7 @@ export default function VendorPage() {
                 <button
                   type="button"
                   onClick={copyCode}
-                  className="flex items-center gap-2 rounded-xl border border-dashed border-white/25 bg-white/[0.03] px-4 py-2.5 transition hover:border-gold hover:bg-gold/10"
+                  className="flex items-center gap-2 rounded-xl border border-dashed border-ink/20 bg-panel-2 px-4 py-2.5 transition hover:border-gold hover:bg-gold/10"
                   aria-label={`Copy code ${vendor.code}`}
                 >
                   <span className="font-semibold tracking-wide">{vendor.code}</span>
@@ -83,7 +83,7 @@ export default function VendorPage() {
                 href={vendor.affiliateUrl}
                 target="_blank"
                 rel="sponsored noopener noreferrer"
-                className="rounded-xl bg-gold px-5 py-2.5 text-sm font-bold text-bg transition hover:brightness-110"
+                className="rounded-xl bg-gold px-5 py-2.5 text-sm font-bold text-ongold transition hover:brightness-110"
               >
                 Visit {vendor.name} →
               </a>
@@ -97,7 +97,7 @@ export default function VendorPage() {
               </span>
               {vendor.onSaleCount > 0 && (
                 <span className="text-muted">
-                  <b className="text-gold">{vendor.onSaleCount}</b> on sale now
+                  <b className="text-accent">{vendor.onSaleCount}</b> on sale now
                 </span>
               )}
               {vendor.cheapest !== null && (
@@ -130,7 +130,7 @@ export default function VendorPage() {
             </p>
           </>
         ) : (
-          <div className="mt-10 rounded-3xl border border-line bg-panel p-8 text-center">
+          <div className="mt-10 rounded-3xl border border-line bg-panel shadow-card p-8 text-center">
             <h2 className="font-display text-xl font-bold">Product pricing coming soon</h2>
             <p className="mx-auto mt-2 max-w-md text-sm text-muted">
               We're still pulling {vendor.name}'s live catalog. In the meantime, your discount
@@ -140,7 +140,7 @@ export default function VendorPage() {
               href={vendor.affiliateUrl}
               target="_blank"
               rel="sponsored noopener noreferrer"
-              className="mt-5 inline-flex rounded-xl bg-gold px-6 py-3 text-sm font-bold text-bg transition hover:brightness-110"
+              className="mt-5 inline-flex rounded-xl bg-gold px-6 py-3 text-sm font-bold text-ongold transition hover:brightness-110"
             >
               Shop {vendor.name} →
             </a>

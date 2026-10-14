@@ -12,7 +12,7 @@ export default function SaleOfWeek() {
   return (
     <section id="sale" className="scroll-mt-20 py-14 md:py-16">
       <div className="container-p4p">
-        <div className="relative overflow-hidden rounded-3xl border border-gold/35 bg-gradient-to-br from-[#1c160a] to-panel p-6 md:p-8">
+        <div className="relative overflow-hidden rounded-3xl border border-gold/35 bg-gradient-to-br from-feature to-panel shadow-cardlg p-6 md:p-8">
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0"
@@ -32,7 +32,7 @@ export default function SaleOfWeek() {
                 {p.compound} <span className="text-muted">· {p.size}</span>
               </h2>
               <div className="mt-4 flex flex-wrap items-end gap-3">
-                <span className="font-display text-4xl font-bold text-gold">
+                <span className="font-display text-4xl font-bold text-accent">
                   {formatPrice(p.price, p.currency)}
                 </span>
                 {p.regularPrice && (
@@ -41,7 +41,7 @@ export default function SaleOfWeek() {
                   </span>
                 )}
                 {p.discountPct && (
-                  <span className="mb-1 rounded-full bg-gold px-2.5 py-1 text-sm font-extrabold text-bg">
+                  <span className="mb-1 rounded-full bg-gold px-2.5 py-1 text-sm font-extrabold text-ongold">
                     −{p.discountPct}%
                   </span>
                 )}
@@ -52,7 +52,7 @@ export default function SaleOfWeek() {
                   href={p.url}
                   target="_blank"
                   rel="sponsored noopener noreferrer"
-                  className="rounded-full bg-gold px-6 py-3 text-sm font-bold text-bg transition hover:brightness-110"
+                  className="rounded-full bg-gold px-6 py-3 text-sm font-bold text-ongold transition hover:brightness-110"
                 >
                   Grab this deal →
                 </a>
@@ -63,7 +63,7 @@ export default function SaleOfWeek() {
                 )}
                 <Link
                   to={`/vendor/${sale.vendorSlug}`}
-                  className="text-sm font-semibold text-gold hover:underline"
+                  className="text-sm font-semibold text-accent hover:underline"
                 >
                   See all {sale.vendorName} prices →
                 </Link>
@@ -82,7 +82,7 @@ export default function SaleOfWeek() {
                         href={d.product.url}
                         target="_blank"
                         rel="sponsored noopener noreferrer"
-                        className="flex items-center justify-between gap-3 rounded-xl px-2 py-1.5 transition hover:bg-panel"
+                        className="flex items-center justify-between gap-3 rounded-xl px-2 py-1.5 transition hover:bg-panel shadow-card"
                       >
                         <span className="min-w-0 truncate text-sm">
                           <b>{d.product.compound}</b>{" "}
@@ -94,7 +94,7 @@ export default function SaleOfWeek() {
                             {formatPrice(d.product.price, d.product.currency)}
                           </span>
                           {d.product.discountPct && (
-                            <span className="rounded-full bg-gold/15 px-2 py-0.5 text-xs font-bold text-gold">
+                            <span className="rounded-full bg-gold/15 px-2 py-0.5 text-xs font-bold text-accent">
                               −{d.product.discountPct}%
                             </span>
                           )}

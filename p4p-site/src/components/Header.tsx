@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { NAV_LINKS, SITE } from "@/data/content";
+import ThemeToggle from "./ThemeToggle";
 
 export default function Header() {
   const [open, setOpen] = useState(false);
@@ -21,7 +22,7 @@ export default function Header() {
     >
       <div className="container-p4p flex h-[64px] items-center justify-between gap-4">
         <Link to="/" className="flex items-center gap-2.5" aria-label={`${SITE.name} home`}>
-          <span className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-gold to-gold-bright font-display text-sm font-bold text-bg">
+          <span className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-gold to-gold-bright font-display text-sm font-bold text-ongold">
             P4P
           </span>
           <span className="font-display text-base font-bold tracking-tight">
@@ -40,24 +41,28 @@ export default function Header() {
               {l.label}
             </Link>
           ))}
+          <ThemeToggle />
           <Link
             to="/#deals"
-            className="rounded-full bg-gold px-4 py-2 text-sm font-bold text-bg transition hover:brightness-110"
+            className="rounded-full bg-gold px-4 py-2 text-sm font-bold text-ongold transition hover:brightness-110"
           >
             See Deals
           </Link>
         </nav>
 
-        {/* Mobile toggle */}
-        <button
-          type="button"
-          className="md:hidden grid h-10 w-10 place-items-center rounded-lg border border-line text-ink"
-          aria-label={open ? "Close menu" : "Open menu"}
-          aria-expanded={open}
-          onClick={() => setOpen((v) => !v)}
-        >
-          <span className="text-lg leading-none">{open ? "✕" : "☰"}</span>
-        </button>
+        {/* Mobile controls */}
+        <div className="flex items-center gap-2 md:hidden">
+          <ThemeToggle />
+          <button
+            type="button"
+            className="grid h-10 w-10 place-items-center rounded-lg border border-line text-ink"
+            aria-label={open ? "Close menu" : "Open menu"}
+            aria-expanded={open}
+            onClick={() => setOpen((v) => !v)}
+          >
+            <span className="text-lg leading-none">{open ? "✕" : "☰"}</span>
+          </button>
+        </div>
       </div>
 
       {/* Mobile menu */}
@@ -76,7 +81,7 @@ export default function Header() {
             ))}
             <Link
               to="/#deals"
-              className="my-2 rounded-full bg-gold px-4 py-2.5 text-center text-sm font-bold text-bg"
+              className="my-2 rounded-full bg-gold px-4 py-2.5 text-center text-sm font-bold text-ongold"
               onClick={() => setOpen(false)}
             >
               See Deals

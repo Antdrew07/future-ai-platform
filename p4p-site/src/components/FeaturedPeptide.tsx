@@ -5,7 +5,7 @@ export default function FeaturedPeptide() {
   return (
     <section id="featured" className="py-16 md:py-20">
       <div className="container-p4p">
-        <div className="relative overflow-hidden rounded-3xl border border-gold/30 bg-gradient-to-br from-[#1c160a] to-panel p-8 md:p-12">
+        <div className="relative overflow-hidden rounded-3xl border border-gold/30 bg-gradient-to-br from-feature to-panel shadow-cardlg p-8 md:p-12">
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0"
@@ -20,11 +20,11 @@ export default function FeaturedPeptide() {
               <h2 className="mt-3 font-display text-4xl font-bold md:text-5xl">
                 {p.name}
               </h2>
-              <p className="mt-1 text-lg italic text-gold">{p.nickname}</p>
+              <p className="mt-1 text-lg italic text-accent">{p.nickname}</p>
               <ul className="mt-6 space-y-2.5">
                 {p.bullets.map((b) => (
                   <li key={b} className="flex items-start gap-3 text-ink">
-                    <span className="mt-1 text-gold">▸</span>
+                    <span className="mt-1 text-accent">▸</span>
                     <span>{b}</span>
                   </li>
                 ))}
@@ -35,7 +35,7 @@ export default function FeaturedPeptide() {
             <div className="shrink-0">
               <a
                 href="#deals"
-                className="inline-flex items-center justify-center rounded-full bg-gold px-7 py-3.5 text-sm font-bold text-bg transition hover:brightness-110"
+                className="inline-flex items-center justify-center rounded-full bg-gold px-7 py-3.5 text-sm font-bold text-ongold transition hover:brightness-110"
               >
                 Find it from a vetted vendor →
               </a>

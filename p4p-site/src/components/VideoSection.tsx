@@ -11,7 +11,7 @@ function embedUrl(v: VideoItem): string | null {
 function VideoCard({ v }: { v: VideoItem }) {
   const url = embedUrl(v);
   return (
-    <figure className="overflow-hidden rounded-2xl border border-line bg-panel">
+    <figure className="overflow-hidden rounded-2xl border border-line bg-panel shadow-card">
       <div className="relative aspect-video w-full bg-bg-2">
         {url ? (
           <iframe
@@ -26,7 +26,7 @@ function VideoCard({ v }: { v: VideoItem }) {
         ) : (
           <div className="absolute inset-0 grid place-items-center text-center">
             <div>
-              <div className="mx-auto grid h-14 w-14 place-items-center rounded-full border border-gold/40 bg-gold/10 text-gold">
+              <div className="mx-auto grid h-14 w-14 place-items-center rounded-full border border-gold/40 bg-gold/10 text-accent">
                 <span className="ml-1 text-xl">▶</span>
               </div>
               <p className="mt-3 px-4 text-xs text-muted">Video coming soon</p>

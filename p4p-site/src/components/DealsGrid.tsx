@@ -47,7 +47,7 @@ function CodePill({
     <button
       type="button"
       onClick={() => onCopy(code)}
-      className="flex w-full items-center justify-between gap-2 rounded-xl border border-dashed border-white/25 bg-white/[0.03] px-3 py-2.5 text-left transition hover:border-gold hover:bg-gold/10"
+      className="flex w-full items-center justify-between gap-2 rounded-xl border border-dashed border-ink/20 bg-panel-2 px-3 py-2.5 text-left transition hover:border-gold hover:bg-gold/10"
       aria-label={`Copy code ${code}`}
     >
       <span className="font-semibold tracking-wide text-ink">{code}</span>
@@ -69,7 +69,7 @@ function PartnerCard({
 
   if (p.comingSoon) {
     return (
-      <div className="flex flex-col gap-4 rounded-2xl border border-line bg-panel p-5 opacity-75">
+      <div className="flex flex-col gap-4 rounded-2xl border border-line bg-panel shadow-card p-5 opacity-75">
         <div className="flex items-center gap-3">
           <Logo name={p.name} website={p.websiteUrl} size={44} />
           <h4 className="text-base font-bold leading-tight">{p.name}</h4>
@@ -85,11 +85,11 @@ function PartnerCard({
   }
 
   return (
-    <div className="flex flex-col gap-4 rounded-2xl border border-line bg-panel p-5 transition hover:-translate-y-0.5 hover:border-gold/40 hover:bg-panel-2">
+    <div className="flex flex-col gap-4 rounded-2xl border border-line bg-panel shadow-card p-5 transition hover:-translate-y-0.5 hover:border-gold/40 hover:bg-panel-2">
       <div className="flex items-center gap-3">
         <Logo name={p.name} website={p.websiteUrl} size={44} />
         <h4 className="text-base font-bold leading-tight">{p.name}</h4>
-        <span className="ml-auto whitespace-nowrap rounded-full border border-gold/35 bg-gold/15 px-2.5 py-1 text-xs font-bold text-gold">
+        <span className="ml-auto whitespace-nowrap rounded-full border border-gold/35 bg-gold/15 px-2.5 py-1 text-xs font-bold text-accent">
           {p.savings}
         </span>
       </div>
@@ -102,7 +102,7 @@ function PartnerCard({
         href={p.affiliateUrl || p.websiteUrl || "#"}
         target="_blank"
         rel="sponsored noopener noreferrer"
-        className="mt-auto inline-flex w-full items-center justify-center rounded-xl bg-gold px-4 py-2.5 text-sm font-bold text-bg transition hover:brightness-110"
+        className="mt-auto inline-flex w-full items-center justify-center rounded-xl bg-gold px-4 py-2.5 text-sm font-bold text-ongold transition hover:brightness-110"
       >
         Shop &amp; Save →
       </a>
@@ -110,7 +110,7 @@ function PartnerCard({
       {vendor && vendor.productCount > 0 && (
         <Link
           to={`/vendor/${p.slug}`}
-          className="-mt-1 inline-flex items-center justify-center gap-1 text-sm font-semibold text-gold hover:underline"
+          className="-mt-1 inline-flex items-center justify-center gap-1 text-sm font-semibold text-accent hover:underline"
         >
           View {vendor.productCount} products
           {vendor.onSaleCount > 0 ? ` · ${vendor.onSaleCount} on sale` : ""} →
@@ -138,7 +138,7 @@ export default function DealsGrid() {
         </div>
 
         {/* House brand */}
-        <div className="relative mt-10 overflow-hidden rounded-3xl border border-gold/35 bg-gradient-to-br from-[#1c160a] to-panel p-6 md:p-7">
+        <div className="relative mt-10 overflow-hidden rounded-3xl border border-gold/35 bg-gradient-to-br from-feature to-panel shadow-cardlg p-6 md:p-7">
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0"
@@ -149,11 +149,11 @@ export default function DealsGrid() {
           />
           <div className="relative flex flex-wrap items-center justify-between gap-5">
             <div className="flex items-center gap-4">
-              <div className="grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br from-gold to-[#fff0c2] font-bold text-bg">
+              <div className="grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br from-gold to-[#fff0c2] font-bold text-ongold">
                 P4P
               </div>
               <div>
-                <span className="inline-block rounded-full bg-gold px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wider text-bg">
+                <span className="inline-block rounded-full bg-gold px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wider text-ongold">
                   House Brand
                 </span>
                 <h3 className="mt-1.5 font-display text-xl font-bold">{h.name}</h3>
@@ -172,7 +172,7 @@ export default function DealsGrid() {
                 href={h.affiliateUrl || h.websiteUrl}
                 target="_blank"
                 rel="sponsored noopener noreferrer"
-                className="inline-flex items-center justify-center rounded-xl bg-gold px-5 py-2.5 text-sm font-bold text-bg transition hover:brightness-110"
+                className="inline-flex items-center justify-center rounded-xl bg-gold px-5 py-2.5 text-sm font-bold text-ongold transition hover:brightness-110"
               >
                 Shop &amp; Save →
               </a>

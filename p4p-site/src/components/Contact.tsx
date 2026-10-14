@@ -86,7 +86,7 @@ export default function Contact() {
             <button
               type="submit"
               disabled={status === "sending"}
-              className="w-full rounded-xl bg-gold px-5 py-3 text-sm font-bold text-bg transition hover:brightness-110 disabled:opacity-60"
+              className="w-full rounded-xl bg-gold px-5 py-3 text-sm font-bold text-ongold transition hover:brightness-110 disabled:opacity-60"
             >
               {status === "sending" ? "Sending…" : "Send message"}
             </button>
@@ -111,7 +111,7 @@ export default function Contact() {
                   href={s.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-muted transition hover:text-gold"
+                  className="text-sm text-muted transition hover:text-accent"
                 >
                   {s.label}
                 </a>

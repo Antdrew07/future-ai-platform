@@ -26,13 +26,13 @@ export default function Hero() {
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <a
             href="#deals"
-            className="rounded-full bg-gold px-6 py-3 text-sm font-bold text-bg transition hover:brightness-110"
+            className="rounded-full bg-gold px-6 py-3 text-sm font-bold text-ongold transition hover:brightness-110"
           >
             Shop the Deals →
           </a>
           <a
             href="#videos"
-            className="rounded-full border border-line px-6 py-3 text-sm font-bold text-ink transition hover:border-gold hover:text-gold"
+            className="rounded-full border border-line px-6 py-3 text-sm font-bold text-ink transition hover:border-gold hover:text-accent"
           >
             Watch Dave's Videos
           </a>
@@ -45,7 +45,7 @@ export default function Hero() {
               key={s.label}
               className="rounded-2xl border border-line bg-panel/60 px-3 py-4"
             >
-              <div className="font-display text-2xl font-bold text-gold md:text-3xl">{s.value}</div>
+              <div className="font-display text-2xl font-bold text-accent md:text-3xl">{s.value}</div>
               <div className="mt-1 text-xs text-muted md:text-sm">{s.label}</div>
             </div>
           ))}

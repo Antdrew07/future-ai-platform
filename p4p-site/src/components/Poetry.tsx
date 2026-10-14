@@ -17,9 +17,9 @@ export default function Poetry() {
           {POETRY.map((poem) => (
             <blockquote
               key={poem.title}
-              className="rounded-2xl border border-line bg-panel p-6"
+              className="rounded-2xl border border-line bg-panel shadow-card p-6"
             >
-              <h3 className="font-display text-lg font-bold text-gold">{poem.title}</h3>
+              <h3 className="font-display text-lg font-bold text-accent">{poem.title}</h3>
               <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-muted">
                 {poem.body}
               </p>

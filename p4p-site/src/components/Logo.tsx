@@ -37,7 +37,7 @@ export default function Logo({
   if (!src) {
     return (
       <div
-        className={`grid shrink-0 place-items-center bg-gradient-to-br from-gold to-gold-bright font-bold text-bg ${rounded} ${className}`}
+        className={`grid shrink-0 place-items-center bg-gradient-to-br from-gold to-gold-bright font-bold text-ongold ${rounded} ${className}`}
         style={{ width: size, height: size, fontSize: size * 0.3 }}
         aria-hidden
       >
