@@ -11,7 +11,7 @@ export default function FeaturedPeptide() {
             className="pointer-events-none absolute inset-0"
             style={{
               background:
-                "radial-gradient(120% 120% at 100% 0%, rgba(231,184,75,.18), transparent 55%)",
+                "radial-gradient(120% 120% at 100% 0%, rgba(30,154,224,.18), transparent 55%)",
             }}
           />
           <div className="relative flex flex-col gap-8 md:flex-row md:items-center md:justify-between">

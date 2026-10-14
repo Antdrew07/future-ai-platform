@@ -9,7 +9,7 @@ export default function Hero() {
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(60% 50% at 50% 0%, rgba(231,184,75,.14), transparent 60%), radial-gradient(40% 40% at 85% 10%, rgba(124,92,255,.12), transparent 60%)",
+            "radial-gradient(60% 50% at 50% 0%, rgba(30,154,224,.14), transparent 60%), radial-gradient(40% 40% at 85% 10%, rgba(2,132,199,.12), transparent 60%)",
         }}
       />
       <div className="container-p4p relative text-center">

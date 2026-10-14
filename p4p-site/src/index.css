@@ -1,9 +1,13 @@
 @import "tailwindcss";
 
 /* ------------------------------------------------------------------ *
- * Peptides 4 Power — theme system
- * Light by default; dark via [data-theme="dark"] (toggle in the header).
- * Tailwind color utilities map to runtime CSS vars so they switch live.
+ * Peptides 4 Power — brand theme, matched to the peptides4power.us store
+ * ("White Luxury"): brand blue #1E9AE0 on white, slate text, Inter +
+ * Orbitron. Light by default; dark via [data-theme="dark"].
+ *
+ * NOTE: the Tailwind color tokens are historically named "gold" but now
+ * hold the brand BLUE (bg-gold/from-gold/etc. render blue). --color-accent
+ * is the contrast-safe text/link blue; --color-ongold is text on blue fills.
  * ------------------------------------------------------------------ */
 @theme {
   --color-bg: var(--c-bg);
@@ -14,51 +18,52 @@
   --color-ink: var(--c-ink);
   --color-muted: var(--c-muted);
 
-  --color-gold: var(--c-gold); /* accent FILL (buttons, badges) */
+  --color-gold: var(--c-gold); /* brand FILL (buttons, badges) — blue */
   --color-gold-bright: var(--c-gold-bright);
-  --color-accent: var(--c-accent); /* accent TEXT / links (contrast-safe per theme) */
-  --color-ongold: #1b1407; /* text on gold fills — always dark */
-  --color-feature: var(--c-feature); /* warm gradient start for feature panels */
+  --color-accent: var(--c-accent); /* brand TEXT / links (contrast-safe) */
+  --color-ongold: #ffffff; /* text on brand fills — white */
+  --color-feature: var(--c-feature); /* soft gradient start for feature panels */
 
   --shadow-card: var(--p4p-shadow);
   --shadow-cardlg: var(--p4p-shadow-lg);
 
-  --font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-brand: "Orbitron", "Inter", ui-sans-serif, sans-serif;
 }
 
-/* Light (default) */
+/* Light (default) — store "White Luxury" */
 :root {
   color-scheme: light;
-  --c-bg: #faf9f6;
-  --c-bg-2: #f1efe9;
+  --c-bg: #ffffff;
+  --c-bg-2: #f1f5f9;
   --c-panel: #ffffff;
-  --c-panel-2: #f6f4ef;
-  --c-line: rgba(23, 21, 17, 0.1);
-  --c-ink: #171511;
-  --c-muted: #6b665e;
-  --c-gold: #e3a92b;
-  --c-gold-bright: #f3cf6e;
-  --c-accent: #9a6a08;
-  --c-feature: #fff6e0;
-  --p4p-shadow: 0 1px 2px rgba(23, 21, 17, 0.05), 0 10px 30px rgba(23, 21, 17, 0.07);
-  --p4p-shadow-lg: 0 2px 6px rgba(23, 21, 17, 0.06), 0 24px 60px rgba(23, 21, 17, 0.1);
+  --c-panel-2: #f1f5f9;
+  --c-line: #e2e8f0;
+  --c-ink: #1e293b;
+  --c-muted: #64748b;
+  --c-gold: #1e9ae0;
+  --c-gold-bright: #0ea5e9;
+  --c-accent: #0284c7;
+  --c-feature: #e8f5fd;
+  --p4p-shadow: 0 1px 2px rgba(30, 41, 59, 0.06), 0 10px 30px rgba(30, 41, 59, 0.08);
+  --p4p-shadow-lg: 0 2px 6px rgba(30, 41, 59, 0.07), 0 24px 60px rgba(30, 41, 59, 0.12);
 }
 
-/* Dark */
+/* Dark — store .dark */
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --c-bg: #08080c;
-  --c-bg-2: #0d0d14;
-  --c-panel: #14141c;
-  --c-panel-2: #1b1b26;
-  --c-line: rgba(255, 255, 255, 0.08);
-  --c-ink: #f4f4f7;
-  --c-muted: #a6a6b5;
-  --c-gold: #e7b84b;
-  --c-gold-bright: #f0d07e;
-  --c-accent: #ecc158;
-  --c-feature: #1c160a;
+  --c-bg: #060811;
+  --c-bg-2: #0a0e18;
+  --c-panel: #0c111d;
+  --c-panel-2: #141a28;
+  --c-line: rgba(255, 255, 255, 0.1);
+  --c-ink: #e8eef6;
+  --c-muted: #94a3b8;
+  --c-gold: #1e9ae0;
+  --c-gold-bright: #38bdf8;
+  --c-accent: #38bdf8;
+  --c-feature: #08203a;
   --p4p-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 30px rgba(0, 0, 0, 0.35);
   --p4p-shadow-lg: 0 2px 8px rgba(0, 0, 0, 0.4), 0 24px 60px rgba(0, 0, 0, 0.5);
 }
@@ -83,6 +88,7 @@ h2,
 h3,
 .font-display {
   font-family: var(--font-display);
+  font-weight: 700;
   letter-spacing: -0.015em;
 }
 
@@ -99,8 +105,9 @@ h3,
 
 .section-eyebrow {
   display: inline-block;
+  font-family: var(--font-brand);
   font-size: 12px;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   font-weight: 700;
   color: var(--color-accent);

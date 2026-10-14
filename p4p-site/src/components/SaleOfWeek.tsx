@@ -18,7 +18,7 @@ export default function SaleOfWeek() {
             className="pointer-events-none absolute inset-0"
             style={{
               background:
-                "radial-gradient(120% 120% at 100% 0%, rgba(231,184,75,.2), transparent 55%)",
+                "radial-gradient(120% 120% at 100% 0%, rgba(30,154,224,.2), transparent 55%)",
             }}
           />
           <div className="relative grid gap-8 md:grid-cols-[1.3fr_1fr] md:items-center">

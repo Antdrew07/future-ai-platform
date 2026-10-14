@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { NAV_LINKS, SITE } from "@/data/content";
+import { P4P_LOGO } from "@/assets/logo";
 
 export default function Footer() {
   const year = new Date().getFullYear();
@@ -7,14 +8,9 @@ export default function Footer() {
     <footer className="border-t border-line bg-bg-2/60 py-12">
       <div className="container-p4p">
         <div className="flex flex-col items-center gap-6 text-center md:flex-row md:justify-between md:text-left">
-          <div className="flex items-center gap-2.5">
-            <span className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-gold to-gold-bright font-display text-sm font-bold text-ongold">
-              P4P
-            </span>
-            <div>
-              <div className="font-display text-sm font-bold">{SITE.name}</div>
-              <div className="text-xs text-muted">{SITE.owner}</div>
-            </div>
+          <div className="flex items-center gap-3">
+            <img src={P4P_LOGO} alt="Peptides 4 Power" className="h-10 w-auto" />
+            <span className="text-xs text-muted">{SITE.owner}</span>
           </div>
 
           <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">

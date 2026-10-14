@@ -144,7 +144,7 @@ export default function DealsGrid() {
             className="pointer-events-none absolute inset-0"
             style={{
               background:
-                "radial-gradient(120% 140% at 0% 0%, rgba(231,184,75,.18), transparent 55%)",
+                "radial-gradient(120% 140% at 0% 0%, rgba(30,154,224,.18), transparent 55%)",
             }}
           />
           <div className="relative flex flex-wrap items-center justify-between gap-5">

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { NAV_LINKS, SITE } from "@/data/content";
+import { P4P_LOGO } from "@/assets/logo";
 import ThemeToggle from "./ThemeToggle";
 
 export default function Header() {
@@ -21,13 +22,12 @@ export default function Header() {
       }`}
     >
       <div className="container-p4p flex h-[64px] items-center justify-between gap-4">
-        <Link to="/" className="flex items-center gap-2.5" aria-label={`${SITE.name} home`}>
-          <span className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-gold to-gold-bright font-display text-sm font-bold text-ongold">
-            P4P
-          </span>
-          <span className="font-display text-base font-bold tracking-tight">
-            Peptides&nbsp;4&nbsp;Power
-          </span>
+        <Link to="/" className="flex items-center" aria-label={`${SITE.name} home`}>
+          <img
+            src={P4P_LOGO}
+            alt="Peptides 4 Power"
+            className="h-9 w-auto max-w-[160px] object-contain md:h-10 md:max-w-[220px]"
+          />
         </Link>
 
         {/* Desktop nav */}
