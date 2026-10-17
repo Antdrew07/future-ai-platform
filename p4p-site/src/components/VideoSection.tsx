@@ -1,11 +1,13 @@
 import { VIDEO_CATEGORIES, type VideoItem } from "@/data/videos";
 
+/** Resolve a host-agnostic clip to an iframe src, or null if none set. */
 function embedUrl(v: VideoItem): string | null {
-  if (!v.videoId) return null;
-  if (v.provider === "youtube") {
+  if (v.embed) return v.embed;
+  if (v.videoId) {
+    if (v.provider === "vimeo") return `https://player.vimeo.com/video/${v.videoId}`;
     return `https://www.youtube-nocookie.com/embed/${v.videoId}`;
   }
-  return `https://player.vimeo.com/video/${v.videoId}`;
+  return null;
 }
 
 function VideoCard({ v }: { v: VideoItem }) {
@@ -13,7 +15,16 @@ function VideoCard({ v }: { v: VideoItem }) {
   return (
     <figure className="overflow-hidden rounded-2xl border border-line bg-panel shadow-card">
       <div className="relative aspect-video w-full bg-bg-2">
-        {url ? (
+        {v.file ? (
+          <video
+            className="absolute inset-0 h-full w-full bg-black"
+            src={v.file}
+            title={v.title}
+            controls
+            preload="metadata"
+            playsInline
+          />
+        ) : url ? (
           <iframe
             className="absolute inset-0 h-full w-full"
             src={url}
