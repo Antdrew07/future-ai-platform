@@ -2,6 +2,7 @@ import { VIDEO_CATEGORIES, type VideoItem } from "@/data/videos";
 
 /** Resolve a host-agnostic clip to an iframe src, or null if none set. */
 function embedUrl(v: VideoItem): string | null {
+  if (v.drive) return `https://drive.google.com/file/d/${v.drive}/preview`;
   if (v.embed) return v.embed;
   if (v.videoId) {
     if (v.provider === "vimeo") return `https://player.vimeo.com/video/${v.videoId}`;
