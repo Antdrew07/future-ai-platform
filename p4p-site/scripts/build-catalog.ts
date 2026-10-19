@@ -33,6 +33,14 @@ const SLUG_ALIAS: Record<string, string> = {
   "treasure-coast": "treasure-coast-peptide",
 };
 
+/** Directory holding the per-vendor raw catalog files (siblings of the snapshot's parent). */
+const RAW_DIR = path.resolve(path.dirname(SNAPSHOT), "..");
+
+/** curated slug -> standalone raw catalog file, for vendors not in the snapshot tables. */
+const RAW_CATALOG_FILES: Record<string, string> = {
+  "get-melts": "getmelts-raw-catalog.json",
+};
+
 type Row = Record<string, unknown>;
 interface Snapshot {
   generatedAt: string;
@@ -41,6 +49,7 @@ interface Snapshot {
   compoundVariants: Row[];
   partnerListings: Row[];
   listingCurrentStates: Row[];
+  catalogReviewRows: Row[];
 }
 
 function num(v: unknown): number | null {
@@ -121,6 +130,15 @@ for (const l of snap.partnerListings) {
   listingsByPartner.set(Number(l.partnerId), arr);
 }
 
+// Raw catalog capture (broader coverage than the curated mapped listings).
+// Used for vendors that have a scraped catalog but no clean mapped listings yet.
+const reviewRowsByPartner = new Map<number, Row[]>();
+for (const r of snap.catalogReviewRows ?? []) {
+  const arr = reviewRowsByPartner.get(Number(r.partnerId)) ?? [];
+  arr.push(r);
+  reviewRowsByPartner.set(Number(r.partnerId), arr);
+}
+
 function buildProducts(scraperPartner: Row, affiliateUrl: string): CatalogProduct[] {
   const listings = listingsByPartner.get(Number(scraperPartner.id)) ?? [];
   const products: CatalogProduct[] = [];
@@ -163,12 +181,184 @@ function buildProducts(scraperPartner: Row, affiliateUrl: string): CatalogProduc
   return products;
 }
 
+/** Decode the common HTML entities WooCommerce leaves in raw product names. */
+function decodeEntities(s: string): string {
+  return String(s)
+    .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, n) => String.fromCharCode(parseInt(n, 16)))
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;|&#039;/g, "'")
+    .replace(/&nbsp;/g, " ")
+    .replace(/[\s–—-]+$/, "")
+    .trim();
+}
+
+/** Split a raw product name into (compound, size) when a trailing dose is present. */
+function splitNameSize(raw: string): { compound: string; size: string } {
+  const name = decodeEntities(raw);
+  const m = name.match(/^(.*?)[\s–—-]+(\d[\d.,]*\s?(?:mg|mcg|ml|iu|g)\b.*)$/i);
+  if (m) return { compound: m[1].trim(), size: m[2].trim() };
+  return { compound: name, size: "" };
+}
+
+/** Placeholder / non-product rows that shouldn't appear on a storefront. */
+const JUNK_NAME =
+  /^(offer|credit|store credit|gift\s*card|e-?gift|test product|sample|deposit|balance|donation|wallet)\b/i;
+
+const MAX_REVIEW_PRODUCTS = 60;
+
+/** Collapse size variations: group rows by their product-page URL (minus query). */
+function pathKey(url: string): string {
+  try {
+    const u = new URL(url);
+    return (u.hostname + u.pathname).replace(/\/+$/, "").toLowerCase();
+  } catch {
+    return url;
+  }
+}
+
+/**
+ * Build products from the raw catalog-review rows (for vendors without clean
+ * mapped listings). One entry per product page; drops junk and placeholders.
+ */
+function buildProductsFromReviewRows(scraperPartner: Row, affiliateUrl: string): CatalogProduct[] {
+  const rows = reviewRowsByPartner.get(Number(scraperPartner.id)) ?? [];
+  // Group size-variations of the same product together.
+  const groups = new Map<string, Row[]>();
+  for (const r of rows) {
+    const key = pathKey(String(r.directProductUrl || r.sourceProductKey || r.rawName));
+    (groups.get(key) ?? groups.set(key, []).get(key)!).push(r);
+  }
+
+  const products: CatalogProduct[] = [];
+  for (const group of groups.values()) {
+    // Prefer an in-stock, lowest-priced variation to represent the product.
+    const best = group
+      .filter((r) => num(r.listedPrice) !== null)
+      .sort((a, b) => {
+        const ia = Number(a.inStock) === 1 ? 0 : 1;
+        const ib = Number(b.inStock) === 1 ? 0 : 1;
+        if (ia !== ib) return ia - ib;
+        return (num(a.listedPrice) ?? Infinity) - (num(b.listedPrice) ?? Infinity);
+      })[0];
+    if (!best) continue;
+
+    const price = num(best.listedPrice);
+    if (price === null || price < 2) continue; // drop $0–$1 placeholders
+    const { compound, size } = splitNameSize(String(best.rawName ?? "Product"));
+    if (!compound || JUNK_NAME.test(compound)) continue;
+
+    const regular = num(best.regularPrice);
+    const inStock = Number(best.inStock) === 1;
+    const onSale = !!(regular !== null && regular > price && inStock);
+    const discountPct = onSale && regular ? Math.round(((regular - price) / regular) * 100) : null;
+    const productUrl = (best.directProductUrl as string) || affiliateUrl;
+    products.push({
+      id: Number(best.id),
+      compound,
+      category: null,
+      size,
+      mg: null,
+      form: null,
+      price,
+      regularPrice: regular,
+      onSale,
+      discountPct,
+      inStock,
+      currency: "USD",
+      url: withAffiliateRef(productUrl, affiliateUrl),
+      observedAt: (best.sourceObservedAt as string) ?? null,
+    });
+  }
+  products.sort((a, b) => {
+    if (a.onSale !== b.onSale) return a.onSale ? -1 : 1;
+    if (a.inStock !== b.inStock) return a.inStock ? -1 : 1;
+    return (a.price ?? Infinity) - (b.price ?? Infinity);
+  });
+  return products.slice(0, MAX_REVIEW_PRODUCTS);
+}
+
+/** Build products from a standalone raw catalog file (Shopify-style export). */
+function buildProductsFromRawFile(file: string, affiliateUrl: string): CatalogProduct[] {
+  const full = path.join(RAW_DIR, file);
+  if (!fs.existsSync(full)) return [];
+  const data = JSON.parse(fs.readFileSync(full, "utf8"));
+  const rows: Row[] = Array.isArray(data) ? data : ((data.products ?? data.items ?? []) as Row[]);
+  const groups = new Map<string, Row[]>();
+  for (const r of rows) {
+    const key = pathKey(String(r.directProductUrl || r.sourceProductKey || r.rawName));
+    (groups.get(key) ?? groups.set(key, []).get(key)!).push(r);
+  }
+  const products: CatalogProduct[] = [];
+  for (const group of groups.values()) {
+    const best = group
+      .filter((r) => num(r.listedPrice) !== null)
+      .sort((a, b) => {
+        const ia = Number(a.inStock) === 1 ? 0 : 1;
+        const ib = Number(b.inStock) === 1 ? 0 : 1;
+        if (ia !== ib) return ia - ib;
+        return (num(a.listedPrice) ?? Infinity) - (num(b.listedPrice) ?? Infinity);
+      })[0];
+    if (!best) continue;
+    const price = num(best.listedPrice);
+    if (price === null || price < 2) continue;
+    const { compound } = splitNameSize(String(best.rawName ?? "Product"));
+    if (!compound || JUNK_NAME.test(compound)) continue;
+    const rawVariant = String(best.rawVariant ?? "");
+    const size = decodeEntities(String(best.rawSize ?? (rawVariant && rawVariant !== "Default Title" ? rawVariant : "")));
+    const regular = num(best.compareAtPrice ?? best.regularPrice);
+    const inStock = Number(best.inStock) === 1;
+    const onSale = !!(regular !== null && regular > price && inStock);
+    const discountPct = onSale && regular ? Math.round(((regular - price) / regular) * 100) : null;
+    const productUrl = (best.directProductUrl as string) || affiliateUrl;
+    const idNum = Number(best.sourceProductKey);
+    products.push({
+      id: Number.isFinite(idNum) ? idNum : products.length + 1,
+      compound,
+      category: null,
+      size,
+      mg: null,
+      form: null,
+      price,
+      regularPrice: regular,
+      onSale,
+      discountPct,
+      inStock,
+      currency: "USD",
+      url: withAffiliateRef(productUrl, affiliateUrl),
+      observedAt: (best.observedAt as string) ?? null,
+    });
+  }
+  products.sort((a, b) => {
+    if (a.onSale !== b.onSale) return a.onSale ? -1 : 1;
+    if (a.inStock !== b.inStock) return a.inStock ? -1 : 1;
+    return (a.price ?? Infinity) - (b.price ?? Infinity);
+  });
+  return products.slice(0, MAX_REVIEW_PRODUCTS);
+}
+
 const curated: Partner[] = [...PARTNERS, HOUSE_BRAND];
 
 const vendors: CatalogVendor[] = curated.map((p, i) => {
   const scraperSlug = SLUG_ALIAS[p.slug] ?? p.slug;
   const sp = partnerBySlug.get(scraperSlug);
-  const products = sp && !p.comingSoon ? buildProducts(sp, p.affiliateUrl || p.websiteUrl) : [];
+  let products: CatalogProduct[] = [];
+  const aff = p.affiliateUrl || p.websiteUrl;
+  if (sp && !p.comingSoon) {
+    const mapped = listingsByPartner.get(Number(sp.id)) ?? [];
+    const reviews = reviewRowsByPartner.get(Number(sp.id)) ?? [];
+    // Prefer clean mapped listings; fall back to the raw catalog capture.
+    products = mapped.length >= 5 || reviews.length === 0
+      ? buildProducts(sp, aff)
+      : buildProductsFromReviewRows(sp, aff);
+  }
+  // Vendors with a standalone raw catalog file (not in the snapshot tables).
+  if (products.length === 0 && !p.comingSoon && RAW_CATALOG_FILES[p.slug]) {
+    products = buildProductsFromRawFile(RAW_CATALOG_FILES[p.slug], aff);
+  }
   const onSaleCount = products.filter((x) => x.onSale).length;
   const inStockPrices = products.filter((x) => x.inStock && x.price !== null).map((x) => x.price!);
   return {
