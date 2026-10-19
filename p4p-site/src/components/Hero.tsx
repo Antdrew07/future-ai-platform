@@ -1,8 +1,8 @@
-import { HERO_STATS, SITE } from "@/data/content";
+import { HERO_STATS } from "@/data/content";
 
 export default function Hero() {
   return (
-    <section id="home" className="relative overflow-hidden pt-[112px] pb-20 md:pt-[150px] md:pb-28">
+    <section id="home" className="relative overflow-hidden pt-[104px] pb-10 md:pt-[132px] md:pb-14">
       {/* ambient glow */}
       <div
         aria-hidden
@@ -15,31 +15,31 @@ export default function Hero() {
       <div className="container-p4p relative text-center">
         <span className="section-eyebrow">David Furka · Peptides 4 Power</span>
         <h1 className="mx-auto mt-4 max-w-4xl font-display text-4xl font-bold leading-[1.05] md:text-6xl">
-          Peptide knowledge that{" "}
-          <span className="gold-text">actually makes sense</span> — plus the codes that save you money.
+          So many peptide sites.{" "}
+          <span className="gold-text">Start here.</span>
         </h1>
         <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-muted md:text-lg">
-          {SITE.tagline} Watch Dave break it down, then shop his vetted vendor list with
-          verified discount codes.
+          David's hand-picked list of trusted peptide companies — each with a discount code.
+          One page, no guesswork. Then dig into the videos.
         </p>
 
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+        <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
           <a
             href="#deals"
             className="rounded-full bg-gold px-6 py-3 text-sm font-bold text-ongold transition hover:brightness-110"
           >
-            Shop the Deals →
+            See where to buy →
           </a>
           <a
             href="#videos"
             className="rounded-full border border-line px-6 py-3 text-sm font-bold text-ink transition hover:border-gold hover:text-accent"
           >
-            Watch Dave's Videos
+            Watch the videos
           </a>
         </div>
 
         {/* stats */}
-        <div className="mx-auto mt-12 grid max-w-xl grid-cols-3 gap-3">
+        <div className="mx-auto mt-9 grid max-w-xl grid-cols-3 gap-3">
           {HERO_STATS.map((s) => (
             <div
               key={s.label}

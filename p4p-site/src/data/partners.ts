@@ -194,6 +194,30 @@ export const PARTNERS: Partner[] = [
   },
 ];
 
+/**
+ * Accent color per vendor (hex). Drives the colorful home-page tiles so the
+ * vendor wall reads bright and scannable at a glance. Roughly keyed to each
+ * brand's own look; tweak freely.
+ */
+export const VENDOR_COLORS: Record<string, string> = {
+  "aio-peptides": "#7c3aed",
+  "treasure-coast": "#0d9488",
+  "kimera-chems": "#dc2626",
+  "glow-aminos": "#db2777",
+  "flawless-compounds": "#d97706",
+  "iron-protocol": "#475569",
+  "atomik-labz": "#ef4444",
+  "aminos-research": "#16a34a",
+  "evolve-peptides": "#4f46e5",
+  "swiss-chems": "#e11d48",
+  "bio-longevity-labs": "#2563eb",
+  "solution-peptides": "#0891b2",
+  "nano-blue-labs": "#1d4ed8",
+  "certia-peptide": "#64748b",
+  refillpen: "#f97316",
+  "get-melts": "#be123c",
+};
+
 /** House brand — featured above the affiliate grid. */
 export const HOUSE_BRAND: Partner = {
   slug: "peptides-4-power",

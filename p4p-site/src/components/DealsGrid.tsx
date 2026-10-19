@@ -1,7 +1,9 @@
 import { useCallback, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { PARTNERS, HOUSE_BRAND, type Partner } from "@/data/partners";
+import { PARTNERS, HOUSE_BRAND, VENDOR_COLORS, type Partner } from "@/data/partners";
 import Logo from "./Logo";
+
+const BRAND_BLUE = "#1e9ae0";
 
 function useCopy() {
   const [copied, setCopied] = useState<string | null>(null);
@@ -65,6 +67,7 @@ function PartnerCard({
   onCopy: (c: string) => void;
 }) {
   const to = `/vendor/${p.slug}`;
+  const color = VENDOR_COLORS[p.slug] ?? BRAND_BLUE;
 
   if (p.comingSoon) {
     return (
@@ -91,7 +94,8 @@ function PartnerCard({
       <Link
         to={to}
         aria-label={`View ${p.name}`}
-        className="relative block aspect-[4/5] overflow-hidden bg-gradient-to-br from-feature to-panel"
+        className="relative block aspect-[4/5] overflow-hidden"
+        style={{ background: `linear-gradient(150deg, ${color}2e 0%, ${color}0f 55%, ${color}05 100%)` }}
       >
         {p.productImage ? (
           <img
@@ -102,10 +106,13 @@ function PartnerCard({
           />
         ) : (
           <div className="grid h-full w-full place-items-center">
-            <Logo name={p.name} website={p.websiteUrl} size={112} />
+            <Logo name={p.name} website={p.websiteUrl} size={120} rounded="rounded-2xl" />
           </div>
         )}
-        <span className="absolute right-3 top-3 whitespace-nowrap rounded-full bg-gold px-2.5 py-1 text-xs font-extrabold text-ongold shadow-card">
+        <span
+          className="absolute right-3 top-3 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-extrabold text-white shadow-card"
+          style={{ background: color }}
+        >
           {p.savings} off
         </span>
       </Link>
@@ -153,12 +160,12 @@ export default function DealsGrid() {
     <section id="deals" className="scroll-mt-20 py-16 md:py-20">
       <div className="container-p4p">
         <div className="mx-auto max-w-2xl text-center">
-          <span className="section-eyebrow">Purchase From Me Directly</span>
+          <span className="section-eyebrow">Where to buy</span>
           <h2 className="mt-3 font-display text-3xl font-bold md:text-4xl">
-            Vetted vendors, <span className="gold-text">verified codes</span>
+            So many places out there — <span className="gold-text">here's where to start</span>
           </h2>
           <p className="mt-3 text-muted">
-            Tap any code to copy it, then shop and save. Dave only lists vendors he stands behind.
+            Dave's hand-picked peptide companies, all in one spot. Tap a code to copy it, then shop and save.
           </p>
         </div>
 
@@ -206,7 +213,7 @@ export default function DealsGrid() {
         </div>
 
         {/* Partner grid */}
-        <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {PARTNERS.map((p) => (
             <PartnerCard key={p.slug} p={p} copied={copied} onCopy={copy} />
           ))}
