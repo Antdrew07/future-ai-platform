@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { PARTNERS, HOUSE_BRAND, VENDOR_COLORS, type Partner } from "@/data/partners";
+import { P4P_LOGO } from "@/assets/logo";
 import Logo from "./Logo";
 
 const BRAND_BLUE = "#1e9ae0";
@@ -181,8 +182,12 @@ export default function DealsGrid() {
           />
           <div className="relative flex flex-wrap items-center justify-between gap-5">
             <div className="flex items-center gap-4">
-              <div className="grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br from-gold to-[#fff0c2] font-bold text-ongold">
-                P4P
+              <div className="grid h-16 w-16 shrink-0 place-items-center rounded-xl bg-white p-2 shadow-card">
+                <img
+                  src={P4P_LOGO}
+                  alt="Peptides 4 Power"
+                  className="h-full w-full object-contain"
+                />
               </div>
               <div>
                 <span className="inline-block rounded-full bg-gold px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wider text-ongold">
