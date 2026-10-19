@@ -27,9 +27,9 @@ export default function Home() {
     <main>
       <Hero />
       <SaleOfWeek />
+      <DealsGrid />
       <FeaturedPeptide />
       <VideoSection />
-      <DealsGrid />
       <Poetry />
       <Contact />
     </main>

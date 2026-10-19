@@ -11,12 +11,16 @@ export const SITE = {
   tagline: "Peptide education you can actually understand — plus the codes that save you money.",
 };
 
-/** Sticky-nav links (single-page smooth scroll). */
+/**
+ * Nav links. A plain slug (e.g. "about") is a real page route; a "#id" is a
+ * smooth-scroll target on the home page.
+ */
 export const NAV_LINKS: { label: string; href: string }[] = [
   { label: "Home", href: "#home" },
+  { label: "Vendors", href: "#deals" },
   { label: "Videos", href: "#videos" },
   { label: "Peptide of the Week", href: "#featured" },
-  { label: "Vendor Deals", href: "#deals" },
+  { label: "About", href: "about" },
   { label: "Poetry", href: "#poetry" },
   { label: "Contact", href: "#contact" },
 ];
@@ -56,6 +60,27 @@ export const POETRY: { title: string; body: string }[] = [
       "A second verse slot, ready for Dave's words. Short or long, it renders\ncleanly in this card.",
   },
 ];
+
+/**
+ * "About Me" page content — David Furka.
+ * DRAFT copy written from what's on the site; Dave should read it over and
+ * tweak any wording. Replace `photo` with a real headshot (a Google Drive
+ * image id works: "https://lh3.googleusercontent.com/d/<FILE_ID>").
+ */
+export const ABOUT = {
+  name: "David Furka",
+  role: "Founder, Peptides 4 Power",
+  photo: "", // leave "" to show an initials avatar until a headshot is added
+  intro:
+    "I'm Dave — the guy behind Peptides 4 Power. I started this site to do one thing: make peptides make sense for regular people, without the hype and without the jargon.",
+  paragraphs: [
+    "A few years back I was doing my own research, piecing things together from scattered forums, sales pages, and studies that read like they were written to confuse you. I figured if it was that hard for me, it was that hard for everyone. So I started breaking it down the way I wish someone had done for me — plain English, real talk, no fluff. That became \"Dave Dumbs It Down.\"",
+    "At 51, I put the work in on myself and documented the whole thing. The results are what keep me doing this: I've seen firsthand what a smart, consistent protocol can do, and I want you to have the same straight-shooting information I had to dig for.",
+    "The other half of this site is about saving you money. I only list vendors I actually trust and use, and I've negotiated discount codes with every one of them. When you shop through my links and codes, you get the best price — and it helps support the free education I put out. That's the deal, and I keep it honest.",
+  ],
+  closing:
+    "Everything here is for research and educational purposes only — none of it is medical advice. Watch the videos, use the codes, and reach out if you've got questions. I read them.",
+};
 
 /** Contact details. Update with Dave's real handles/email. */
 export const CONTACT = {

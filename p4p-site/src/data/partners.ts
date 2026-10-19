@@ -19,6 +19,13 @@ export interface Partner {
   affiliateUrl: string;
   /** Discount code to enter at checkout (null = none / applied via link). */
   code: string | null;
+  /**
+   * Product-vial photo shown big on the home-page vendor card.
+   * A full image URL, or a Google Drive image:
+   *   "https://lh3.googleusercontent.com/d/<FILE_ID>"
+   * Leave undefined to fall back to the vendor's logo tile.
+   */
+  productImage?: string;
   /** Short human savings label, e.g. "15%" or "15% or more". */
   savings: string;
   /** Numeric percent for badges/sorting when applicable (null for non-%). */
