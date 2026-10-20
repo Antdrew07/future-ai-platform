@@ -6,7 +6,7 @@
   "description": "Peptides 4 Power — David Furka. Peptide education, Dave's videos, and vetted vendor discount codes.",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "node scripts/merge-woo-live.mjs && tsc -b && vite build",
     "preview": "vite preview",
     "start": "serve -s dist -l ${PORT:-3000}"
   },
