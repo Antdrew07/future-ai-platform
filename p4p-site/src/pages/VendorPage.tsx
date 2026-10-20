@@ -131,10 +131,17 @@ export default function VendorPage() {
           </>
         ) : (
           <div className="mt-10 rounded-3xl border border-line bg-panel shadow-card p-8 text-center">
-            <h2 className="font-display text-xl font-bold">Product pricing coming soon</h2>
+            <h2 className="font-display text-xl font-bold">Shop {vendor.name} directly</h2>
             <p className="mx-auto mt-2 max-w-md text-sm text-muted">
-              We're still pulling {vendor.name}'s live catalog. In the meantime, your discount
-              code <b className="text-ink">{vendor.code ?? ""}</b> is ready to use.
+              Browse {vendor.name}'s full lineup on their site
+              {vendor.code ? (
+                <>
+                  {" "}— your discount code <b className="text-ink">{vendor.code}</b> is ready to use
+                </>
+              ) : (
+                ""
+              )}
+              .
             </p>
             <a
               href={vendor.affiliateUrl}

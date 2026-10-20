@@ -1,6 +1,6 @@
 {
   "generatedAt": "2026-08-31T03:50:32.937Z",
-  "bakedAt": "2026-10-19T22:32:22.125Z",
+  "bakedAt": "2026-10-20T03:39:34.115Z",
   "vendorCount": 17,
   "productCount": 248,
   "saleOfWeek": {
@@ -4147,14 +4147,13 @@
     {
       "slug": "certia-peptide",
       "name": "Certia Peptide",
-      "website": "",
-      "affiliateUrl": "",
+      "website": "https://certapeptides.com/",
+      "affiliateUrl": "https://certapeptides.com/",
       "code": null,
-      "savings": "Europe only",
+      "savings": "Europe",
       "savingsPct": null,
       "order": 13,
       "region": "Europe",
-      "comingSoon": true,
       "productCount": 0,
       "onSaleCount": 0,
       "cheapest": null,

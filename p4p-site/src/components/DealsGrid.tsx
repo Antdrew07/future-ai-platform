@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { PARTNERS, HOUSE_BRAND, VENDOR_COLORS, type Partner } from "@/data/partners";
+import { getVendor } from "@/data/catalog";
 import { P4P_LOGO } from "@/assets/logo";
 import Logo from "./Logo";
 
@@ -70,53 +71,60 @@ function PartnerCard({
   const to = `/vendor/${p.slug}`;
   const color = VENDOR_COLORS[p.slug] ?? BRAND_BLUE;
 
-  if (p.comingSoon) {
-    return (
-      <div className="flex flex-col overflow-hidden rounded-2xl border border-line bg-panel shadow-card opacity-80">
-        <div className="relative grid aspect-[4/5] place-items-center bg-gradient-to-br from-bg-2 to-panel">
-          <Logo name={p.name} website={p.websiteUrl} size={96} />
-          <span className="absolute right-3 top-3 rounded-full border border-line bg-panel px-2.5 py-1 text-[11px] font-semibold text-muted">
-            Coming soon
-          </span>
+  // Vendors we have a live product catalog for open their on-site page;
+  // the rest go straight to the store through the affiliate link.
+  const vendor = getVendor(p.slug);
+  const hasProducts = (vendor?.products.length ?? 0) > 0;
+  const shopHref = p.affiliateUrl || p.websiteUrl || "#";
+  const badge = p.savingsPct != null ? `${p.savings} off` : p.savings;
+  const artClass = "relative block aspect-[4/5] overflow-hidden";
+  const artStyle = {
+    background: `linear-gradient(150deg, ${color}2e 0%, ${color}0f 55%, ${color}05 100%)`,
+  };
+  const art = (
+    <>
+      {p.productImage ? (
+        <img
+          src={p.productImage}
+          alt={`${p.name} product`}
+          loading="lazy"
+          className="h-full w-full object-contain p-4 transition duration-300 group-hover:scale-[1.03]"
+        />
+      ) : (
+        <div className="grid h-full w-full place-items-center">
+          <Logo name={p.name} website={p.websiteUrl} size={120} rounded="rounded-2xl" />
         </div>
-        <div className="p-4">
-          <h3 className="font-display text-sm font-bold uppercase tracking-wide">{p.name}</h3>
-          <p className="mt-1 text-sm text-muted">
-            {p.region === "Europe" ? "Europe only — launching soon." : "Launching soon."}
-          </p>
-        </div>
-      </div>
-    );
-  }
+      )}
+      <span
+        className="absolute right-3 top-3 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-extrabold text-white shadow-card"
+        style={{ background: color }}
+      >
+        {badge}
+      </span>
+    </>
+  );
+  const btnClass =
+    "mt-auto inline-flex w-full items-center justify-center rounded-xl bg-gold px-4 py-2.5 text-sm font-bold text-ongold transition hover:brightness-110";
 
   return (
     <div className="group flex flex-col overflow-hidden rounded-2xl border border-line bg-panel shadow-card transition hover:-translate-y-0.5 hover:border-gold/40 hover:shadow-cardlg">
-      {/* Big product photo */}
-      <Link
-        to={to}
-        aria-label={`View ${p.name}`}
-        className="relative block aspect-[4/5] overflow-hidden"
-        style={{ background: `linear-gradient(150deg, ${color}2e 0%, ${color}0f 55%, ${color}05 100%)` }}
-      >
-        {p.productImage ? (
-          <img
-            src={p.productImage}
-            alt={`${p.name} product`}
-            loading="lazy"
-            className="h-full w-full object-contain p-4 transition duration-300 group-hover:scale-[1.03]"
-          />
-        ) : (
-          <div className="grid h-full w-full place-items-center">
-            <Logo name={p.name} website={p.websiteUrl} size={120} rounded="rounded-2xl" />
-          </div>
-        )}
-        <span
-          className="absolute right-3 top-3 whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-extrabold text-white shadow-card"
-          style={{ background: color }}
+      {/* Product photo — links to the on-site page, or straight to the store. */}
+      {hasProducts ? (
+        <Link to={to} aria-label={`View ${p.name}`} className={artClass} style={artStyle}>
+          {art}
+        </Link>
+      ) : (
+        <a
+          href={shopHref}
+          target="_blank"
+          rel="sponsored noopener noreferrer"
+          aria-label={`Shop ${p.name}`}
+          className={artClass}
+          style={artStyle}
         >
-          {p.savings} off
-        </span>
-      </Link>
+          {art}
+        </a>
+      )}
 
       {/* Details */}
       <div className="flex flex-1 flex-col gap-3 p-4">
@@ -142,12 +150,15 @@ function PartnerCard({
           <p className="text-sm text-muted">Discount applied at the link</p>
         )}
 
-        <Link
-          to={to}
-          className="mt-auto inline-flex w-full items-center justify-center rounded-xl bg-gold px-4 py-2.5 text-sm font-bold text-ongold transition hover:brightness-110"
-        >
-          View {p.name} →
-        </Link>
+        {hasProducts ? (
+          <Link to={to} className={btnClass}>
+            View {p.name} →
+          </Link>
+        ) : (
+          <a href={shopHref} target="_blank" rel="sponsored noopener noreferrer" className={btnClass}>
+            Shop {p.name} →
+          </a>
+        )}
       </div>
     </div>
   );
