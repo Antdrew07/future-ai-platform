@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { VIDEO_CATEGORIES, type VideoItem } from "@/data/videos";
 
 /** Resolve a host-agnostic clip to an iframe src, or null if none set. */
@@ -11,8 +12,27 @@ function embedUrl(v: VideoItem): string | null {
   return null;
 }
 
+/** A lightweight poster image for the clip (so we don't load 54 players up front). */
+function posterUrl(v: VideoItem): string | null {
+  if (v.drive) return `https://drive.google.com/thumbnail?id=${v.drive}&sz=w800`;
+  if (v.videoId && v.provider !== "vimeo") return `https://i.ytimg.com/vi/${v.videoId}/hqdefault.jpg`;
+  return null;
+}
+
+function PlayBadge() {
+  return (
+    <span className="pointer-events-none absolute left-1/2 top-1/2 grid h-14 w-14 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-accent shadow-cardlg transition group-hover:scale-105">
+      <span className="ml-1 text-xl">▶</span>
+    </span>
+  );
+}
+
 function VideoCard({ v }: { v: VideoItem }) {
   const url = embedUrl(v);
+  const [open, setOpen] = useState(false);
+  const [posterOk, setPosterOk] = useState(true);
+  const poster = posterUrl(v);
+
   return (
     <figure className="overflow-hidden rounded-2xl border border-line bg-panel shadow-card">
       <div className="relative aspect-video w-full bg-bg-2">
@@ -22,19 +42,40 @@ function VideoCard({ v }: { v: VideoItem }) {
             src={v.file}
             title={v.title}
             controls
-            preload="metadata"
+            preload="none"
             playsInline
           />
-        ) : url ? (
+        ) : url && open ? (
+          // Player loads only after the user taps — keeps the page fast.
           <iframe
             className="absolute inset-0 h-full w-full"
             src={url}
             title={v.title}
-            loading="lazy"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             referrerPolicy="strict-origin-when-cross-origin"
             allowFullScreen
           />
+        ) : url ? (
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            aria-label={`Play ${v.title}`}
+            className="group absolute inset-0 h-full w-full"
+          >
+            {poster && posterOk ? (
+              <img
+                src={poster}
+                alt=""
+                loading="lazy"
+                onError={() => setPosterOk(false)}
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-br from-bg-2 to-panel" />
+            )}
+            <span className="absolute inset-0 bg-black/15 transition group-hover:bg-black/5" />
+            <PlayBadge />
+          </button>
         ) : (
           <div className="absolute inset-0 grid place-items-center text-center">
             <div>
