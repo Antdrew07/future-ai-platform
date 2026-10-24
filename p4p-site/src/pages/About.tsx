@@ -26,21 +26,15 @@ export default function About() {
         <div className="mx-auto max-w-3xl">
           <span className="section-eyebrow">About</span>
 
-          {/* Photos */}
-          {ABOUT.photos.length > 0 ? (
-            <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              {ABOUT.photos.map((src, i) => (
-                <img
-                  key={i}
-                  src={src}
-                  alt={ABOUT.name}
-                  loading="lazy"
-                  className="aspect-[4/5] w-full rounded-3xl object-cover object-top shadow-cardlg"
-                />
-              ))}
-            </div>
+          {/* Hero photo */}
+          {ABOUT.photoTop ? (
+            <img
+              src={ABOUT.photoTop}
+              alt={ABOUT.name}
+              className="mx-auto mt-5 aspect-[4/5] w-full max-w-sm rounded-3xl object-cover object-top shadow-cardlg"
+            />
           ) : (
-            <div className="mt-5 grid h-28 w-28 place-items-center rounded-2xl bg-gradient-to-br from-gold to-gold-bright text-3xl font-bold text-ongold shadow-cardlg">
+            <div className="mx-auto mt-5 grid h-28 w-28 place-items-center rounded-2xl bg-gradient-to-br from-gold to-gold-bright text-3xl font-bold text-ongold shadow-cardlg">
               {initials(ABOUT.name)}
             </div>
           )}
@@ -62,6 +56,16 @@ export default function About() {
               {ABOUT.closing}
             </p>
           </div>
+
+          {/* Second photo */}
+          {ABOUT.photoBottom && (
+            <img
+              src={ABOUT.photoBottom}
+              alt={ABOUT.name}
+              loading="lazy"
+              className="mx-auto mt-8 aspect-[4/5] w-full max-w-sm rounded-3xl object-cover object-top shadow-cardlg"
+            />
+          )}
 
           {/* CTAs */}
           <div className="mt-8 flex flex-wrap justify-center gap-3">
