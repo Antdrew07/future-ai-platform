@@ -32,13 +32,46 @@ export default function FeaturedPeptide() {
               <p className="mt-6 text-xs text-muted">{p.disclaimer}</p>
             </div>
 
-            <div className="shrink-0">
-              <a
-                href="#deals"
-                className="inline-flex items-center justify-center rounded-full bg-gold px-7 py-3.5 text-sm font-bold text-ongold transition hover:brightness-110"
-              >
-                Find it from a vetted vendor →
-              </a>
+            <div className="w-full shrink-0 md:w-80">
+              <p className="mb-3 text-sm font-semibold text-ink">{p.carriedByNote}</p>
+              <div className="space-y-3">
+                {p.buyOptions.map((opt) => (
+                  <a
+                    key={opt.vendor}
+                    href={opt.url}
+                    target="_blank"
+                    rel="sponsored noopener noreferrer"
+                    className="flex items-center justify-between gap-3 rounded-2xl border border-line bg-panel p-4 shadow-card transition hover:-translate-y-0.5 hover:border-gold/40"
+                  >
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="truncate font-display font-bold">{opt.vendor}</span>
+                        {opt.houseBrand && (
+                          <span className="shrink-0 rounded-full bg-gold px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-ongold">
+                            House
+                          </span>
+                        )}
+                      </div>
+                      <div className="mt-0.5 text-sm text-muted">
+                        {opt.price != null ? (
+                          <span className="font-bold text-accent">${opt.price.toFixed(2)}</span>
+                        ) : (
+                          <span>{opt.priceNote}</span>
+                        )}
+                        {opt.code && (
+                          <>
+                            {" · code "}
+                            <b className="text-ink">{opt.code}</b>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <span className="shrink-0 rounded-xl bg-gold px-4 py-2 text-sm font-bold text-ongold">
+                      Shop →
+                    </span>
+                  </a>
+                ))}
+              </div>
             </div>
           </div>
         </div>

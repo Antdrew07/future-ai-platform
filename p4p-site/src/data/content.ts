@@ -36,6 +36,16 @@ export const HERO_STATS: { value: string; label: string }[] = [
  * "Peptide of the Week" feature. Editable each week.
  * Mirrors the format Dave ran on the old site (e.g. SLU-PP-332).
  */
+export interface BuyOption {
+  vendor: string;
+  houseBrand?: boolean;
+  url: string;
+  code: string | null;
+  /** Numeric price if known (shows "$X.XX"); otherwise priceNote is shown. */
+  price: number | null;
+  priceNote?: string | null;
+}
+
 export const FEATURED_PEPTIDE = {
   name: "SLU-PP-332",
   nickname: "“Exercise in a bottle”",
@@ -45,6 +55,24 @@ export const FEATURED_PEPTIDE = {
     "Premixed, caps, liquid, transdermal & powder options",
   ],
   disclaimer: "For research purposes only. Not medical advice.",
+  carriedByNote: "Only two vendors carry it — grab it from either:",
+  buyOptions: [
+    {
+      vendor: "Peptides 4 Power",
+      houseBrand: true,
+      url: "https://www.peptides4power.us/",
+      code: null,
+      price: null,
+      priceNote: "See price on site",
+    },
+    {
+      vendor: "Kimera Chems",
+      url: "https://kimerachems.co/product/slu-pp-332/",
+      code: "POWER15",
+      price: 31.99,
+      priceNote: null,
+    },
+  ] as BuyOption[],
 };
 
 /** Peptide Poetry — Dave's signature segment. Placeholder verses until supplied. */
