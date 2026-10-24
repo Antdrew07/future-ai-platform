@@ -148,8 +148,8 @@ Stronger cells, a brighter view,
 Longevity starts right here with you.
 
 Save big now, it's worth the show,
-POWER20 makes prices low.
-Take 20% off, the smart way to pay,
+POWER25 makes prices low.
+Take 25% off, the smart way to pay,
 Grab Epitalon at AIO today.`,
   },
   {
@@ -181,12 +181,12 @@ It helps you recover, restore, and keep.`,
     body: `AIO just made a bold new act,
 Cartalax and Thymalin join the pack.
 Healing and balance now on display,
-With Power20 you save today.
+With Power25 you save today.
 
 Science and savings all in one go,
 AIO drops what you need to know.
 So stock up now, don't miss the show,
-20% off helps the wallet grow.`,
+25% off helps the wallet grow.`,
   },
 ];
 
