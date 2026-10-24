@@ -163,7 +163,7 @@ export const PARTNERS: Partner[] = [
   },
   {
     slug: "certia-peptide",
-    name: "Certia Peptide",
+    name: "Certa Peptides",
     websiteUrl: "https://certapeptides.com/",
     affiliateUrl: "https://certapeptides.com/",
     code: null,
