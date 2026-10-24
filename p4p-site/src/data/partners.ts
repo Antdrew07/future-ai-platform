@@ -175,12 +175,12 @@ export const PARTNERS: Partner[] = [
   {
     slug: "refillpen",
     name: "RefillPen",
-    websiteUrl: "https://refillpens.com/",
-    affiliateUrl: "https://refillpens.com/",
+    websiteUrl: "https://www.refillpen.com/",
+    affiliateUrl: "https://www.refillpen.com/?ref=Power10",
     code: "POWER10",
     savings: "10%",
     savingsPct: 10,
-    note: "Brand/destination naming to confirm.",
+    productImage: "/vendors/refillpen.webp",
   },
   {
     slug: "get-melts",

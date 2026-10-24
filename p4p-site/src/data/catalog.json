@@ -1,6 +1,6 @@
 {
   "generatedAt": "2026-08-31T03:50:32.937Z",
-  "bakedAt": "2026-10-20T03:39:34.115Z",
+  "bakedAt": "2026-10-24T22:30:44.705Z",
   "vendorCount": 17,
   "productCount": 248,
   "saleOfWeek": {
@@ -4162,8 +4162,8 @@
     {
       "slug": "refillpen",
       "name": "RefillPen",
-      "website": "https://refillpens.com/",
-      "affiliateUrl": "https://refillpens.com/",
+      "website": "https://www.refillpen.com/",
+      "affiliateUrl": "https://www.refillpen.com/?ref=Power10",
       "code": "POWER10",
       "savings": "10%",
       "savingsPct": 10,
