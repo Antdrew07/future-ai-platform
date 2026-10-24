@@ -62,8 +62,8 @@ export const FEATURED_PEPTIDE = {
       houseBrand: true,
       url: "https://www.peptides4power.us/",
       code: null,
-      price: null,
-      priceNote: "See price on site",
+      price: 30.0,
+      priceNote: null,
     },
     {
       vendor: "Kimera Chems",
