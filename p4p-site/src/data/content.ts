@@ -129,7 +129,8 @@ AlphaOmega brings it straight to you.`,
 export const ABOUT = {
   name: "David Furka",
   role: "Founder, Peptides 4 Power",
-  photo: "", // leave "" to show an initials avatar until a headshot is added
+  // Photos shown at the top of the About page. Empty array -> initials avatar.
+  photos: ["/about/david-portrait.jpg", "/about/david-gym.jpg"],
   intro:
     "I'm Dave — the guy behind Peptides 4 Power. I started this site to do one thing: make peptides make sense for regular people, without the hype and without the jargon.",
   paragraphs: [

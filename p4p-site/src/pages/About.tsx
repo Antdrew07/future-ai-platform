@@ -26,26 +26,28 @@ export default function About() {
         <div className="mx-auto max-w-3xl">
           <span className="section-eyebrow">About</span>
 
-          <div className="mt-5 flex flex-col items-center gap-6 sm:flex-row sm:items-center">
-            {/* Headshot (or initials until one is added) */}
-            <div className="shrink-0">
-              {ABOUT.photo ? (
+          {/* Photos */}
+          {ABOUT.photos.length > 0 ? (
+            <div className="mt-5 grid gap-4 sm:grid-cols-2">
+              {ABOUT.photos.map((src, i) => (
                 <img
-                  src={ABOUT.photo}
+                  key={i}
+                  src={src}
                   alt={ABOUT.name}
-                  className="h-28 w-28 rounded-2xl object-cover shadow-cardlg md:h-32 md:w-32"
+                  loading="lazy"
+                  className="aspect-[4/5] w-full rounded-3xl object-cover object-top shadow-cardlg"
                 />
-              ) : (
-                <div className="grid h-28 w-28 place-items-center rounded-2xl bg-gradient-to-br from-gold to-gold-bright text-3xl font-bold text-ongold shadow-cardlg md:h-32 md:w-32">
-                  {initials(ABOUT.name)}
-                </div>
-              )}
+              ))}
             </div>
+          ) : (
+            <div className="mt-5 grid h-28 w-28 place-items-center rounded-2xl bg-gradient-to-br from-gold to-gold-bright text-3xl font-bold text-ongold shadow-cardlg">
+              {initials(ABOUT.name)}
+            </div>
+          )}
 
-            <div className="text-center sm:text-left">
-              <h1 className="font-display text-3xl font-bold md:text-4xl">{ABOUT.name}</h1>
-              <p className="mt-1 text-accent">{ABOUT.role}</p>
-            </div>
+          <div className="mt-6 text-center">
+            <h1 className="font-display text-3xl font-bold md:text-4xl">{ABOUT.name}</h1>
+            <p className="mt-1 text-accent">{ABOUT.role}</p>
           </div>
 
           {/* Bio */}
@@ -62,7 +64,7 @@ export default function About() {
           </div>
 
           {/* CTAs */}
-          <div className="mt-8 flex flex-wrap justify-center gap-3 sm:justify-start">
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link
               to="/#deals"
               className="rounded-full bg-gold px-6 py-3 text-sm font-bold text-ongold transition hover:brightness-110"
