@@ -10,6 +10,7 @@ export default function Poetry() {
           <h2 className="mt-3 font-display text-3xl font-bold md:text-4xl">
             Dave's signature segment
           </h2>
+          <p className="mt-2 text-sm font-semibold text-accent">By Dr. David Furka</p>
           <p className="mt-3 text-muted">The personality that made the original site his.</p>
         </div>
 

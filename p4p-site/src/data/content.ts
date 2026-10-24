@@ -78,14 +78,45 @@ export const FEATURED_PEPTIDE = {
 /** Peptide Poetry — Dave's signature segment. Placeholder verses until supplied. */
 export const POETRY: { title: string; body: string }[] = [
   {
-    title: "Ode to Recovery",
-    body:
-      "Add Dave's poem here. This section keeps the personality that made the\noriginal site his — we'll drop in the real verses once you send them over.",
+    title: "PEG-MGF / IGF",
+    body: `In a lab at AIO, sleek and bright,
+Lived PEG-MGF, a peptide of might.
+With IGF by its loyal side,
+They build up muscle far and wide.
+Peg said, "Let's grow, let's heal, let's flex!"
+While IGF works through cell specs.
+Together they sparked repair and gain,
+In fibers torn from heavy strain.
+They danced through tissue, swift and clean,
+Boosting growth like a well-oiled machine.
+Not for fame or gym applause,
+Just pure science, without a pause.
+So if you hear a whisper low,
+Of peptides making muscles grow,
+Tip your hat to the AIO pair,
+PEG and IGF are beyond compare.`,
   },
   {
-    title: "The Protocol",
-    body:
-      "A second verse slot, ready for Dave's words. Short or long, it renders\ncleanly in this card.",
+    title: "L-Carnitine",
+    body: `L-Carnitine at AIO,
+Gives your muscles fuel to grow.
+Energy high and spirits bright,
+It powers the day and trains at night.
+
+Living strong where peptides flow,
+Helping every lifter grow.
+At AIO it finds its scene...
+The mighty friend named L-Carnitine.`,
+  },
+  {
+    title: "Humanin",
+    body: `At Alpha Omega, Humanin stays,
+Guarding your cells in protective ways.
+A peptide of strength, resilience within,
+Longevity's ally — that's Humanin.
+
+With energy steady and wellness true,
+AlphaOmega brings it straight to you.`,
   },
 ];
 
