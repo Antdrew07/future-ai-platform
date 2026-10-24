@@ -118,6 +118,76 @@ Longevity's ally — that's Humanin.
 With energy steady and wellness true,
 AlphaOmega brings it straight to you.`,
   },
+  {
+    title: "Semax",
+    body: `At Flawless, Semax stands with pride,
+A nootropic boost for the mind inside.
+Sharper focus, memory's glow,
+A cleaner path where thoughts can flow.
+
+When brainpower's key and clarity too,
+Flawless Semax is there for you.`,
+  },
+  {
+    title: "Lipo-C",
+    body: `At AIO the choice is clear,
+Lipo-C brings the boost your cheer.
+Support for health, energy too,
+A brighter day is made for you.
+
+Stronger mornings, nights that flow,
+With AIO you're good to go.
+Wellness shining, can't you see?
+Feel the lift with Lipo-C.`,
+  },
+  {
+    title: "Epitalon",
+    body: `At AIO, Epitalon shines,
+Aging's foe with sleek design.
+Stronger cells, a brighter view,
+Longevity starts right here with you.
+
+Save big now, it's worth the show,
+POWER20 makes prices low.
+Take 20% off, the smart way to pay,
+Grab Epitalon at AIO today.`,
+  },
+  {
+    title: "HCG",
+    body: `HCG can spark the flame,
+Hormones balanced, strength reclaimed.
+Boosts testosterone, keeps lean mass,
+Helps your wellness truly last.
+
+Supports fertility, mood, and drive.
+Energy back, you feel alive.
+For mind and body, and all it can be,
+That's the gift of HCG.`,
+  },
+  {
+    title: "Tesamorelin",
+    body: `Tesamorelin's known to trim and define,
+Helping reduce belly fat over time.
+It boosts growth hormone, supports looking lean,
+Improves how your body uses protein.
+
+At AIO and AlphaOmega, it shows,
+A peptide for balance, where wellness grows.
+With energy lifted and sleep that's more deep,
+It helps you recover, restore, and keep.`,
+  },
+  {
+    title: "Double Drop",
+    body: `AIO just made a bold new act,
+Cartalax and Thymalin join the pack.
+Healing and balance now on display,
+With Power20 you save today.
+
+Science and savings all in one go,
+AIO drops what you need to know.
+So stock up now, don't miss the show,
+20% off helps the wallet grow.`,
+  },
 ];
 
 /**
