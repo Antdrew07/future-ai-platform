@@ -202,9 +202,9 @@ So stock up now, don't miss the show,
 export const ABOUT = {
   name: "David Furka",
   role: "Founder, Peptides 4 Power",
-  // About-page photos: one up top (hero), one down at the bottom.
-  photoTop: "/about/david-gym.jpg",
-  photoBottom: "/about/david-portrait.jpg",
+  // About-page photo: the portrait (the gym shot is the home-page hero now).
+  photoTop: "/about/david-portrait.jpg",
+  photoBottom: "",
   intro:
     "I'm Dave — the guy behind Peptides 4 Power. I started this site to do one thing: make peptides make sense for regular people, without the hype and without the jargon.",
   paragraphs: [
