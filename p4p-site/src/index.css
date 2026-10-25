@@ -75,10 +75,12 @@
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 76px;
+  overflow-x: hidden;
 }
 
 body {
   margin: 0;
+  overflow-x: hidden;
   background: var(--color-bg);
   color: var(--color-ink);
   font-family: var(--font-sans);

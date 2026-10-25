@@ -29,8 +29,9 @@ export default function SaleOfWeek() {
                 {vendor && <Logo name={vendor.name} website={vendor.website} size={44} />}
                 <span className="text-sm font-semibold text-muted">{sale.vendorName}</span>
               </div>
-              <h2 className="mt-4 font-display text-3xl font-bold md:text-4xl">
-                {p.compound} <span className="text-muted">· {p.size}</span>
+              <h2 className="mt-4 font-display text-2xl font-bold leading-tight break-words md:text-3xl">
+                {p.compound}
+                {p.size ? <span className="text-muted"> · {p.size}</span> : null}
               </h2>
               <div className="mt-4 flex flex-wrap items-end gap-3">
                 <span className="font-display text-4xl font-bold text-accent">
