@@ -76,7 +76,7 @@ export default function About() {
               Shop Dave's vendors →
             </Link>
             <Link
-              to="/#videos"
+              to="/videos"
               className="rounded-full border border-line px-6 py-3 text-sm font-bold text-ink transition hover:border-gold hover:text-accent"
             >
               Watch the videos

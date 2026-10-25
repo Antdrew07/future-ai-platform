@@ -16,13 +16,12 @@ export const SITE = {
  * smooth-scroll target on the home page.
  */
 export const NAV_LINKS: { label: string; href: string }[] = [
-  { label: "Home", href: "#home" },
-  { label: "Vendors", href: "#deals" },
-  { label: "Videos", href: "#videos" },
-  { label: "Peptide of the Week", href: "#featured" },
+  { label: "Vendors", href: "" },
+  { label: "Videos", href: "videos" },
+  { label: "Peptide of the Week", href: "peptide-of-the-week" },
   { label: "About", href: "about" },
   { label: "Poetry", href: "poetry" },
-  { label: "Contact", href: "#contact" },
+  { label: "Contact", href: "contact" },
 ];
 
 /** Hero stats strip. */

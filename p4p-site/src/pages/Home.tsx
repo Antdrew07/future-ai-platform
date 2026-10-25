@@ -2,9 +2,6 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import DealsGrid from "@/components/DealsGrid";
 import SaleOfWeek from "@/components/SaleOfWeek";
-import FeaturedPeptide from "@/components/FeaturedPeptide";
-import VideoSection from "@/components/VideoSection";
-import Contact from "@/components/Contact";
 
 export default function Home() {
   const location = useLocation();
@@ -25,9 +22,6 @@ export default function Home() {
     <main>
       <DealsGrid />
       <SaleOfWeek />
-      <FeaturedPeptide />
-      <VideoSection />
-      <Contact />
     </main>
   );
 }
