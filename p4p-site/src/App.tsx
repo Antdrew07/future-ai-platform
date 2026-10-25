@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import Home from "@/pages/Home";
@@ -9,11 +9,11 @@ import FeaturedPage from "@/pages/FeaturedPage";
 import ContactPage from "@/pages/ContactPage";
 import VendorPage from "@/pages/VendorPage";
 
-export default function App() {
+function AppRoutes() {
+  const location = useLocation();
   return (
-    <BrowserRouter>
-      <Header />
-      <Routes>
+    <div key={location.pathname} className="page-fade">
+      <Routes location={location}>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
         <Route path="/poetry" element={<PoetryPage />} />
@@ -23,6 +23,15 @@ export default function App() {
         <Route path="/vendor/:slug" element={<VendorPage />} />
         <Route path="*" element={<Home />} />
       </Routes>
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Header />
+      <AppRoutes />
       <Footer />
     </BrowserRouter>
   );

@@ -4,6 +4,8 @@ import { PARTNERS, HOUSE_BRAND, VENDOR_COLORS, type Partner } from "@/data/partn
 import { getVendor } from "@/data/catalog";
 import { P4P_LOGO } from "@/assets/logo";
 import Logo from "./Logo";
+import Reveal from "./Reveal";
+import { ArrowRightIcon } from "./icons";
 
 const BRAND_BLUE = "#1e9ae0";
 
@@ -104,10 +106,10 @@ function PartnerCard({
     </>
   );
   const btnClass =
-    "mt-auto inline-flex w-full items-center justify-center rounded-xl bg-gold px-4 py-2.5 text-sm font-bold text-ongold transition hover:brightness-110";
+    "cta mt-auto inline-flex w-full items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-bold";
 
   return (
-    <div className="group flex flex-col overflow-hidden rounded-2xl border border-line bg-panel shadow-card transition hover:-translate-y-0.5 hover:border-gold/40 hover:shadow-cardlg">
+    <div className="group flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-panel shadow-card transition duration-300 hover:-translate-y-1 hover:border-gold/40 hover:shadow-cardlg">
       {/* Product photo — links to the on-site page, or straight to the store. */}
       {hasProducts ? (
         <Link to={to} aria-label={`View ${p.name}`} className={artClass} style={artStyle}>
@@ -152,11 +154,11 @@ function PartnerCard({
 
         {hasProducts ? (
           <Link to={to} className={btnClass}>
-            View {p.name} →
+            View {p.name} <ArrowRightIcon size={16} />
           </Link>
         ) : (
           <a href={shopHref} target="_blank" rel="sponsored noopener noreferrer" className={btnClass}>
-            Shop {p.name} →
+            Shop {p.name} <ArrowRightIcon size={16} />
           </a>
         )}
       </div>
@@ -171,18 +173,19 @@ export default function DealsGrid() {
   return (
     <section id="deals" className="scroll-mt-20 pt-24 pb-16 md:pt-28 md:pb-20">
       <div className="container-p4p">
-        <div className="mx-auto max-w-2xl text-center">
+        <Reveal className="mx-auto max-w-2xl text-center">
           <span className="section-eyebrow">Where to buy</span>
           <h2 className="mt-3 font-display text-3xl font-bold md:text-4xl">
-            So many places out there — <span className="gold-text">here's where to start</span>
+            So many places out there — <span className="gradient-text">here's where to start</span>
           </h2>
           <p className="mt-3 text-muted">
             Dave's hand-picked peptide companies, all in one spot. Tap a code to copy it, then shop and save.
           </p>
-        </div>
+        </Reveal>
 
         {/* House brand */}
-        <div className="relative mt-10 overflow-hidden rounded-3xl border border-gold/35 bg-gradient-to-br from-feature to-panel shadow-cardlg p-6 md:p-7">
+        <Reveal className="mt-10">
+        <div className="relative overflow-hidden rounded-3xl border border-gold/35 bg-gradient-to-br from-feature to-panel shadow-cardlg p-6 md:p-7">
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0"
@@ -220,18 +223,21 @@ export default function DealsGrid() {
                 href={h.affiliateUrl || h.websiteUrl}
                 target="_blank"
                 rel="sponsored noopener noreferrer"
-                className="inline-flex items-center justify-center rounded-xl bg-gold px-5 py-2.5 text-sm font-bold text-ongold transition hover:brightness-110"
+                className="cta inline-flex items-center justify-center gap-1.5 rounded-xl px-5 py-2.5 text-sm font-bold"
               >
-                Shop &amp; Save →
+                Shop &amp; Save <ArrowRightIcon size={16} />
               </a>
             </div>
           </div>
         </div>
+        </Reveal>
 
         {/* Partner grid */}
         <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {PARTNERS.map((p) => (
-            <PartnerCard key={p.slug} p={p} copied={copied} onCopy={copy} />
+          {PARTNERS.map((p, i) => (
+            <Reveal key={p.slug} delay={Math.min(i, 7) * 60}>
+              <PartnerCard p={p} copied={copied} onCopy={copy} />
+            </Reveal>
           ))}
         </div>
 

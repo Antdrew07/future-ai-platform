@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { CATALOG, formatPrice, getVendor } from "@/data/catalog";
 import Logo from "./Logo";
+import { ArrowRightIcon } from "./icons";
 
 export default function SaleOfWeek() {
   const sale = CATALOG.saleOfWeek;
@@ -52,9 +53,9 @@ export default function SaleOfWeek() {
                   href={p.url}
                   target="_blank"
                   rel="sponsored noopener noreferrer"
-                  className="rounded-full bg-gold px-6 py-3 text-sm font-bold text-ongold transition hover:brightness-110"
+                  className="cta inline-flex items-center gap-1.5 rounded-full px-6 py-3 text-sm font-bold"
                 >
-                  Grab this deal →
+                  Grab this deal <ArrowRightIcon size={16} />
                 </a>
                 {sale.code && (
                   <span className="text-sm text-muted">

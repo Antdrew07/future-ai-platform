@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import DealsGrid from "@/components/DealsGrid";
 import SaleOfWeek from "@/components/SaleOfWeek";
+import TrustBand from "@/components/TrustBand";
 
 export default function Home() {
   const location = useLocation();
@@ -21,6 +22,7 @@ export default function Home() {
   return (
     <main>
       <DealsGrid />
+      <TrustBand />
       <SaleOfWeek />
     </main>
   );

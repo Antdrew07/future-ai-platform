@@ -1,4 +1,5 @@
 import { FEATURED_PEPTIDE } from "@/data/content";
+import { CheckIcon } from "./icons";
 
 export default function FeaturedPeptide() {
   const p = FEATURED_PEPTIDE;
@@ -24,7 +25,9 @@ export default function FeaturedPeptide() {
               <ul className="mt-6 space-y-2.5">
                 {p.bullets.map((b) => (
                   <li key={b} className="flex items-start gap-3 text-ink">
-                    <span className="mt-1 text-accent">▸</span>
+                    <span className="mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full bg-gold/15 text-accent">
+                      <CheckIcon size={13} />
+                    </span>
                     <span>{b}</span>
                   </li>
                 ))}

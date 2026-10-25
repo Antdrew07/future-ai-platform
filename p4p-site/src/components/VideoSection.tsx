@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { VIDEO_CATEGORIES, type VideoItem } from "@/data/videos";
+import Reveal from "./Reveal";
+import { PlayIcon } from "./icons";
 
 /** Resolve a host-agnostic clip to an iframe src, or null if none set. */
 function embedUrl(v: VideoItem): string | null {
@@ -21,8 +23,8 @@ function posterUrl(v: VideoItem): string | null {
 
 function PlayBadge() {
   return (
-    <span className="pointer-events-none absolute left-1/2 top-1/2 grid h-14 w-14 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white/90 text-accent shadow-cardlg transition group-hover:scale-105">
-      <span className="ml-1 text-xl">▶</span>
+    <span className="pointer-events-none absolute left-1/2 top-1/2 grid h-14 w-14 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full bg-white/95 text-accent shadow-cardlg transition group-hover:scale-110">
+      <PlayIcon size={22} className="ml-0.5" />
     </span>
   );
 }
@@ -80,7 +82,7 @@ function VideoCard({ v }: { v: VideoItem }) {
           <div className="absolute inset-0 grid place-items-center text-center">
             <div>
               <div className="mx-auto grid h-14 w-14 place-items-center rounded-full border border-gold/40 bg-gold/10 text-accent">
-                <span className="ml-1 text-xl">▶</span>
+                <PlayIcon size={20} className="ml-0.5" />
               </div>
               <p className="mt-3 px-4 text-xs text-muted">Video coming soon</p>
             </div>
@@ -99,7 +101,7 @@ export default function VideoSection() {
   return (
     <section id="videos" className="border-t border-line bg-bg-2/40 py-16 md:py-20">
       <div className="container-p4p">
-        <div className="mx-auto max-w-2xl text-center">
+        <Reveal className="mx-auto max-w-2xl text-center">
           <span className="section-eyebrow">Learn from Dave</span>
           <h2 className="mt-3 font-display text-3xl font-bold md:text-4xl">
             The video library
@@ -107,7 +109,7 @@ export default function VideoSection() {
           <p className="mt-3 text-muted">
             Everything from the original site, reorganized and easier to browse.
           </p>
-        </div>
+        </Reveal>
 
         <div className="mt-12 space-y-14">
           {VIDEO_CATEGORIES.map((cat) => (
@@ -120,7 +122,9 @@ export default function VideoSection() {
               </div>
               <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {cat.videos.map((v, i) => (
-                  <VideoCard key={cat.id + i} v={v} />
+                  <Reveal key={cat.id + i} delay={Math.min(i, 5) * 50}>
+                    <VideoCard v={v} />
+                  </Reveal>
                 ))}
               </div>
             </div>

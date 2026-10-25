@@ -28,7 +28,7 @@
   --shadow-cardlg: var(--p4p-shadow-lg);
 
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-brand: "Orbitron", "Inter", ui-sans-serif, sans-serif;
 }
 
@@ -46,8 +46,10 @@
   --c-gold-bright: #0ea5e9;
   --c-accent: #0284c7;
   --c-feature: #e8f5fd;
-  --p4p-shadow: 0 1px 2px rgba(30, 41, 59, 0.06), 0 10px 30px rgba(30, 41, 59, 0.08);
-  --p4p-shadow-lg: 0 2px 6px rgba(30, 41, 59, 0.07), 0 24px 60px rgba(30, 41, 59, 0.12);
+  --p4p-shadow: 0 1px 2px rgba(30, 41, 59, 0.04), 0 4px 12px rgba(30, 41, 59, 0.06),
+    0 18px 42px -12px rgba(30, 41, 59, 0.1);
+  --p4p-shadow-lg: 0 2px 6px rgba(30, 41, 59, 0.05), 0 12px 28px rgba(30, 41, 59, 0.1),
+    0 36px 80px -20px rgba(2, 132, 199, 0.18);
 }
 
 /* Dark — store .dark */
@@ -64,8 +66,10 @@
   --c-gold-bright: #38bdf8;
   --c-accent: #38bdf8;
   --c-feature: #08203a;
-  --p4p-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 30px rgba(0, 0, 0, 0.35);
-  --p4p-shadow-lg: 0 2px 8px rgba(0, 0, 0, 0.4), 0 24px 60px rgba(0, 0, 0, 0.5);
+  --p4p-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 18px rgba(0, 0, 0, 0.35),
+    0 20px 48px -12px rgba(0, 0, 0, 0.5);
+  --p4p-shadow-lg: 0 2px 8px rgba(0, 0, 0, 0.4), 0 16px 36px rgba(0, 0, 0, 0.45),
+    0 40px 90px -20px rgba(14, 165, 233, 0.25);
 }
 
 html {
@@ -119,6 +123,125 @@ h3,
   border-radius: 4px;
 }
 
+h1,
+h2 {
+  letter-spacing: -0.025em;
+}
+
+/* ---------- Premium pass: texture, depth, motion ---------- */
+
+/* Subtle film grain so large surfaces don't read as flat. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+:root[data-theme="dark"] body::after {
+  opacity: 0.05;
+}
+
+/* Gradient text for accent words. */
+.gradient-text {
+  background: linear-gradient(100deg, var(--c-accent), var(--c-gold-bright));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Premium primary button: gradient fill, soft colored shadow, hover shine. */
+.cta {
+  position: relative;
+  overflow: hidden;
+  background-image: linear-gradient(135deg, var(--c-gold-bright), var(--c-gold));
+  color: #fff;
+  box-shadow: 0 8px 22px -8px color-mix(in srgb, var(--c-gold) 70%, transparent);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+}
+.cta:hover {
+  transform: translateY(-1.5px);
+  filter: brightness(1.05);
+  box-shadow: 0 14px 30px -8px color-mix(in srgb, var(--c-gold) 75%, transparent);
+}
+.cta::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -130%;
+  width: 55%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transform: skewX(-20deg);
+  transition: left 0.6s ease;
+}
+.cta:hover::after {
+  left: 150%;
+}
+
+/* Scroll-reveal — elements rise + fade as they enter the viewport. */
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+  will-change: opacity, transform;
+}
+.reveal.in {
+  opacity: 1;
+  transform: none;
+}
+
+/* Page transition on route change. */
+@keyframes pageFade {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.page-fade {
+  animation: pageFade 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* Dark feature band for contrast against the white sections. */
+.band-dark {
+  background:
+    radial-gradient(60% 120% at 15% 0%, rgba(56, 189, 248, 0.14), transparent 60%),
+    radial-gradient(50% 120% at 100% 100%, rgba(30, 154, 224, 0.16), transparent 55%),
+    #070b14;
+  color: #e8eef6;
+}
+
+/* Loading shimmer (video thumbnails, etc.). */
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--c-muted) 14%, transparent);
+}
+.skeleton::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--c-panel) 60%, transparent),
+    transparent
+  );
+  animation: shimmer 1.4s infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -126,5 +249,9 @@ h3,
   * {
     animation-duration: 0.001ms !important;
     transition-duration: 0.001ms !important;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
   }
 }

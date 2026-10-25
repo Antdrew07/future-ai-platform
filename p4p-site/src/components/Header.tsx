@@ -42,10 +42,7 @@ export default function Header() {
             </Link>
           ))}
           <ThemeToggle />
-          <Link
-            to="/#deals"
-            className="rounded-full bg-gold px-4 py-2 text-sm font-bold text-ongold transition hover:brightness-110"
-          >
+          <Link to="/#deals" className="cta rounded-full px-4 py-2 text-sm font-bold">
             See Deals
           </Link>
         </nav>
@@ -81,7 +78,7 @@ export default function Header() {
             ))}
             <Link
               to="/#deals"
-              className="my-2 rounded-full bg-gold px-4 py-2.5 text-center text-sm font-bold text-ongold"
+              className="cta my-2 rounded-full px-4 py-2.5 text-center text-sm font-bold"
               onClick={() => setOpen(false)}
             >
               See Deals

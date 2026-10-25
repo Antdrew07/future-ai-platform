@@ -69,10 +69,7 @@ export default function About() {
 
           {/* CTAs */}
           <div className="mt-8 flex flex-wrap justify-center gap-3">
-            <Link
-              to="/#deals"
-              className="rounded-full bg-gold px-6 py-3 text-sm font-bold text-ongold transition hover:brightness-110"
-            >
+            <Link to="/#deals" className="cta rounded-full px-6 py-3 text-sm font-bold">
               Shop Dave's vendors →
             </Link>
             <Link

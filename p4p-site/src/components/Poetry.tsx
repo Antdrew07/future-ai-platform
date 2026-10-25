@@ -1,4 +1,5 @@
 import { POETRY } from "@/data/content";
+import Reveal from "./Reveal";
 
 export default function Poetry() {
   if (!POETRY.length) return null;
@@ -15,16 +16,15 @@ export default function Poetry() {
         </div>
 
         <div className="mx-auto mt-10 grid max-w-4xl gap-5 md:grid-cols-2">
-          {POETRY.map((poem) => (
-            <blockquote
-              key={poem.title}
-              className="rounded-2xl border border-line bg-panel shadow-card p-6"
-            >
-              <h3 className="font-display text-lg font-bold text-accent">{poem.title}</h3>
-              <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-muted">
-                {poem.body}
-              </p>
-            </blockquote>
+          {POETRY.map((poem, i) => (
+            <Reveal key={poem.title} delay={Math.min(i, 6) * 60}>
+              <blockquote className="h-full rounded-2xl border border-line bg-panel shadow-card p-6 transition duration-300 hover:-translate-y-1 hover:border-gold/40 hover:shadow-cardlg">
+                <h3 className="font-display text-lg font-bold text-accent">{poem.title}</h3>
+                <p className="mt-3 whitespace-pre-line text-sm leading-relaxed text-muted">
+                  {poem.body}
+                </p>
+              </blockquote>
+            </Reveal>
           ))}
         </div>
       </div>
