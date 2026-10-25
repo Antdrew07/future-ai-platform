@@ -1,4 +1,6 @@
 import { FEATURED_PEPTIDE } from "@/data/content";
+import { P4P_LOGO } from "@/assets/logo";
+import Logo from "./Logo";
 import { CheckIcon } from "./icons";
 
 export default function FeaturedPeptide() {
@@ -46,7 +48,17 @@ export default function FeaturedPeptide() {
                     rel="sponsored noopener noreferrer"
                     className="flex items-center justify-between gap-3 rounded-2xl border border-line bg-panel p-4 shadow-card transition hover:-translate-y-0.5 hover:border-gold/40"
                   >
-                    <div className="min-w-0">
+                    <div className="flex min-w-0 items-center gap-3">
+                      {opt.houseBrand ? (
+                        <img
+                          src={P4P_LOGO}
+                          alt={opt.vendor}
+                          className="h-10 w-10 shrink-0 rounded-lg bg-white object-contain p-1 shadow-card"
+                        />
+                      ) : (
+                        <Logo name={opt.vendor} website={opt.url} size={40} />
+                      )}
+                      <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="truncate font-display font-bold">{opt.vendor}</span>
                         {opt.houseBrand && (
@@ -68,6 +80,7 @@ export default function FeaturedPeptide() {
                             <b className="text-ink">{opt.code}</b>
                           </>
                         )}
+                      </div>
                       </div>
                     </div>
                     <span className="shrink-0 rounded-xl bg-gold px-4 py-2 text-sm font-bold text-ongold">
