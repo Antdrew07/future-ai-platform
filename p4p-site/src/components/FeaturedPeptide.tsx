@@ -55,6 +55,7 @@ export default function FeaturedPeptide() {
                           </span>
                         )}
                       </div>
+                      {opt.dose && <div className="mt-0.5 text-xs text-muted">{opt.dose}</div>}
                       <div className="mt-0.5 text-sm text-muted">
                         {opt.price != null ? (
                           <span className="font-bold text-accent">${opt.price.toFixed(2)}</span>

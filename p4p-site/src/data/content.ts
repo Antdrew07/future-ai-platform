@@ -40,6 +40,8 @@ export interface BuyOption {
   houseBrand?: boolean;
   url: string;
   code: string | null;
+  /** Dose / size line, e.g. "500mcg × 60 capsules". */
+  dose?: string | null;
   /** Numeric price if known (shows "$X.XX"); otherwise priceNote is shown. */
   price: number | null;
   priceNote?: string | null;
@@ -61,13 +63,15 @@ export const FEATURED_PEPTIDE = {
       houseBrand: true,
       url: "https://www.peptides4power.us/",
       code: null,
-      price: 30.0,
+      dose: "500mcg × 60 capsules",
+      price: 40.0,
       priceNote: null,
     },
     {
       vendor: "Kimera Chems",
       url: "https://kimerachems.co/product/slu-pp-332/",
       code: "POWER15",
+      dose: "250mcg × 60 caps · 15mg",
       price: 31.99,
       priceNote: null,
     },
