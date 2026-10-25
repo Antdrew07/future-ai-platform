@@ -24,7 +24,7 @@ export default function Hero() {
             "radial-gradient(55% 60% at 12% 0%, rgba(30,154,224,.16), transparent 60%), radial-gradient(45% 55% at 95% 25%, rgba(2,132,199,.14), transparent 60%)",
         }}
       />
-      <div className="container-p4p relative grid items-center gap-10 md:grid-cols-[1.05fr_0.95fr]">
+      <div className="container-p4p relative grid grid-cols-1 items-center gap-10 md:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
         {/* Copy */}
         <div className="text-center md:text-left">
           <span className="section-eyebrow">David Furka · Peptides 4 Power</span>
