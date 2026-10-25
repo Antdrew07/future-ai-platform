@@ -21,7 +21,7 @@ export const NAV_LINKS: { label: string; href: string }[] = [
   { label: "Videos", href: "#videos" },
   { label: "Peptide of the Week", href: "#featured" },
   { label: "About", href: "about" },
-  { label: "Poetry", href: "#poetry" },
+  { label: "Poetry", href: "poetry" },
   { label: "Contact", href: "#contact" },
 ];
 

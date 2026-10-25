@@ -4,7 +4,6 @@ import DealsGrid from "@/components/DealsGrid";
 import SaleOfWeek from "@/components/SaleOfWeek";
 import FeaturedPeptide from "@/components/FeaturedPeptide";
 import VideoSection from "@/components/VideoSection";
-import Poetry from "@/components/Poetry";
 import Contact from "@/components/Contact";
 
 export default function Home() {
@@ -28,7 +27,6 @@ export default function Home() {
       <SaleOfWeek />
       <FeaturedPeptide />
       <VideoSection />
-      <Poetry />
       <Contact />
     </main>
   );
