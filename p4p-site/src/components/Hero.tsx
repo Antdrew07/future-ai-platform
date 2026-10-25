@@ -38,9 +38,9 @@ export default function Hero() {
           </p>
 
           <div className="mt-7 flex flex-wrap justify-center gap-3 md:justify-start">
-            <a href="#deals" className="cta inline-flex items-center gap-1.5 rounded-full px-6 py-3.5 text-sm font-bold">
+            <Link to="/vendors" className="cta inline-flex items-center gap-1.5 rounded-full px-6 py-3.5 text-sm font-bold">
               Browse the vendors <ArrowRightIcon size={16} />
-            </a>
+            </Link>
             <Link
               to="/videos"
               className="inline-flex items-center gap-1.5 rounded-full border border-line bg-panel/60 px-6 py-3.5 text-sm font-bold text-ink backdrop-blur transition hover:border-gold hover:text-accent"
