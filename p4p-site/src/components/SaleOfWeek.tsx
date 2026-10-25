@@ -22,8 +22,8 @@ export default function SaleOfWeek() {
                 "radial-gradient(120% 120% at 100% 0%, rgba(30,154,224,.2), transparent 55%)",
             }}
           />
-          <div className="relative grid gap-8 md:grid-cols-[1.3fr_1fr] md:items-center">
-            <div>
+          <div className="relative grid grid-cols-1 gap-8 md:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)] md:items-center">
+            <div className="min-w-0">
               <span className="section-eyebrow">🔥 Sale of the Week</span>
               <div className="mt-3 flex items-center gap-3">
                 {vendor && <Logo name={vendor.name} website={vendor.website} size={44} />}
@@ -73,7 +73,7 @@ export default function SaleOfWeek() {
             </div>
 
             {runners.length > 0 && (
-              <div className="rounded-2xl border border-line bg-bg/40 p-4">
+              <div className="min-w-0 rounded-2xl border border-line bg-bg/40 p-4">
                 <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">
                   More deals this week
                 </p>
