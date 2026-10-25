@@ -171,7 +171,7 @@ export default function DealsGrid() {
   const h = HOUSE_BRAND;
 
   return (
-    <section id="deals" className="scroll-mt-20 pt-24 pb-16 md:pt-28 md:pb-20">
+    <section id="deals" className="scroll-mt-20 pt-8 pb-16 md:pt-12 md:pb-20">
       <div className="container-p4p">
         <Reveal className="mx-auto max-w-2xl text-center">
           <span className="section-eyebrow">Where to buy</span>

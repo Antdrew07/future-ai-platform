@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
+import Hero from "@/components/Hero";
 import DealsGrid from "@/components/DealsGrid";
 import SaleOfWeek from "@/components/SaleOfWeek";
 import TrustBand from "@/components/TrustBand";
@@ -21,6 +22,7 @@ export default function Home() {
 
   return (
     <main>
+      <Hero />
       <DealsGrid />
       <TrustBand />
       <SaleOfWeek />

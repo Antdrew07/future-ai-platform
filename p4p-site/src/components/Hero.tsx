@@ -1,59 +1,86 @@
-import { HERO_STATS } from "@/data/content";
+import { Link } from "react-router-dom";
+import { PARTNERS } from "@/data/partners";
+import { CATALOG } from "@/data/catalog";
+import { VIDEO_CATEGORIES } from "@/data/videos";
+import { ArrowRightIcon, ShieldCheckIcon } from "./icons";
+
+const videoCount = VIDEO_CATEGORIES.reduce((n, c) => n + c.videos.length, 0);
+
+const CHIPS = [
+  `${PARTNERS.length} vetted vendors`,
+  `${CATALOG.productCount}+ live prices`,
+  `${videoCount} videos`,
+];
 
 export default function Hero() {
   return (
-    <section id="home" className="relative overflow-hidden pt-[104px] pb-10 md:pt-[132px] md:pb-14">
-      {/* ambient glow */}
+    <section className="relative overflow-hidden pt-[84px] pb-6 md:pt-28 md:pb-10">
+      {/* ambient gradient mesh */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            "radial-gradient(60% 50% at 50% 0%, rgba(30,154,224,.14), transparent 60%), radial-gradient(40% 40% at 85% 10%, rgba(2,132,199,.12), transparent 60%)",
+            "radial-gradient(55% 60% at 12% 0%, rgba(30,154,224,.16), transparent 60%), radial-gradient(45% 55% at 95% 25%, rgba(2,132,199,.14), transparent 60%)",
         }}
       />
-      <div className="container-p4p relative text-center">
-        <span className="section-eyebrow">David Furka · Peptides 4 Power</span>
-        <h1 className="mx-auto mt-4 max-w-4xl font-display text-4xl font-bold leading-[1.05] md:text-6xl">
-          So many peptide sites.{" "}
-          <span className="gold-text">Start here.</span>
-        </h1>
-        <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-muted md:text-lg">
-          David's hand-picked list of trusted peptide companies — each with a discount code.
-          One page, no guesswork. Then dig into the videos.
-        </p>
+      <div className="container-p4p relative grid items-center gap-10 md:grid-cols-[1.05fr_0.95fr]">
+        {/* Copy */}
+        <div className="text-center md:text-left">
+          <span className="section-eyebrow">David Furka · Peptides 4 Power</span>
+          <h1 className="mx-auto mt-4 max-w-xl font-display text-5xl font-bold leading-[0.95] tracking-tight md:mx-0 md:text-7xl">
+            So many peptide sites.{" "}
+            <span className="gradient-text">Start here.</span>
+          </h1>
+          <p className="mx-auto mt-5 max-w-md text-base leading-relaxed text-muted md:mx-0 md:text-lg">
+            One trusted list of the best peptide companies — each with a discount code.
+            Shop smart, then dig into Dave's breakdowns.
+          </p>
 
-        <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
-          <a
-            href="#deals"
-            className="rounded-full bg-gold px-6 py-3 text-sm font-bold text-ongold transition hover:brightness-110"
-          >
-            See where to buy →
-          </a>
-          <a
-            href="#videos"
-            className="rounded-full border border-line px-6 py-3 text-sm font-bold text-ink transition hover:border-gold hover:text-accent"
-          >
-            Watch the videos
-          </a>
-        </div>
-
-        {/* stats */}
-        <div className="mx-auto mt-9 grid max-w-xl grid-cols-3 gap-3">
-          {HERO_STATS.map((s) => (
-            <div
-              key={s.label}
-              className="rounded-2xl border border-line bg-panel/60 px-3 py-4"
+          <div className="mt-7 flex flex-wrap justify-center gap-3 md:justify-start">
+            <a href="#deals" className="cta inline-flex items-center gap-1.5 rounded-full px-6 py-3.5 text-sm font-bold">
+              Browse the vendors <ArrowRightIcon size={16} />
+            </a>
+            <Link
+              to="/videos"
+              className="inline-flex items-center gap-1.5 rounded-full border border-line bg-panel/60 px-6 py-3.5 text-sm font-bold text-ink backdrop-blur transition hover:border-gold hover:text-accent"
             >
-              <div className="font-display text-2xl font-bold text-accent md:text-3xl">{s.value}</div>
-              <div className="mt-1 text-xs text-muted md:text-sm">{s.label}</div>
-            </div>
-          ))}
+              Watch the videos
+            </Link>
+          </div>
+
+          <div className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-muted md:justify-start">
+            {CHIPS.map((c) => (
+              <span key={c} className="inline-flex items-center gap-1.5">
+                <ShieldCheckIcon size={15} className="text-accent" />
+                {c}
+              </span>
+            ))}
+          </div>
         </div>
 
-        <p className="mx-auto mt-10 max-w-xl text-xs leading-relaxed text-muted/80">
-          For research & educational purposes only. Nothing here is medical advice.
-        </p>
+        {/* Photo */}
+        <div className="relative mx-auto w-full max-w-sm md:max-w-none">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -inset-6 rounded-[2.5rem] opacity-70 blur-2xl"
+            style={{ background: "radial-gradient(60% 60% at 50% 30%, rgba(30,154,224,.35), transparent 70%)" }}
+          />
+          <img
+            src="/about/david-gym.jpg"
+            alt="David Furka"
+            className="relative aspect-[4/5] w-full rounded-[2rem] border border-white/40 object-cover object-top shadow-cardlg"
+          />
+          <div className="absolute -bottom-4 left-4 flex items-center gap-2.5 rounded-2xl border border-line bg-panel/80 px-4 py-3 shadow-cardlg backdrop-blur md:-left-6">
+            <span className="grid h-9 w-9 place-items-center rounded-xl bg-gold/15 text-accent">
+              <ShieldCheckIcon size={18} />
+            </span>
+            <div className="leading-tight">
+              <div className="text-sm font-bold">Verified codes</div>
+              <div className="text-xs text-muted">Hand-picked by Dave</div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
