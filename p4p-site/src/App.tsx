@@ -4,6 +4,7 @@ import Footer from "@/components/Footer";
 import Home from "@/pages/Home";
 import About from "@/pages/About";
 import PoetryPage from "@/pages/PoetryPage";
+import VendorsPage from "@/pages/VendorsPage";
 import VideosPage from "@/pages/VideosPage";
 import FeaturedPage from "@/pages/FeaturedPage";
 import ContactPage from "@/pages/ContactPage";
@@ -16,6 +17,7 @@ function AppRoutes() {
       <Routes location={location}>
         <Route path="/" element={<Home />} />
         <Route path="/about" element={<About />} />
+        <Route path="/vendors" element={<VendorsPage />} />
         <Route path="/poetry" element={<PoetryPage />} />
         <Route path="/videos" element={<VideosPage />} />
         <Route path="/peptide-of-the-week" element={<FeaturedPage />} />

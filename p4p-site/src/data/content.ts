@@ -16,7 +16,7 @@ export const SITE = {
  * smooth-scroll target on the home page.
  */
 export const NAV_LINKS: { label: string; href: string }[] = [
-  { label: "Vendors", href: "" },
+  { label: "Vendors", href: "vendors" },
   { label: "Videos", href: "videos" },
   { label: "Peptide of the Week", href: "peptide-of-the-week" },
   { label: "About", href: "about" },
