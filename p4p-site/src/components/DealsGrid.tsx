@@ -109,7 +109,7 @@ function PartnerCard({
     "cta mt-auto inline-flex w-full items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-bold";
 
   return (
-    <div className="group flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-panel shadow-card transition duration-300 hover:-translate-y-1 hover:border-gold/40 hover:shadow-cardlg">
+    <div className="glow-card group flex h-full flex-col overflow-hidden rounded-2xl border border-line bg-panel shadow-card hover:-translate-y-1 hover:border-gold/40">
       {/* Product photo — links to the on-site page, or straight to the store. */}
       {hasProducts ? (
         <Link to={to} aria-label={`View ${p.name}`} className={artClass} style={artStyle}>

@@ -160,13 +160,15 @@ body::after {
   overflow: hidden;
   background-image: linear-gradient(135deg, var(--c-gold-bright), var(--c-gold));
   color: #fff;
-  box-shadow: 0 8px 22px -8px color-mix(in srgb, var(--c-gold) 70%, transparent);
-  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  box-shadow: 0 8px 22px -8px color-mix(in srgb, var(--c-gold) 70%, transparent),
+    0 0 18px -4px color-mix(in srgb, var(--c-gold-bright) 62%, transparent);
+  transition: transform 0.2s ease, box-shadow 0.3s ease, filter 0.2s ease;
 }
 .cta:hover {
   transform: translateY(-1.5px);
   filter: brightness(1.05);
-  box-shadow: 0 14px 30px -8px color-mix(in srgb, var(--c-gold) 75%, transparent);
+  box-shadow: 0 14px 30px -8px color-mix(in srgb, var(--c-gold) 80%, transparent),
+    0 0 30px -1px color-mix(in srgb, var(--c-gold-bright) 85%, transparent);
 }
 .cta::after {
   content: "";
@@ -242,6 +244,51 @@ body::after {
     transparent
   );
   animation: shimmer 1.4s infinite;
+}
+
+/* Soft brand glow on card hover. */
+.glow-card {
+  transition: transform 0.3s ease, box-shadow 0.35s ease, border-color 0.3s ease;
+}
+.glow-card:hover {
+  box-shadow: var(--p4p-shadow-lg), 0 0 28px -6px color-mix(in srgb, var(--c-gold) 55%, transparent);
+}
+
+/* Slow ambient glow drift (hero atmosphere). */
+@keyframes floatGlow {
+  0%,
+  100% {
+    opacity: 0.68;
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-8px) scale(1.07);
+  }
+}
+.anim-glow {
+  animation: floatGlow 7s ease-in-out infinite;
+}
+
+/* Animated underline for nav links. */
+.navlink {
+  position: relative;
+}
+.navlink::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -5px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--c-gold), var(--c-gold-bright));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s ease;
+}
+.navlink:hover::after {
+  transform: scaleX(1);
 }
 
 @media (prefers-reduced-motion: reduce) {

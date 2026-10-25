@@ -63,7 +63,7 @@ export default function Hero() {
         <div className="relative mx-auto w-full max-w-sm md:max-w-none">
           <div
             aria-hidden
-            className="pointer-events-none absolute -inset-6 rounded-[2.5rem] opacity-70 blur-2xl"
+            className="anim-glow pointer-events-none absolute -inset-6 rounded-[2.5rem] opacity-70 blur-2xl"
             style={{ background: "radial-gradient(60% 60% at 50% 30%, rgba(30,154,224,.35), transparent 70%)" }}
           />
           <img

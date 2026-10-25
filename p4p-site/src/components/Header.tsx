@@ -36,7 +36,7 @@ export default function Header() {
             <Link
               key={l.href}
               to={`/${l.href}`}
-              className="text-sm text-muted transition-colors hover:text-ink"
+              className="navlink text-sm text-muted transition-colors hover:text-ink"
             >
               {l.label}
             </Link>

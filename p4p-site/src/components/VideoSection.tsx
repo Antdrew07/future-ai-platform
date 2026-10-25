@@ -36,7 +36,7 @@ function VideoCard({ v }: { v: VideoItem }) {
   const poster = posterUrl(v);
 
   return (
-    <figure className="overflow-hidden rounded-2xl border border-line bg-panel shadow-card">
+    <figure className="glow-card overflow-hidden rounded-2xl border border-line bg-panel shadow-card hover:-translate-y-1 hover:border-gold/40">
       <div className="relative aspect-video w-full bg-bg-2">
         {v.file ? (
           <video
