@@ -235,7 +235,7 @@ export default function DealsGrid() {
         {/* Partner grid */}
         <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {PARTNERS.map((p, i) => (
-            <Reveal key={p.slug} delay={Math.min(i, 7) * 60}>
+            <Reveal key={p.slug} delay={(i % 3) * 40}>
               <PartnerCard p={p} copied={copied} onCopy={copy} />
             </Reveal>
           ))}

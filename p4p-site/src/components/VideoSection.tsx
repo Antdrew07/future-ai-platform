@@ -122,7 +122,7 @@ export default function VideoSection() {
               </div>
               <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {cat.videos.map((v, i) => (
-                  <Reveal key={cat.id + i} delay={Math.min(i, 5) * 50}>
+                  <Reveal key={cat.id + i} delay={(i % 3) * 40}>
                     <VideoCard v={v} />
                   </Reveal>
                 ))}
