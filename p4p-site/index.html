@@ -37,6 +37,16 @@
         }
       })();
     </script>
+    <!-- Analytics opt-out: load ?umami=off to stop counting this browser, ?umami=on to resume. -->
+    <script>
+      (function () {
+        try {
+          var mode = new URLSearchParams(location.search).get("umami");
+          if (mode === "off") localStorage.setItem("umami.disabled", "1");
+          else if (mode === "on") localStorage.removeItem("umami.disabled");
+        } catch (e) {}
+      })();
+    </script>
     <!-- Umami analytics (self-hosted on stats.peptides4power.com) -->
     <script
       defer
