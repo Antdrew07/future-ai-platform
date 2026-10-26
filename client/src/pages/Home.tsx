@@ -208,6 +208,7 @@ export default function Home() {
             <a href="#how-it-works" className="hover:text-foreground transition-colors">How it works</a>
             <Link href="/pricing" className="hover:text-foreground transition-colors">Pricing</Link>
             <Link href="/gallery" className="hover:text-foreground transition-colors">Gallery</Link>
+            <Link href="/calculator" className="hover:text-foreground transition-colors">Calculator</Link>
           </nav>
 
           <div className="hidden md:flex items-center gap-3">
@@ -241,6 +242,7 @@ export default function Home() {
             <a href="#what-i-can-do" className="block text-sm font-medium py-2.5 px-3 rounded-lg hover:bg-accent" onClick={() => setMobileMenuOpen(false)}>What I can do</a>
             <a href="#how-it-works" className="block text-sm font-medium py-2.5 px-3 rounded-lg hover:bg-accent" onClick={() => setMobileMenuOpen(false)}>How it works</a>
             <Link href="/pricing" className="block text-sm font-medium py-2.5 px-3 rounded-lg hover:bg-accent" onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
+            <Link href="/calculator" className="block text-sm font-medium py-2.5 px-3 rounded-lg hover:bg-accent" onClick={() => setMobileMenuOpen(false)}>Calculator</Link>
             <div className="pt-3 flex flex-col gap-2">
               <Link href="/signin"><Button variant="outline" className="w-full">Sign in</Button></Link>
               <a href={getLoginUrl()}><Button className="w-full bg-primary text-white font-semibold">Meet your Future</Button></a>
