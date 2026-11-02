@@ -89,7 +89,7 @@ function Dashboard({ onOut }: { onOut: () => void }) {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [q, setQ] = useState("");
   const [status, setStatus] = useState("all");
-  const [tab, setTab] = useState<"contacts" | "broadcast">("contacts");
+  const [tab, setTab] = useState<"contacts" | "marketing" | "broadcast">("contacts");
   const [selected, setSelected] = useState<Contact | null>(null);
 
   const loadStats = useCallback(() => { api("/admin/stats").then((r) => r.json()).then((d) => d.ok && setStats(d.stats)).catch(() => {}); }, []);
@@ -131,22 +131,22 @@ function Dashboard({ onOut }: { onOut: () => void }) {
 
       {/* tabs */}
       <div className="mt-8 flex gap-2 border-b border-line">
-        {(["contacts", "broadcast"] as const).map((t) => (
+        {(["contacts", "marketing", "broadcast"] as const).map((t) => (
           <button key={t} onClick={() => setTab(t)}
-            className={`-mb-px border-b-2 px-4 py-2 text-sm font-semibold capitalize ${tab === t ? "border-gold text-accent" : "border-transparent text-muted hover:text-ink"}`}>
-            {t === "broadcast" ? "Send broadcast" : "Contacts"}
+            className={`-mb-px border-b-2 px-4 py-2 text-sm font-semibold ${tab === t ? "border-gold text-accent" : "border-transparent text-muted hover:text-ink"}`}>
+            {t === "broadcast" ? "Send broadcast" : t === "marketing" ? "AI Marketing Manager" : "Contacts"}
           </button>
         ))}
       </div>
 
-      {tab === "contacts" ? (
+      {tab === "contacts" && (
         <Contacts
           contacts={contacts} q={q} setQ={setQ} status={status} setStatus={setStatus}
           onOpen={setSelected} onAdded={refresh}
         />
-      ) : (
-        <Broadcast subscribers={stats?.subscribers ?? 0} />
       )}
+      {tab === "marketing" && <Marketing />}
+      {tab === "broadcast" && <Broadcast subscribers={stats?.subscribers ?? 0} />}
 
       {selected && (
         <ContactDrawer contact={selected} onClose={() => setSelected(null)} onChanged={() => { refresh(); setSelected(null); }} />
@@ -305,6 +305,112 @@ function Broadcast({ subscribers }: { subscribers: number }) {
       <Field label="Message"><textarea className={inp} rows={10} value={body} onChange={(e) => setBody(e.target.value)} placeholder="Write your announcement… (plain text, line breaks become paragraphs)" /></Field>
       <button onClick={send} disabled={busy || !subject || !body} className="cta rounded-xl px-6 py-3 text-sm font-bold disabled:opacity-60">{busy ? "Sending…" : `Send to ${subscribers}`}</button>
       {result && <p className="text-sm font-semibold text-accent">{result}</p>}
+    </div>
+  );
+}
+
+/* ---------- AI marketing manager ---------- */
+type LogEntry = { id: number; type: string; title: string | null; body: string | null; created_at: string };
+
+function Marketing() {
+  const [prompt, setPrompt] = useState("");
+  const [reply, setReply] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  const [log, setLog] = useState<LogEntry[]>([]);
+
+  const loadLog = useCallback(() => {
+    api("/admin/marketing/log").then((r) => r.json()).then((d) => d.ok && setLog(d.log)).catch(() => {});
+  }, []);
+  useEffect(() => { loadLog(); }, [loadLog]);
+
+  const QUICK = [
+    "Give me 5 sale campaign ideas for this month",
+    "Write a Peptide of the Week email for SLU-PP-332",
+    "3 Instagram hooks to get first-time buyers",
+    "An ad angle for people overwhelmed by too many peptide vendors",
+  ];
+
+  async function ask(q?: string) {
+    const message = (q ?? prompt).trim();
+    if (!message || busy) return;
+    if (q) setPrompt(q);
+    setBusy(true); setErr(""); setReply("");
+    try {
+      const r = await api("/admin/marketing/ai", { method: "POST", body: JSON.stringify({ message }) });
+      const d = await r.json();
+      if (r.ok) setReply(d.reply); else setErr(d.error || "AI error");
+    } catch { setErr("Network error"); }
+    setBusy(false);
+  }
+  async function saveIdea() {
+    if (!reply) return;
+    await api("/admin/marketing/log", { method: "POST", body: JSON.stringify({ type: "idea", title: prompt.slice(0, 120) || "Saved idea", body: reply }) });
+    loadLog();
+  }
+  async function addNote() {
+    const title = window.prompt("Note / research title:");
+    if (!title) return;
+    const body = window.prompt("Details (optional):") || "";
+    await api("/admin/marketing/log", { method: "POST", body: JSON.stringify({ type: "research", title, body }) });
+    loadLog();
+  }
+  async function delEntry(id: number) {
+    await api(`/admin/marketing/log/${id}`, { method: "DELETE" });
+    loadLog();
+  }
+
+  return (
+    <div className="mt-5 grid gap-8 lg:grid-cols-[1.4fr_1fr]">
+      <div>
+        <h3 className="font-display text-lg font-bold">Ask your marketing manager</h3>
+        <p className="mt-1 text-sm text-muted">Ideas, campaigns, and copy — it knows your business and your recent activity.</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {QUICK.map((qp) => (
+            <button key={qp} onClick={() => ask(qp)} disabled={busy}
+              className="rounded-full border border-line bg-panel px-3 py-1.5 text-xs text-muted hover:border-gold hover:text-accent disabled:opacity-50">{qp}</button>
+          ))}
+        </div>
+        <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+          <textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} rows={2}
+            placeholder="Ask for ideas, a campaign, an email, an ad angle…" className={inp} />
+          <button onClick={() => ask()} disabled={busy || !prompt.trim()}
+            className="cta shrink-0 self-start rounded-xl px-5 py-2.5 text-sm font-bold disabled:opacity-60">{busy ? "Thinking…" : "Ask"}</button>
+        </div>
+        {err && <p className="mt-2 text-sm text-red-500">{err}</p>}
+        {reply && (
+          <div className="mt-4 rounded-xl border border-line bg-panel p-4">
+            <div className="whitespace-pre-wrap text-sm leading-relaxed">{reply}</div>
+            <div className="mt-3 flex gap-2">
+              <button onClick={saveIdea} className="rounded-full bg-gold/15 px-3 py-1.5 text-xs font-semibold text-accent hover:bg-gold/25">Save to log</button>
+              <button onClick={() => navigator.clipboard?.writeText(reply)} className="rounded-full border border-line px-3 py-1.5 text-xs text-muted hover:text-ink">Copy</button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div>
+        <div className="flex items-center justify-between">
+          <h3 className="font-display text-lg font-bold">Activity log</h3>
+          <button onClick={addNote} className="rounded-full border border-line px-3 py-1.5 text-xs font-semibold hover:border-gold hover:text-accent">+ Note</button>
+        </div>
+        <p className="mt-1 text-sm text-muted">Everything done &amp; saved — your marketing memory.</p>
+        <div className="mt-3 space-y-2">
+          {log.length === 0 && <p className="rounded-xl border border-dashed border-line p-4 text-center text-sm text-muted">Nothing logged yet. Saved ideas and sent broadcasts show up here.</p>}
+          {log.map((e) => (
+            <div key={e.id} className="group rounded-xl border border-line bg-panel p-3">
+              <div className="flex items-center justify-between gap-2">
+                <span className="inline-block rounded-full bg-bg px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-muted">{e.type}</span>
+                <span className="text-[11px] text-muted">{new Date(e.created_at).toLocaleDateString()}
+                  <button onClick={() => delEntry(e.id)} className="ml-2 opacity-0 transition group-hover:opacity-100 hover:text-red-500">✕</button>
+                </span>
+              </div>
+              {e.title && <div className="mt-1 text-sm font-semibold">{e.title}</div>}
+              {e.body && <div className="mt-0.5 line-clamp-3 whitespace-pre-wrap text-xs text-muted">{e.body}</div>}
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

@@ -9,6 +9,7 @@ import path from "node:path";
 import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 import pg from "pg";
+import Anthropic from "@anthropic-ai/sdk";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DIST = path.join(__dirname, "dist");
@@ -52,6 +53,17 @@ async function initDb() {
     );
     CREATE INDEX IF NOT EXISTS contacts_created_idx ON contacts (created_at DESC);
   `);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS marketing_log (
+      id          SERIAL PRIMARY KEY,
+      type        TEXT NOT NULL DEFAULT 'note',
+      title       TEXT,
+      body        TEXT,
+      meta        JSONB,
+      created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
+    CREATE INDEX IF NOT EXISTS marketing_log_created_idx ON marketing_log (created_at DESC);
+  `);
   // One-time migration from the original subscribers table, if it exists.
   try {
     await pool.query(`
@@ -67,6 +79,15 @@ async function initDb() {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const clean = (v, n = 200) => (v == null ? null : String(v).trim().slice(0, n) || null);
+
+// Marketing activity log — the AI Marketing Manager's memory.
+async function logMarketing(type, title, body, meta) {
+  if (!pool) return;
+  await pool.query(
+    `INSERT INTO marketing_log (type, title, body, meta) VALUES ($1,$2,$3,$4)`,
+    [type, title ? String(title).slice(0, 200) : null, body ? String(body).slice(0, 50000) : null, meta ? JSON.stringify(meta) : null]
+  );
+}
 
 /* ================================================================== */
 /* Email (Resend)                                                     */
@@ -351,10 +372,74 @@ app.post("/api/admin/broadcast", requireAdmin, async (req, res) => {
       await resendSend(chunk);
       sent += chunk.length;
     }
+    await logMarketing("broadcast", subject, body, { sent }).catch(() => {});
     return res.json({ ok: true, sent });
   } catch (err) {
     console.error("[broadcast]", err?.message);
     return res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+/* ================================================================== */
+/* AI Marketing Manager                                               */
+/* ================================================================== */
+const SYSTEM_MARKETING = `You are the AI Marketing Manager for Peptides 4 Power (peptides4power.com), David Furka's ("Dave") peptide-education and affiliate business.
+
+Business model: Dave teaches peptides in plain English (videos, a weekly "Peptide of the Week", poetry) and earns affiliate commissions when people buy through his vetted-vendor discount codes. Vendors include AIO, Kimera, Flawless Compounds, Glow Aminos, Iron Protocol, and RefillPen; codes like POWER25 and POWER15. His audience: people overwhelmed by "so many peptide sites — I don't know where to start," who want one trusted guide.
+
+Your job: be his hands-on marketing manager. Give sharp, specific, actionable ideas and ready-to-use copy — email campaigns and subject lines, sale angles, social and ad hooks, Peptide of the Week themes, content ideas, and audience strategy. Use the live context provided. Be concrete and concise; when asked for copy, write it ready to send, in Dave's plain, confident voice — no hype, no fluff.
+
+Compliance: everything is for research & educational purposes only. Never make medical or disease-treatment claims or promise health outcomes.`;
+
+app.get("/api/admin/marketing/log", requireAdmin, async (_req, res) => {
+  try {
+    const q = await pool.query(`SELECT id,type,title,body,meta,created_at FROM marketing_log ORDER BY created_at DESC LIMIT 200`);
+    return res.json({ ok: true, log: q.rows });
+  } catch (err) { return res.status(500).json({ ok: false, error: err.message }); }
+});
+app.post("/api/admin/marketing/log", requireAdmin, async (req, res) => {
+  try {
+    await logMarketing(clean(req.body?.type, 30) || "note", clean(req.body?.title, 200), clean(req.body?.body, 50000), req.body?.meta || null);
+    return res.json({ ok: true });
+  } catch (err) { return res.status(500).json({ ok: false, error: err.message }); }
+});
+app.delete("/api/admin/marketing/log/:id", requireAdmin, async (req, res) => {
+  try { await pool.query(`DELETE FROM marketing_log WHERE id = $1`, [parseInt(req.params.id, 10)]); return res.json({ ok: true }); }
+  catch (err) { return res.status(500).json({ ok: false, error: err.message }); }
+});
+
+app.post("/api/admin/marketing/ai", requireAdmin, async (req, res) => {
+  try {
+    if (!process.env.ANTHROPIC_API_KEY) {
+      return res.status(503).json({ ok: false, error: "The AI Marketing Manager isn't switched on yet — add your Anthropic API key to enable it." });
+    }
+    const message = clean(req.body?.message, 6000);
+    if (!message) return res.status(400).json({ ok: false, error: "What would you like ideas on?" });
+
+    let subs = 0, recent = [];
+    if (pool) {
+      const s = await pool.query(`SELECT COUNT(*) FILTER (WHERE subscribed)::int AS subs FROM contacts`);
+      subs = s.rows[0]?.subs || 0;
+      const r = await pool.query(`SELECT type,title,created_at FROM marketing_log ORDER BY created_at DESC LIMIT 15`);
+      recent = r.rows;
+    }
+    const ctx = `Live context:
+- Newsletter subscribers: ${subs}
+- Recent marketing activity (most recent first):
+${recent.length ? recent.map((e) => `  • ${new Date(e.created_at).toISOString().slice(0, 10)} [${e.type}] ${e.title || ""}`).join("\n") : "  (nothing logged yet)"}`;
+
+    const anthropic = new Anthropic();
+    const out = await anthropic.messages.create({
+      model: process.env.AI_MODEL || "claude-opus-5-5",
+      max_tokens: 2000,
+      system: SYSTEM_MARKETING,
+      messages: [{ role: "user", content: `${ctx}\n\nMy request: ${message}` }],
+    });
+    const reply = out.content.filter((b) => b.type === "text").map((b) => b.text).join("\n").trim();
+    return res.json({ ok: true, reply });
+  } catch (err) {
+    console.error("[ai]", err?.message);
+    return res.status(500).json({ ok: false, error: "The AI had a problem — please try again." });
   }
 });
 
