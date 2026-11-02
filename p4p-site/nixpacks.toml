@@ -1,0 +1,11 @@
+# Railway / Nixpacks build config for the Peptides 4 Power static site.
+# Railway: set this service's Root Directory to "p4p-site".
+
+[phases.setup]
+nixPkgs = ["nodejs_20"]
+
+[phases.build]
+cmds = ["npm ci || npm install", "npm run build"]
+
+[start]
+cmd = "npm run start"

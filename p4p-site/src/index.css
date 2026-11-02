@@ -1,0 +1,306 @@
+@import "tailwindcss";
+
+/* ------------------------------------------------------------------ *
+ * Peptides 4 Power — brand theme, matched to the peptides4power.us store
+ * ("White Luxury"): brand blue #1E9AE0 on white, slate text, Inter +
+ * Orbitron. Light by default; dark via [data-theme="dark"].
+ *
+ * NOTE: the Tailwind color tokens are historically named "gold" but now
+ * hold the brand BLUE (bg-gold/from-gold/etc. render blue). --color-accent
+ * is the contrast-safe text/link blue; --color-ongold is text on blue fills.
+ * ------------------------------------------------------------------ */
+@theme {
+  --color-bg: var(--c-bg);
+  --color-bg-2: var(--c-bg-2);
+  --color-panel: var(--c-panel);
+  --color-panel-2: var(--c-panel-2);
+  --color-line: var(--c-line);
+  --color-ink: var(--c-ink);
+  --color-muted: var(--c-muted);
+
+  --color-gold: var(--c-gold); /* brand FILL (buttons, badges) — blue */
+  --color-gold-bright: var(--c-gold-bright);
+  --color-accent: var(--c-accent); /* brand TEXT / links (contrast-safe) */
+  --color-ongold: #ffffff; /* text on brand fills — white */
+  --color-feature: var(--c-feature); /* soft gradient start for feature panels */
+
+  --shadow-card: var(--p4p-shadow);
+  --shadow-cardlg: var(--p4p-shadow-lg);
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-brand: "Orbitron", "Inter", ui-sans-serif, sans-serif;
+}
+
+/* Light (default) — store "White Luxury" */
+:root {
+  color-scheme: light;
+  --c-bg: #ffffff;
+  --c-bg-2: #f1f5f9;
+  --c-panel: #ffffff;
+  --c-panel-2: #f1f5f9;
+  --c-line: #e2e8f0;
+  --c-ink: #1e293b;
+  --c-muted: #64748b;
+  --c-gold: #1e9ae0;
+  --c-gold-bright: #0ea5e9;
+  --c-accent: #0284c7;
+  --c-feature: #e8f5fd;
+  --p4p-shadow: 0 1px 2px rgba(30, 41, 59, 0.04), 0 4px 12px rgba(30, 41, 59, 0.06),
+    0 18px 42px -12px rgba(30, 41, 59, 0.1);
+  --p4p-shadow-lg: 0 2px 6px rgba(30, 41, 59, 0.05), 0 12px 28px rgba(30, 41, 59, 0.1),
+    0 36px 80px -20px rgba(2, 132, 199, 0.18);
+}
+
+/* Dark — store .dark */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --c-bg: #060811;
+  --c-bg-2: #0a0e18;
+  --c-panel: #0c111d;
+  --c-panel-2: #141a28;
+  --c-line: rgba(255, 255, 255, 0.1);
+  --c-ink: #e8eef6;
+  --c-muted: #94a3b8;
+  --c-gold: #1e9ae0;
+  --c-gold-bright: #38bdf8;
+  --c-accent: #38bdf8;
+  --c-feature: #08203a;
+  --p4p-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 18px rgba(0, 0, 0, 0.35),
+    0 20px 48px -12px rgba(0, 0, 0, 0.5);
+  --p4p-shadow-lg: 0 2px 8px rgba(0, 0, 0, 0.4), 0 16px 36px rgba(0, 0, 0, 0.45),
+    0 40px 90px -20px rgba(14, 165, 233, 0.25);
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 76px;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  overflow-x: hidden;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+h1,
+h2,
+h3,
+.font-display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.container-p4p {
+  width: 100%;
+  max-width: 1160px;
+  margin-inline: auto;
+  padding-inline: 20px;
+}
+
+.gold-text {
+  color: var(--color-accent);
+}
+
+.section-eyebrow {
+  display: inline-block;
+  font-family: var(--font-brand);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--color-accent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+h1,
+h2 {
+  letter-spacing: -0.025em;
+}
+
+/* ---------- Premium pass: texture, depth, motion ---------- */
+
+/* Subtle film grain so large surfaces don't read as flat. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+:root[data-theme="dark"] body::after {
+  opacity: 0.05;
+}
+
+/* Gradient text for accent words. */
+.gradient-text {
+  background: linear-gradient(100deg, var(--c-accent), var(--c-gold-bright));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Premium primary button: gradient fill, soft colored shadow, hover shine. */
+.cta {
+  position: relative;
+  overflow: hidden;
+  background-image: linear-gradient(135deg, var(--c-gold-bright), var(--c-gold));
+  color: #fff;
+  box-shadow: 0 8px 22px -8px color-mix(in srgb, var(--c-gold) 70%, transparent),
+    0 0 18px -4px color-mix(in srgb, var(--c-gold-bright) 62%, transparent);
+  transition: transform 0.2s ease, box-shadow 0.3s ease, filter 0.2s ease;
+}
+.cta:hover {
+  transform: translateY(-1.5px);
+  filter: brightness(1.05);
+  box-shadow: 0 14px 30px -8px color-mix(in srgb, var(--c-gold) 80%, transparent),
+    0 0 30px -1px color-mix(in srgb, var(--c-gold-bright) 85%, transparent);
+}
+.cta::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -130%;
+  width: 55%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transform: skewX(-20deg);
+  transition: left 0.6s ease;
+}
+.cta:hover::after {
+  left: 150%;
+}
+
+/* Scroll-reveal — elements rise + fade as they enter the viewport. */
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1);
+  will-change: opacity, transform;
+}
+.reveal.in {
+  opacity: 1;
+  transform: none;
+}
+
+/* Page transition on route change. */
+@keyframes pageFade {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.page-fade {
+  animation: pageFade 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+/* Dark feature band for contrast against the white sections. */
+.band-dark {
+  background:
+    radial-gradient(60% 120% at 15% 0%, rgba(56, 189, 248, 0.14), transparent 60%),
+    radial-gradient(50% 120% at 100% 100%, rgba(30, 154, 224, 0.16), transparent 55%),
+    #070b14;
+  color: #e8eef6;
+}
+
+/* Loading shimmer (video thumbnails, etc.). */
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--c-muted) 14%, transparent);
+}
+.skeleton::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--c-panel) 60%, transparent),
+    transparent
+  );
+  animation: shimmer 1.4s infinite;
+}
+
+/* Soft brand glow on card hover. */
+.glow-card {
+  transition: transform 0.3s ease, box-shadow 0.35s ease, border-color 0.3s ease;
+}
+.glow-card:hover {
+  box-shadow: var(--p4p-shadow-lg), 0 0 28px -6px color-mix(in srgb, var(--c-gold) 55%, transparent);
+}
+
+/* Slow ambient glow drift (hero atmosphere). */
+@keyframes floatGlow {
+  0%,
+  100% {
+    opacity: 0.68;
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-8px) scale(1.07);
+  }
+}
+.anim-glow {
+  animation: floatGlow 7s ease-in-out infinite;
+}
+
+/* Animated underline for nav links. */
+.navlink {
+  position: relative;
+}
+.navlink::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -5px;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--c-gold), var(--c-gold-bright));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s ease;
+}
+.navlink:hover::after {
+  transform: scaleX(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
