@@ -9,6 +9,7 @@ import VideosPage from "@/pages/VideosPage";
 import FeaturedPage from "@/pages/FeaturedPage";
 import ContactPage from "@/pages/ContactPage";
 import VendorPage from "@/pages/VendorPage";
+import AdminPage from "@/pages/AdminPage";
 
 function AppRoutes() {
   const location = useLocation();
@@ -29,12 +30,23 @@ function AppRoutes() {
   );
 }
 
-export default function App() {
+function Chrome() {
+  const location = useLocation();
+  // The admin dashboard is a standalone app — no marketing header/footer.
+  if (location.pathname.startsWith("/admin")) return <AdminPage />;
   return (
-    <BrowserRouter>
+    <>
       <Header />
       <AppRoutes />
       <Footer />
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Chrome />
     </BrowserRouter>
   );
 }
