@@ -23,6 +23,9 @@ const { Pool } = pg;
 const pool = process.env.DATABASE_URL
   ? new Pool({ connectionString: process.env.DATABASE_URL, max: 5 })
   : null;
+// Never let an idle-client error (e.g. Postgres restart) crash the process and
+// take the public site down — log it and let the pool recover.
+if (pool) pool.on("error", (err) => console.error("[pg pool]", err?.message));
 
 async function initDb() {
   if (!pool) {
