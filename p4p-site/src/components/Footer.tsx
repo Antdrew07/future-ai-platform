@@ -1,12 +1,17 @@
 import { Link } from "react-router-dom";
 import { NAV_LINKS, SITE } from "@/data/content";
 import { P4P_LOGO } from "@/assets/logo";
+import NewsletterSignup from "./NewsletterSignup";
 
 export default function Footer() {
   const year = new Date().getFullYear();
   return (
     <footer className="border-t border-line bg-bg-2/60 py-12">
       <div className="container-p4p">
+        <div className="mb-10 flex flex-col items-center gap-4 border-b border-line pb-10 text-center md:flex-row md:items-center md:justify-between md:text-left">
+          <NewsletterSignup source="footer" />
+        </div>
+
         <div className="flex flex-col items-center gap-8 text-center md:flex-row md:items-start md:justify-between md:text-left">
           <div className="max-w-xs">
             <img src={P4P_LOGO} alt="Peptides 4 Power" className="mx-auto h-10 w-auto md:mx-0" />
