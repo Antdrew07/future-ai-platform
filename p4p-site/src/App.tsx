@@ -10,6 +10,7 @@ import FeaturedPage from "@/pages/FeaturedPage";
 import ContactPage from "@/pages/ContactPage";
 import VendorPage from "@/pages/VendorPage";
 import AdminPage from "@/pages/AdminPage";
+import CommunityPage from "@/pages/CommunityPage";
 
 function AppRoutes() {
   const location = useLocation();
@@ -23,6 +24,7 @@ function AppRoutes() {
         <Route path="/videos" element={<VideosPage />} />
         <Route path="/peptide-of-the-week" element={<FeaturedPage />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/community" element={<CommunityPage />} />
         <Route path="/vendor/:slug" element={<VendorPage />} />
         <Route path="*" element={<Home />} />
       </Routes>

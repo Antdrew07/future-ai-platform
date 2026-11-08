@@ -17,6 +17,10 @@ const PORT = process.env.PORT || 3000;
 const PUBLIC_URL = process.env.PUBLIC_URL || "https://peptides4power.com";
 const SESSION_SECRET = process.env.SESSION_SECRET || crypto.randomBytes(16).toString("hex");
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "";
+const WAIVER_VERSION = process.env.WAIVER_VERSION || "2026-11-v1";
+const MEMBER_DISCOUNT_CODE = process.env.MEMBER_DISCOUNT_CODE || "POWER25";
+// During soft-launch (before Stripe is wired) new members are active immediately.
+const FREE_BETA = String(process.env.FREE_BETA || "").toLowerCase() === "true";
 
 const app = express();
 app.disable("x-powered-by");
@@ -63,6 +67,21 @@ async function initDb() {
       created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
     );
     CREATE INDEX IF NOT EXISTS marketing_log_created_idx ON marketing_log (created_at DESC);
+  `);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS members (
+      id                     SERIAL PRIMARY KEY,
+      email                  TEXT NOT NULL UNIQUE,
+      password_hash          TEXT NOT NULL,
+      name                   TEXT,
+      status                 TEXT NOT NULL DEFAULT 'pending',
+      waiver_version         TEXT,
+      waiver_signed_at       TIMESTAMPTZ,
+      stripe_customer_id     TEXT,
+      stripe_subscription_id TEXT,
+      created_at             TIMESTAMPTZ NOT NULL DEFAULT now(),
+      updated_at             TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
   `);
   // One-time migration from the original subscribers table, if it exists.
   try {
@@ -441,6 +460,104 @@ ${recent.length ? recent.map((e) => `  • ${new Date(e.created_at).toISOString(
     console.error("[ai]", err?.message);
     return res.status(500).json({ ok: false, error: "The AI had a problem — please try again." });
   }
+});
+
+/* ================================================================== */
+/* Membership — the coaching community                                */
+/* ================================================================== */
+function hmac(s) { return crypto.createHmac("sha256", SESSION_SECRET).update(s).digest("hex"); }
+function hashPassword(pw) {
+  const salt = crypto.randomBytes(16).toString("hex");
+  return `${salt}:${crypto.scryptSync(pw, salt, 64).toString("hex")}`;
+}
+function verifyPassword(pw, stored) {
+  const [salt, hash] = String(stored || "").split(":");
+  if (!salt || !hash) return false;
+  try { return crypto.timingSafeEqual(crypto.scryptSync(pw, salt, 64), Buffer.from(hash, "hex")); } catch { return false; }
+}
+function makeMemberToken(id) {
+  const body = `${id}.${Date.now() + 30 * 24 * 60 * 60 * 1000}`;
+  return `${body}.${hmac(body)}`;
+}
+function memberIdFromToken(tok) {
+  if (!tok) return null;
+  const [id, exp, sig] = String(tok).split(".");
+  if (!id || !exp || !sig) return null;
+  const expect = hmac(`${id}.${exp}`);
+  try { if (sig.length !== expect.length || !crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expect))) return null; } catch { return null; }
+  return Date.now() < Number(exp) ? (parseInt(id, 10) || null) : null;
+}
+function setMemberCookie(res, id) {
+  res.setHeader("Set-Cookie", `p4p_member=${makeMemberToken(id)}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=${30 * 24 * 60 * 60}`);
+}
+async function currentMember(req) {
+  const id = memberIdFromToken(readCookie(req, "p4p_member"));
+  if (!id || !pool) return null;
+  const q = await pool.query(`SELECT id,email,name,status FROM members WHERE id = $1`, [id]);
+  return q.rows[0] || null;
+}
+
+app.post("/api/member/register", async (req, res) => {
+  try {
+    if (!pool) return res.status(503).json({ ok: false, error: "Signups are temporarily unavailable." });
+    const email = clean(req.body?.email, 200)?.toLowerCase();
+    const name = clean(req.body?.name, 120);
+    const password = String(req.body?.password || "");
+    if (!email || !EMAIL_RE.test(email)) return res.status(400).json({ ok: false, error: "Enter a valid email." });
+    if (password.length < 8) return res.status(400).json({ ok: false, error: "Password must be at least 8 characters." });
+    if (req.body?.waiver !== true) return res.status(400).json({ ok: false, error: "You must accept the membership agreement." });
+    if ((await pool.query(`SELECT 1 FROM members WHERE email = $1`, [email])).rows[0])
+      return res.status(409).json({ ok: false, error: "An account with that email already exists — try logging in." });
+
+    const status = FREE_BETA ? "active" : "pending";
+    const m = (await pool.query(
+      `INSERT INTO members (email, password_hash, name, status, waiver_version, waiver_signed_at)
+       VALUES ($1,$2,$3,$4,$5, now()) RETURNING id,email,name,status`,
+      [email, hashPassword(password), name, status, WAIVER_VERSION]
+    )).rows[0];
+    await pool.query(
+      `INSERT INTO contacts (email, name, source, status, subscribed, tags)
+       VALUES ($1,$2,'coaching-member','customer',TRUE,ARRAY['member'])
+       ON CONFLICT (email) DO UPDATE SET status='customer',
+         tags=ARRAY(SELECT DISTINCT unnest(contacts.tags || ARRAY['member'])), updated_at=now()`,
+      [email, name]
+    ).catch(() => {});
+    setMemberCookie(res, m.id);
+    return res.json({ ok: true, member: { name: m.name, email: m.email, status: m.status } });
+  } catch (err) {
+    console.error("[member register]", err?.message);
+    return res.status(500).json({ ok: false, error: "Something went wrong — please try again." });
+  }
+});
+
+app.post("/api/member/login", async (req, res) => {
+  try {
+    if (!pool) return res.status(503).json({ ok: false, error: "Login is temporarily unavailable." });
+    const email = clean(req.body?.email, 200)?.toLowerCase();
+    const password = String(req.body?.password || "");
+    if (!email || !password) return res.status(400).json({ ok: false, error: "Enter your email and password." });
+    const row = (await pool.query(`SELECT id,password_hash FROM members WHERE email = $1`, [email])).rows[0];
+    if (!row || !verifyPassword(password, row.password_hash)) return res.status(401).json({ ok: false, error: "Incorrect email or password." });
+    setMemberCookie(res, row.id);
+    return res.json({ ok: true });
+  } catch (err) {
+    return res.status(500).json({ ok: false, error: "Something went wrong — please try again." });
+  }
+});
+
+app.post("/api/member/logout", (_req, res) => {
+  res.setHeader("Set-Cookie", "p4p_member=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0");
+  return res.json({ ok: true });
+});
+
+app.get("/api/member/me", async (req, res) => {
+  const m = await currentMember(req).catch(() => null);
+  if (!m) return res.status(401).json({ ok: false });
+  return res.json({
+    ok: true,
+    member: { name: m.name, email: m.email, status: m.status },
+    discountCode: m.status === "active" ? MEMBER_DISCOUNT_CODE : null,
+  });
 });
 
 /* ================================================================== */
