@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Peptides 4 Power — Affiliate Deals Widget</title>
+<!--
+  PASTE-INTO-WIX WIDGET
+  ---------------------
+  Drop this whole file into a Wix "Embed > Custom Code / HTML iframe" element.
+  In the Wix Editor: Add (+) > Embed Code > Embed HTML > "Code" > paste all of this.
+  Then stretch the element full-width and give it a tall height (≈1600px desktop).
+  Everything is self-contained — no build step, no external JS.
+
+  Vendor order, codes, and links are the client's source of truth
+  (mirrors p4p-site/src/data/partners.ts). Sunrise excluded. Certia = coming soon.
+-->
+<style>
+  :root{
+    --bg:#0b0b10;
+    --panel:#14141c;
+    --panel-2:#1b1b26;
+    --line:rgba(255,255,255,.08);
+    --ink:#f4f4f7;
+    --muted:#a1a1ب0;
+    --muted:#a6a6b5;
+    --gold:#e7b84b;
+    --gold-soft:rgba(231,184,75,.14);
+    --violet:#7c5cff;
+    --radius:16px;
+    --maxw:1120px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  .p4p-wrap{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Space Grotesk",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    padding:28px 16px 40px;
+    -webkit-font-smoothing:antialiased;
+  }
+  .p4p-inner{max-width:var(--maxw);margin:0 auto}
+
+  /* Header */
+  .p4p-head{text-align:center;margin:0 auto 22px;max-width:680px}
+  .p4p-eyebrow{
+    display:inline-block;font-size:12px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--gold);font-weight:700;margin-bottom:10px;
+  }
+  .p4p-title{
+    font-size:clamp(26px,5vw,40px);line-height:1.05;margin:0 0 10px;font-weight:700;letter-spacing:-.01em;
+  }
+  .p4p-title span{color:var(--gold)}
+  .p4p-sub{color:var(--muted);font-size:15px;line-height:1.5;margin:0}
+
+  /* House brand banner */
+  .p4p-house{
+    position:relative;overflow:hidden;border-radius:var(--radius);
+    background:linear-gradient(120deg,#1c160a,#14141c 60%);
+    border:1px solid rgba(231,184,75,.35);
+    padding:22px 24px;margin:24px 0 28px;
+    display:flex;flex-wrap:wrap;align-items:center;gap:18px;justify-content:space-between;
+  }
+  .p4p-house::before{
+    content:"";position:absolute;inset:0;
+    background:radial-gradient(120% 140% at 0% 0%, rgba(231,184,75,.18), transparent 55%);
+    pointer-events:none;
+  }
+  .p4p-house-left{display:flex;align-items:center;gap:16px;position:relative;z-index:1;min-width:260px}
+  .p4p-house-badge{
+    font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#0b0b10;background:var(--gold);
+    font-weight:800;padding:5px 10px;border-radius:999px;white-space:nowrap;
+  }
+  .p4p-house h3{margin:0;font-size:22px;font-weight:700}
+  .p4p-house p{margin:3px 0 0;color:var(--muted);font-size:14px}
+  .p4p-house-cta{position:relative;z-index:1;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+
+  /* Grid */
+  .p4p-grid{
+    display:grid;gap:14px;
+    grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+  }
+  .p4p-card{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px;display:flex;flex-direction:column;gap:14px;
+    transition:transform .15s ease,border-color .15s ease,background .15s ease;
+  }
+  .p4p-card:hover{transform:translateY(-3px);border-color:rgba(231,184,75,.4);background:var(--panel-2)}
+  .p4p-card-top{display:flex;align-items:center;gap:12px}
+  .p4p-mark{
+    width:46px;height:46px;border-radius:12px;flex:0 0 auto;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:15px;letter-spacing:.02em;color:#0b0b10;
+    background:linear-gradient(135deg,var(--gold),#f0d07e);
+  }
+  .p4p-name{font-size:16px;font-weight:700;line-height:1.15;margin:0}
+  .p4p-save{
+    margin-left:auto;font-size:12px;font-weight:800;color:var(--gold);
+    background:var(--gold-soft);border:1px solid rgba(231,184,75,.35);
+    padding:5px 9px;border-radius:999px;white-space:nowrap;
+  }
+  .p4p-code-row{display:flex;align-items:center;gap:8px;margin-top:auto}
+  .p4p-code{
+    flex:1;display:flex;align-items:center;justify-content:space-between;gap:8px;
+    border:1px dashed rgba(255,255,255,.22);border-radius:10px;
+    padding:9px 12px;background:rgba(255,255,255,.03);cursor:pointer;
+    font-size:13px;color:var(--ink);transition:border-color .15s ease,background .15s ease;
+  }
+  .p4p-code:hover{border-color:var(--gold);background:rgba(231,184,75,.08)}
+  .p4p-code b{letter-spacing:.06em}
+  .p4p-code small{color:var(--muted);font-size:11px}
+  .p4p-btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:7px;
+    text-decoration:none;font-weight:700;font-size:14px;border-radius:10px;
+    padding:11px 14px;white-space:nowrap;cursor:pointer;border:0;
+    background:var(--gold);color:#0b0b10;transition:filter .15s ease,transform .15s ease;
+  }
+  .p4p-btn:hover{filter:brightness(1.07);transform:translateY(-1px)}
+  .p4p-btn.full{width:100%}
+  .p4p-btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+  .p4p-btn.ghost:hover{border-color:var(--gold);color:var(--gold)}
+
+  .p4p-card.soon{opacity:.72}
+  .p4p-soon-tag{
+    margin-left:auto;font-size:11px;font-weight:700;color:var(--muted);
+    border:1px solid var(--line);padding:5px 9px;border-radius:999px;white-space:nowrap;
+  }
+  .p4p-soon-note{font-size:13px;color:var(--muted);margin-top:auto}
+
+  .p4p-foot{
+    text-align:center;color:var(--muted);font-size:12px;line-height:1.6;
+    margin:26px auto 0;max-width:760px;
+  }
+
+  /* Toast */
+  .p4p-toast{
+    position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
+    background:var(--gold);color:#0b0b10;font-weight:700;font-size:14px;
+    padding:11px 18px;border-radius:999px;opacity:0;pointer-events:none;
+    transition:opacity .2s ease,transform .2s ease;z-index:50;box-shadow:0 10px 30px rgba(0,0,0,.4);
+  }
+  .p4p-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  @media (max-width:520px){
+    .p4p-house{flex-direction:column;align-items:flex-start}
+    .p4p-house-cta{width:100%}
+    .p4p-house-cta .p4p-btn{flex:1}
+  }
+</style>
+</head>
+<body>
+<div class="p4p-wrap">
+  <div class="p4p-inner">
+
+    <div class="p4p-head">
+      <span class="p4p-eyebrow">Verified Discount Codes</span>
+      <h1 class="p4p-title">Shop smarter with <span>Peptides 4 Power</span></h1>
+      <p class="p4p-sub">Dave's vetted vendor list — tap any code to copy it, then shop and save. New deals added as partners come online.</p>
+    </div>
+
+    <!-- House brand -->
+    <div class="p4p-house">
+      <div class="p4p-house-left">
+        <div class="p4p-mark" style="background:linear-gradient(135deg,#e7b84b,#fff0c2)">P4P</div>
+        <div>
+          <span class="p4p-house-badge">House Brand</span>
+          <h3>Peptides 4 Power</h3>
+          <p>Save $5–$10 on GLPs with code <b>GLP10</b></p>
+        </div>
+      </div>
+      <div class="p4p-house-cta">
+        <div class="p4p-code" data-code="GLP10" role="button" tabindex="0" aria-label="Copy code GLP10">
+          <b>GLP10</b><small>tap to copy</small>
+        </div>
+        <a class="p4p-btn" href="https://www.peptides4power.us/" target="_blank" rel="sponsored noopener noreferrer">Shop &amp; Save →</a>
+      </div>
+    </div>
+
+    <!-- Affiliate grid -->
+    <div class="p4p-grid" id="p4p-grid"></div>
+
+    <p class="p4p-foot">
+      Affiliate disclosure: Peptides 4 Power may earn a commission on purchases made through these links, at no extra cost to you.
+      Products referenced are for research purposes. This is not medical advice.
+    </p>
+
+  </div>
+</div>
+
+<div class="p4p-toast" id="p4p-toast">Code copied ✓</div>
+
+<script>
+(function(){
+  var PARTNERS = [
+    {mark:"AIO", name:"AIO Peptides",        code:"POWER25", save:"25% off", url:"https://aiopeptides.com/?coupon=power25"},
+    {mark:"TC",  name:"Treasure Coast",      code:"POWER15", save:"15% off", url:"https://treasurecoastpeptide.com/"},
+    {mark:"KC",  name:"Kimera Chems",        code:"POWER15", save:"15% off", url:"https://kimerachems.co/"},
+    {mark:"GA",  name:"Glow Aminos",         code:"POWER15", save:"15% off", url:"https://glowaminos.com/"},
+    {mark:"FC",  name:"Flawless Compounds",  code:"POWER15", save:"15% off", url:"https://flawlesscompounds.com/"},
+    {mark:"IP",  name:"Iron Protocol",       code:"POWER15", save:"15% off", url:"https://ironprotocol.com/ref/dfurka08/"},
+    {mark:"AL",  name:"Atomik Labz",         code:"POWER",   save:"15%+ off",url:"https://atomiklabz.com/aff/565/"},
+    {mark:"AR",  name:"Aminos Research",     code:"POWER15", save:"15% off", url:"https://aminosresearch.com/ref/15/"},
+    {mark:"EP",  name:"Evolve Peptides",     code:"POWER20", save:"20% off", url:"https://evolvepeptides.com/?ref=Power20"},
+    {mark:"SC",  name:"Swiss Chems",         code:"DAVID10", save:"10% off", url:"https://swisschems.is/"},
+    {mark:"BL",  name:"Bio Longevity Labs",  code:"DAVID15", save:"15% off", url:"https://biolongevitylabs.com/"},
+    {mark:"SP",  name:"Solution Peptides",   code:"POWER15", save:"15% off", url:"https://solutionpeptides.net/aff/450/"},
+    {mark:"NB",  name:"Nano Blue Labs",      code:"POWER10", save:"10% off", url:"https://nanobluelabs.com/aff/58/"},
+    {mark:"CP",  name:"Certia Peptide",      soon:true,      note:"Europe only — launching soon."},
+    {mark:"RP",  name:"RefillPen",           code:"POWER10", save:"10% off", url:"https://refillpens.com/"},
+    {mark:"GM",  name:"GetMelts",            code:"POWER15", save:"15% off", url:"https://getmelts.com/"}
+  ];
+
+  var grid = document.getElementById("p4p-grid");
+  PARTNERS.forEach(function(p){
+    var card = document.createElement("div");
+    card.className = "p4p-card" + (p.soon ? " soon" : "");
+    if (p.soon){
+      card.innerHTML =
+        '<div class="p4p-card-top">' +
+          '<div class="p4p-mark">'+p.mark+'</div>' +
+          '<h4 class="p4p-name">'+p.name+'</h4>' +
+          '<span class="p4p-soon-tag">Coming soon</span>' +
+        '</div>' +
+        '<p class="p4p-soon-note">'+p.note+'</p>';
+    } else {
+      card.innerHTML =
+        '<div class="p4p-card-top">' +
+          '<div class="p4p-mark">'+p.mark+'</div>' +
+          '<h4 class="p4p-name">'+p.name+'</h4>' +
+          '<span class="p4p-save">'+p.save+'</span>' +
+        '</div>' +
+        '<div class="p4p-code-row">' +
+          '<div class="p4p-code" data-code="'+p.code+'" role="button" tabindex="0" aria-label="Copy code '+p.code+'">' +
+            '<b>'+p.code+'</b><small>tap to copy</small>' +
+          '</div>' +
+        '</div>' +
+        '<a class="p4p-btn full" href="'+p.url+'" target="_blank" rel="sponsored noopener noreferrer">Shop &amp; Save →</a>';
+    }
+    grid.appendChild(card);
+  });
+
+  // Copy-to-clipboard + toast
+  var toast = document.getElementById("p4p-toast");
+  var toastTimer;
+  function showToast(code){
+    toast.textContent = "Copied " + code + " ✓";
+    toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toast.classList.remove("show"); }, 1600);
+  }
+  function copy(code){
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(code).then(function(){ showToast(code); }).catch(function(){ fallback(code); });
+    } else { fallback(code); }
+  }
+  function fallback(code){
+    var t = document.createElement("textarea");
+    t.value = code; t.style.position="fixed"; t.style.opacity="0";
+    document.body.appendChild(t); t.select();
+    try { document.execCommand("copy"); showToast(code); } catch(e){}
+    document.body.removeChild(t);
+  }
+  document.addEventListener("click", function(e){
+    var el = e.target.closest(".p4p-code");
+    if (el){ copy(el.getAttribute("data-code")); }
+  });
+  document.addEventListener("keydown", function(e){
+    if ((e.key === "Enter" || e.key === " ")){
+      var el = e.target.closest && e.target.closest(".p4p-code");
+      if (el){ e.preventDefault(); copy(el.getAttribute("data-code")); }
+    }
+  });
+})();
+</script>
+</body>
+</html>

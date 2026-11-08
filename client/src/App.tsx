@@ -18,6 +18,7 @@ import Templates from "./pages/Templates";
 import Pricing from "./pages/Pricing";
 import AgentGallery from "./pages/AgentGallery";
 import Onboarding from "./pages/Onboarding";
+import Calculator from "./pages/Calculator";
 
 // Dashboard pages
 import Dashboard from "./pages/Dashboard";
@@ -51,6 +52,7 @@ function Router() {
       <Route path="/pricing" component={Pricing} />
       <Route path="/templates" component={Templates} />
       <Route path="/gallery" component={AgentGallery} />
+      <Route path="/calculator" component={Calculator} />
       <Route path="/agent/:slug" component={AgentPublic} />
 
       {/* Onboarding */}
